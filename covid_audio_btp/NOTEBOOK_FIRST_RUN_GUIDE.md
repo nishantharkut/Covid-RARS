@@ -2,14 +2,18 @@
 
 Start with `notebooks/00_RUN_EVERYTHING_PUBLICATION.ipynb`. It is the single main notebook for core Coswara plus publication extras. The older `00_MASTER_RUN_ALL.ipynb` and notebooks `01` through `08` are optional review/debug notebooks.
 
+Before running locally, read `DECISION_LOCK_AND_LOCAL_RUN_PROTOCOL.md`. It records the current decisions: Coswara first, COUGHVID later, `RUN_CNN = False`, no SSL/GRL until baseline evidence exists, and datasets live on your local machine rather than this EC2 workspace.
+
 -First Run Guide
 
 This project is designed to be run from Jupyter, with reusable implementation code under `src/covid_audio_btp`.
 
 ## Setup
 
+On your local machine, replace `<PROJECT_ROOT>` with the extracted project path.
+
 ```bash
-cd /home/ubuntu/nishn_workspce/test_pdfs_generic/.covid_audio_btp_private/covid_audio_btp
+cd <PROJECT_ROOT>
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
@@ -21,7 +25,7 @@ jupyter lab
 ## Put Dataset Here
 
 ```text
-/home/ubuntu/nishn_workspce/test_pdfs_generic/.covid_audio_btp_private/covid_audio_btp/data/raw/coswara
+<PROJECT_ROOT>/data/raw/coswara
 ```
 
 If you use a different path, edit `RAW_COSWARA_DIR` in `notebooks/00_RUN_EVERYTHING_PUBLICATION.ipynb`.

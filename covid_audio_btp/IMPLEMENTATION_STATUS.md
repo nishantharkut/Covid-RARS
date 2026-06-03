@@ -114,6 +114,21 @@ reports/tables/validation_issues.csv
 ```
 
 
+## Decision Lock Added On 2026-06-03
+
+Added `DECISION_LOCK_AND_LOCAL_RUN_PROTOCOL.md` to freeze the current execution strategy:
+
+- datasets are expected on the user's local machine, not this EC2 workspace;
+- run Coswara baseline first;
+- keep `RUN_CNN = False`, `COUGHVID_RAW = None`, and `RUN_COUGHVID_FEATURES = False` for the first run;
+- COUGHVID is cough-only and should be enabled only after Coswara succeeds;
+- SSL/HuBERT/Wav2Vec/GRL work is a later ablation layer, not a replacement for the baseline;
+- compute requirements are documented for CPU baseline, optional CNN, and future SSL/GRL.
+
+## Advanced Extension Spec Added On 2026-06-03
+
+Added `ADVANCED_EXTENSION_FROM_GEMINI_PDFS.md` to preserve the useful parts of the two reviewed PDFs and Gemini conversation without replacing the current baseline pipeline. It records the post-baseline plan for acoustic-domain proxy labels, SSL embeddings, GRL/adversarial training, and advanced ablation comparisons.
+
 ## Publication-Grade Implementation Slice Added On 2026-05-25
 
 Added the first Q-CalFuse publication layer:
