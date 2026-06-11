@@ -23,6 +23,20 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+
+def _read_validation_metrics(path: Path) -> pd.DataFrame:
+    metrics = pd.read_csv(path)
+    if path.name == "ml_baseline_metrics.csv" and "metric_split" not in metrics.columns:
+        raise ValueError(
+            "Refusing to use ml_baseline_metrics.csv as validation metrics because it is test-set output. "
+            "Use data/outputs/metrics/ml_validation_metrics.csv for fusion weights."
+        )
+    if "metric_split" in metrics.columns:
+        splits = set(metrics["metric_split"].dropna().astype(str))
+        if splits and splits != {"validation"}:
+            raise ValueError(f"Validation metrics file contains non-validation metric_split values: {sorted(splits)}")
+    return metrics
+
 def _run_quality_weighted_fusion(
     predictions: pd.DataFrame,
     quality: pd.DataFrame,
@@ -75,7 +89,7 @@ def main() -> None:
     args = parse_args()
     predictions = pd.read_csv(args.predictions)
     quality = pd.read_csv(args.quality)
-    validation_metrics = pd.read_csv(args.validation_metrics)
+    validation_metrics = _read_validation_metrics(args.validation_metrics)
     fused = _run_quality_weighted_fusion(
         predictions,
         quality=quality,

@@ -30,6 +30,7 @@ class TrainResult:
     validation_predictions: pd.DataFrame
     test_predictions: pd.DataFrame
     model: object
+    validation_metrics: dict[str, float | str] | None = None
 
 
 def make_model(model_name: str, random_state: int = 42) -> object:
@@ -137,10 +138,21 @@ def train_single_model(
     val_pred = _prediction_frame(validation, val_prob, model_name)
     test_pred = _prediction_frame(test, test_prob, model_name)
 
+    y_validation = labels_to_binary(validation["label_binary"])
+    validation_metrics = binary_metric_bundle(y_validation, val_prob)
+    validation_metrics.update({"model_name": model_name, "modality": modality, "metric_split": "validation"})
+
     y_test = labels_to_binary(test["label_binary"])
     metrics = binary_metric_bundle(y_test, test_prob)
     metrics.update({"model_name": model_name, "modality": modality})
-    return TrainResult(model_name, metrics, val_pred, test_pred, model)
+    return TrainResult(
+        model_name=model_name,
+        metrics=metrics,
+        validation_predictions=val_pred,
+        test_predictions=test_pred,
+        model=model,
+        validation_metrics=validation_metrics,
+    )
 
 
 def save_model(model: object, path: str) -> None:

@@ -14,6 +14,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--features", required=True, type=Path)
     parser.add_argument("--models-dir", type=Path, default=Path("data/outputs/models"))
     parser.add_argument("--metrics-output", type=Path, default=Path("data/outputs/metrics/ml_baseline_metrics.csv"))
+    parser.add_argument(
+        "--validation-metrics-output",
+        type=Path,
+        default=Path("data/outputs/metrics/ml_validation_metrics.csv"),
+        help="Validation-only branch metrics for fusion weights. Do not use test metrics for fusion weighting.",
+    )
     parser.add_argument("--validation-output", type=Path, default=Path("data/outputs/metrics/ml_predictions_validation.csv"))
     parser.add_argument("--test-output", type=Path, default=Path("data/outputs/metrics/ml_predictions_test.csv"))
     parser.add_argument("--modalities", nargs="+", default=["cough", "breath", "speech"])
@@ -32,6 +38,7 @@ def main() -> None:
     args.metrics_output.parent.mkdir(parents=True, exist_ok=True)
 
     metric_rows = []
+    validation_metric_rows = []
     validation_frames = []
     test_frames = []
     for modality in args.modalities:
@@ -42,6 +49,8 @@ def main() -> None:
                 print(f"SKIP model={model_name} modality={modality}: {exc}")
                 continue
             metric_rows.append(result.metrics)
+            if result.validation_metrics is not None:
+                validation_metric_rows.append(result.validation_metrics)
             validation_frames.append(result.validation_predictions)
             test_frames.append(result.test_predictions)
             save_model(result.model, args.models_dir / f"{model_name}_{modality}.joblib")
@@ -63,9 +72,11 @@ def main() -> None:
         )
 
     pd.DataFrame(metric_rows).to_csv(args.metrics_output, index=False)
+    pd.DataFrame(validation_metric_rows).to_csv(args.validation_metrics_output, index=False)
     pd.concat(validation_frames, ignore_index=True).to_csv(args.validation_output, index=False)
     pd.concat(test_frames, ignore_index=True).to_csv(args.test_output, index=False)
-    print(f"Wrote metrics: {args.metrics_output}")
+    print(f"Wrote test metrics: {args.metrics_output}")
+    print(f"Wrote validation metrics: {args.validation_metrics_output}")
 
 
 if __name__ == "__main__":

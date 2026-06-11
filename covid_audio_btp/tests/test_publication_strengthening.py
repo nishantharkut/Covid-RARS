@@ -210,3 +210,96 @@ def test_paper_table_defaults_include_quality_weighted_fusion_metrics():
 
     paths = {path.as_posix() for path in module.DEFAULT_METRIC_PATHS}
     assert "data/outputs/metrics/quality_weighted_fusion_metrics.csv" in paths
+
+
+def test_ml_baseline_script_writes_validation_metrics_for_fusion_weights(tmp_path):
+    import subprocess
+    import sys
+
+    rows = []
+    labels = ["negative", "positive", "negative", "positive"] * 3
+    splits = ["train"] * 4 + ["validation"] * 4 + ["test"] * 4
+    for idx, (label, split) in enumerate(zip(labels, splits)):
+        is_pos = label == "positive"
+        rows.append(
+            {
+                "recording_id": f"r{idx}",
+                "participant_id": f"p{idx}",
+                "dataset": "toy",
+                "modality": "cough",
+                "label_binary": label,
+                "split": split,
+                "mfcc_mean_0": float(idx) + (1.0 if is_pos else 0.0),
+                "mfcc_std_0": float(idx % 3) + (0.5 if is_pos else 0.0),
+                "spectral_centroid_mean": float(idx % 5),
+            }
+        )
+    features = pd.DataFrame(rows)
+    features_path = tmp_path / "features.csv"
+    metrics_path = tmp_path / "test_metrics.csv"
+    validation_metrics_path = tmp_path / "validation_metrics.csv"
+    validation_predictions_path = tmp_path / "validation_predictions.csv"
+    test_predictions_path = tmp_path / "test_predictions.csv"
+    models_dir = tmp_path / "models"
+    features.to_csv(features_path, index=False)
+
+    script = Path(__file__).resolve().parents[1] / "scripts" / "06_train_ml_baselines.py"
+    subprocess.run(
+        [
+            sys.executable,
+            str(script),
+            "--features",
+            str(features_path),
+            "--models-dir",
+            str(models_dir),
+            "--metrics-output",
+            str(metrics_path),
+            "--validation-metrics-output",
+            str(validation_metrics_path),
+            "--validation-output",
+            str(validation_predictions_path),
+            "--test-output",
+            str(test_predictions_path),
+            "--modalities",
+            "cough",
+            "--model-names",
+            "logistic_regression",
+        ],
+        check=True,
+        cwd=Path(__file__).resolve().parents[1],
+    )
+
+    test_metrics = pd.read_csv(metrics_path)
+    validation_metrics = pd.read_csv(validation_metrics_path)
+
+    assert test_metrics.loc[0, "n_samples"] == 4.0
+    assert validation_metrics.loc[0, "n_samples"] == 4.0
+    assert validation_metrics.loc[0, "metric_split"] == "validation"
+    assert validation_metrics.loc[0, "model_name"] == "logistic_regression"
+    assert validation_metrics.loc[0, "modality"] == "cough"
+
+
+def test_fusion_scripts_reject_test_metrics_as_validation_weights(tmp_path):
+    import importlib.util
+
+    for script_name in ["09_run_fusion.py", "16_run_quality_weighted_fusion.py"]:
+        script_path = Path(__file__).resolve().parents[1] / "scripts" / script_name
+        spec = importlib.util.spec_from_file_location(script_name.replace(".py", ""), script_path)
+        module = importlib.util.module_from_spec(spec)
+        assert spec.loader is not None
+        spec.loader.exec_module(module)
+
+        bad_metrics = tmp_path / "ml_baseline_metrics.csv"
+        bad_metrics.write_text("modality,auprc\ncough,0.9\n", encoding="utf-8")
+
+        try:
+            module._read_validation_metrics(bad_metrics)
+        except ValueError as exc:
+            assert "test-set output" in str(exc)
+        else:
+            raise AssertionError(f"{script_name} accepted test metrics as validation metrics")
+
+        good_metrics = tmp_path / f"{script_name}_validation_metrics.csv"
+        good_metrics.write_text("modality,auprc,metric_split\ncough,0.9,validation\n", encoding="utf-8")
+        accepted = module._read_validation_metrics(good_metrics)
+        assert accepted.loc[0, "metric_split"] == "validation"
