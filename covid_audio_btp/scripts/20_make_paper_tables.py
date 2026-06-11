@@ -14,6 +14,7 @@ DEFAULT_METRIC_PATHS = [
     Path("data/outputs/metrics/cnn_metrics.csv"),
     Path("data/outputs/metrics/calibration_metrics.csv"),
     Path("data/outputs/metrics/fusion_metrics.csv"),
+    Path("data/outputs/metrics/quality_weighted_fusion_metrics.csv"),
     Path("data/outputs/metrics/metadata_baseline_metrics.csv"),
     Path("data/outputs/metrics/cross_dataset_metrics.csv"),
 ]

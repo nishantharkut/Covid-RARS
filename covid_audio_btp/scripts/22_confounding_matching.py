@@ -21,6 +21,18 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def filter_predictions_to_matched_subset(predictions: pd.DataFrame, matched: pd.DataFrame) -> pd.DataFrame:
+    if "recording_id" in predictions.columns and "recording_id" in matched.columns:
+        matched_ids = matched["recording_id"].dropna().astype(str).unique()
+        return predictions[predictions["recording_id"].astype(str).isin(matched_ids)].copy()
+    if "participant_id" in predictions.columns and "participant_id" in matched.columns:
+        matched_ids = matched["participant_id"].dropna().astype(str).unique()
+        return predictions[predictions["participant_id"].astype(str).isin(matched_ids)].copy()
+    raise KeyError(
+        "Predictions must contain recording_id or participant_id matching the matched metadata table"
+    )
+
+
 def main() -> None:
     args = parse_args()
     metadata = pd.read_csv(args.metadata)
@@ -34,8 +46,7 @@ def main() -> None:
     print(f"Wrote balance table: {args.balance_output}")
     if args.predictions and args.predictions.exists() and not matched.empty:
         predictions = pd.read_csv(args.predictions)
-        matched_ids = matched["recording_id"].dropna().astype(str).unique()
-        subset = predictions[predictions["recording_id"].astype(str).isin(matched_ids)].copy()
+        subset = filter_predictions_to_matched_subset(predictions, matched)
         metrics = evaluate_predictions(subset)
         args.metrics_output.parent.mkdir(parents=True, exist_ok=True)
         metrics.to_csv(args.metrics_output, index=False)

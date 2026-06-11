@@ -120,3 +120,93 @@ def test_participant_level_subgroup_merge_does_not_duplicate_fusion_rows():
     assert len(merged) == len(predictions)
     assert merged.loc[merged["participant_id"] == "p1", "quality_flag"].iloc[0] == "corrupt"
     assert merged.loc[merged["participant_id"] == "p2", "quality_flag"].iloc[0] == "mostly_silence"
+
+
+
+def test_matched_subset_filter_supports_participant_level_fusion_predictions():
+    import importlib.util
+
+    script_path = Path(__file__).resolve().parents[1] / "scripts" / "22_confounding_matching.py"
+    spec = importlib.util.spec_from_file_location("confounding_matching_script", script_path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+
+    matched = pd.DataFrame(
+        {
+            "participant_id": ["p1", "p1", "p2", "p2"],
+            "recording_id": ["r1", "r2", "r3", "r4"],
+            "label_binary": ["positive", "positive", "negative", "negative"],
+        }
+    )
+    predictions = pd.DataFrame(
+        {
+            "participant_id": ["p1", "p2", "p3"],
+            "label_binary": ["positive", "negative", "positive"],
+            "probability": [0.8, 0.2, 0.9],
+            "fusion_method": ["quality_weighted_auprc"] * 3,
+        }
+    )
+
+    subset = module.filter_predictions_to_matched_subset(predictions, matched)
+
+    assert list(subset["participant_id"]) == ["p1", "p2"]
+    assert "p3" not in set(subset["participant_id"])
+
+
+
+def test_quality_weighted_fusion_uses_validation_threshold_below_half():
+    import importlib.util
+
+    script_path = Path(__file__).resolve().parents[1] / "scripts" / "16_run_quality_weighted_fusion.py"
+    spec = importlib.util.spec_from_file_location("quality_weighted_fusion_script", script_path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+
+    rows = []
+    for split, ids in [("validation", ["v1", "v2", "v3", "v4"]), ("test", ["t1", "t2", "t3", "t4"])]:
+        labels = {ids[0]: "negative", ids[1]: "negative", ids[2]: "positive", ids[3]: "positive"}
+        probs = {ids[0]: 0.05, ids[1]: 0.10, ids[2]: 0.25, ids[3]: 0.35}
+        for pid in ids:
+            for modality in ["cough", "breath", "speech"]:
+                rows.append(
+                    {
+                        "recording_id": f"{pid}_{modality}",
+                        "participant_id": pid,
+                        "model_name": "logistic_regression",
+                        "modality": modality,
+                        "label_binary": labels[pid],
+                        "split": split,
+                        "probability": probs[pid],
+                    }
+                )
+    predictions = pd.DataFrame(rows)
+    quality = pd.DataFrame({"recording_id": predictions["recording_id"], "quality_flag": "ok"})
+    validation_metrics = pd.DataFrame({"modality": ["cough", "breath", "speech"], "auprc": [0.9, 0.8, 0.7]})
+
+    validation_fused = module._run_quality_weighted_fusion(
+        predictions[predictions["split"] == "validation"], quality, validation_metrics, "auprc"
+    )
+    thresholds = module._thresholds_from_validation(validation_fused)
+    test_fused = module._run_quality_weighted_fusion(
+        predictions[predictions["split"] == "test"], quality, validation_metrics, "auprc"
+    )
+    metrics = module._evaluate_fused(test_fused, thresholds)
+
+    assert thresholds["threshold"].iloc[0] < 0.5
+    assert metrics["threshold"].iloc[0] < 0.5
+    assert metrics["f1"].iloc[0] == 1.0
+
+
+def test_paper_table_defaults_include_quality_weighted_fusion_metrics():
+    import importlib.util
+
+    script_path = Path(__file__).resolve().parents[1] / "scripts" / "20_make_paper_tables.py"
+    spec = importlib.util.spec_from_file_location("paper_tables_script", script_path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+
+    paths = {path.as_posix() for path in module.DEFAULT_METRIC_PATHS}
+    assert "data/outputs/metrics/quality_weighted_fusion_metrics.csv" in paths

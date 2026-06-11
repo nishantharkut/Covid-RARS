@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 
 from covid_audio_btp.fusion import quality_weighted_fusion
-from covid_audio_btp.metrics import evaluate_predictions
+from covid_audio_btp.metrics import best_threshold_by_balanced_accuracy, evaluate_predictions, labels_to_binary
 
 
 def parse_args() -> argparse.Namespace:
@@ -15,10 +15,60 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--predictions", required=True, type=Path)
     parser.add_argument("--quality", required=True, type=Path)
     parser.add_argument("--validation-metrics", required=True, type=Path)
+    parser.add_argument("--validation-predictions", type=Path, default=None)
     parser.add_argument("--output", type=Path, default=Path("data/outputs/metrics/quality_weighted_fusion_predictions.csv"))
     parser.add_argument("--metrics-output", type=Path, default=Path("data/outputs/metrics/quality_weighted_fusion_metrics.csv"))
+    parser.add_argument("--thresholds-output", type=Path, default=Path("data/outputs/metrics/quality_weighted_fusion_thresholds.csv"))
     parser.add_argument("--metric-column", default="auprc")
     return parser.parse_args()
+
+
+def _run_quality_weighted_fusion(
+    predictions: pd.DataFrame,
+    quality: pd.DataFrame,
+    validation_metrics: pd.DataFrame,
+    metric_column: str,
+) -> pd.DataFrame:
+    return quality_weighted_fusion(
+        predictions,
+        quality=quality,
+        validation_metrics=validation_metrics,
+        metric_column=metric_column,
+    )
+
+
+def _resolve_validation_predictions(args: argparse.Namespace) -> Path | None:
+    if args.validation_predictions is not None:
+        return args.validation_predictions if args.validation_predictions.exists() else None
+    candidate = args.predictions.with_name("calibrated_branch_predictions_validation.csv")
+    return candidate if candidate.exists() else None
+
+
+def _thresholds_from_validation(validation_fused: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    for method, group in validation_fused.groupby("fusion_method", dropna=False):
+        if group.empty or not group["label_binary"].isin(["positive", "negative"]).all():
+            threshold = 0.5
+        else:
+            threshold = best_threshold_by_balanced_accuracy(
+                labels_to_binary(group["label_binary"]),
+                group["probability"].astype(float).to_numpy(),
+            )
+        rows.append({"fusion_method": method, "threshold": threshold, "threshold_source": "validation"})
+    return pd.DataFrame(rows)
+
+
+def _evaluate_fused(fused: pd.DataFrame, thresholds: pd.DataFrame | None = None) -> pd.DataFrame:
+    metric_frames = []
+    threshold_map = {}
+    if thresholds is not None and not thresholds.empty:
+        threshold_map = thresholds.set_index("fusion_method")["threshold"].to_dict()
+    for method, group in fused.groupby("fusion_method", dropna=False):
+        threshold = float(threshold_map.get(method, 0.5))
+        metrics = evaluate_predictions(group, threshold=threshold)
+        metrics["fusion_method"] = method
+        metric_frames.append(metrics)
+    return pd.concat(metric_frames, ignore_index=True) if metric_frames else pd.DataFrame()
 
 
 def main() -> None:
@@ -26,16 +76,32 @@ def main() -> None:
     predictions = pd.read_csv(args.predictions)
     quality = pd.read_csv(args.quality)
     validation_metrics = pd.read_csv(args.validation_metrics)
-    fused = quality_weighted_fusion(
+    fused = _run_quality_weighted_fusion(
         predictions,
         quality=quality,
         validation_metrics=validation_metrics,
         metric_column=args.metric_column,
     )
-    metrics = evaluate_predictions(fused, group_columns=["fusion_method"])
+
+    validation_predictions_path = _resolve_validation_predictions(args)
+    thresholds = None
+    if validation_predictions_path is not None:
+        validation_predictions = pd.read_csv(validation_predictions_path)
+        validation_fused = _run_quality_weighted_fusion(
+            validation_predictions,
+            quality=quality,
+            validation_metrics=validation_metrics,
+            metric_column=args.metric_column,
+        )
+        thresholds = _thresholds_from_validation(validation_fused)
+
+    metrics = _evaluate_fused(fused, thresholds)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     fused.to_csv(args.output, index=False)
     metrics.to_csv(args.metrics_output, index=False)
+    if thresholds is not None:
+        thresholds.to_csv(args.thresholds_output, index=False)
+        print(f"Wrote quality-weighted fusion thresholds: {args.thresholds_output}")
     print(f"Wrote quality-weighted fusion predictions: {args.output}")
     print(f"Wrote quality-weighted fusion metrics: {args.metrics_output}")
 
