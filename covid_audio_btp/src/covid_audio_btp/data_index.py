@@ -23,7 +23,16 @@ def discover_audio_files(raw_dir: Path) -> list[Path]:
     raw_dir = Path(raw_dir)
     if not raw_dir.exists():
         raise FileNotFoundError(f"Raw directory does not exist: {raw_dir}")
-    files = [p for p in raw_dir.rglob("*") if p.is_file() and p.suffix.lower() in AUDIO_EXTENSIONS]
+    files = [
+        p
+        for p in raw_dir.rglob("*")
+        if (
+            p.is_file()
+            and p.suffix.lower() in AUDIO_EXTENSIONS
+            and not p.name.startswith("._")
+            and "__MACOSX" not in p.parts
+        )
+    ]
     return sorted(files)
 
 

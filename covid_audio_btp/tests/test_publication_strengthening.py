@@ -85,3 +85,38 @@ def test_manifest_records_config_and_sha256(tmp_path):
     assert manifest["artifacts"][0]["path"].endswith("metrics.csv")
     assert len(manifest["artifacts"][0]["sha256"]) == 64
     assert "created_at_utc" in manifest
+
+
+
+def test_participant_level_subgroup_merge_does_not_duplicate_fusion_rows():
+    import importlib.util
+
+    script_path = Path(__file__).resolve().parents[1] / "scripts" / "10_shift_and_confounding_checks.py"
+    spec = importlib.util.spec_from_file_location("shift_and_confounding_checks", script_path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+
+    predictions = pd.DataFrame(
+        {
+            "participant_id": ["p1", "p2"],
+            "label_binary": ["positive", "negative"],
+            "probability": [0.8, 0.2],
+            "fusion_method": ["uniform_mean", "uniform_mean"],
+        }
+    )
+    metadata = pd.DataFrame(
+        {
+            "participant_id": ["p1", "p1", "p2", "p2"],
+            "recording_id": ["r1", "r2", "r3", "r4"],
+            "quality_flag": ["ok", "corrupt", "ok", "mostly_silence"],
+            "age": [21, 21, 44, 44],
+            "gender": ["male", "male", "female", "female"],
+        }
+    )
+
+    merged = module.merge_predictions_with_metadata(predictions, metadata)
+
+    assert len(merged) == len(predictions)
+    assert merged.loc[merged["participant_id"] == "p1", "quality_flag"].iloc[0] == "corrupt"
+    assert merged.loc[merged["participant_id"] == "p2", "quality_flag"].iloc[0] == "mostly_silence"

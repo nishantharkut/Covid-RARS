@@ -32,6 +32,29 @@ def expected_calibration_error(y_true: np.ndarray, y_prob: np.ndarray, n_bins: i
     return float(ece)
 
 
+def best_threshold_by_balanced_accuracy(y_true: np.ndarray, y_prob: np.ndarray) -> float:
+    y_true = np.asarray(y_true).astype(int)
+    y_prob = np.asarray(y_prob).astype(float)
+    if y_prob.size == 0 or len(np.unique(y_true)) < 2:
+        return 0.5
+    finite = np.isfinite(y_prob)
+    if not np.any(finite):
+        return 0.5
+    values = np.unique(np.clip(y_prob[finite], 0.0, 1.0))
+    if values.size > 1:
+        mids = (values[:-1] + values[1:]) / 2.0
+        thresholds = np.unique(np.concatenate(([0.0, 0.5, 1.0], values, mids)))
+    else:
+        thresholds = np.unique(np.concatenate(([0.0, 0.5, 1.0], values)))
+    best_threshold = 0.5
+    best_score = -np.inf
+    for threshold in thresholds:
+        score = balanced_accuracy_score(y_true, (y_prob >= threshold).astype(int))
+        if score > best_score or (score == best_score and abs(threshold - 0.5) < abs(best_threshold - 0.5)):
+            best_score = float(score)
+            best_threshold = float(threshold)
+    return best_threshold
+
 def binary_metric_bundle(y_true: np.ndarray, y_prob: np.ndarray, threshold: float = 0.5) -> dict[str, float]:
     y_true = np.asarray(y_true).astype(int)
     y_prob = np.asarray(y_prob).astype(float)
@@ -69,6 +92,7 @@ def evaluate_predictions(
     probability_column: str = "probability",
     label_column: str = "label_binary",
     group_columns: list[str] | None = None,
+    threshold: float = 0.5,
 ) -> pd.DataFrame:
     group_columns = group_columns or []
     rows = []
@@ -81,7 +105,7 @@ def evaluate_predictions(
             continue
         y_true = labels_to_binary(group[label_column])
         y_prob = group[probability_column].astype(float).to_numpy()
-        row = binary_metric_bundle(y_true, y_prob)
+        row = binary_metric_bundle(y_true, y_prob, threshold=threshold)
         if group_columns:
             if not isinstance(group_key, tuple):
                 group_key = (group_key,)

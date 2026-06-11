@@ -102,3 +102,20 @@ def test_build_audio_index_uses_official_coswara_short_metadata_columns(tmp_path
     assert comorbidities["asthma"] is False
     assert row["test_type"] == "rtpcr"
     assert row["test_status"] == "positive"
+
+
+
+def test_discover_audio_files_ignores_appledouble_and_macosx_sidecars(tmp_path):
+    from covid_audio_btp.data_index import discover_audio_files
+
+    root = tmp_path / "coswara"
+    real = root / "20200413" / "abc123" / "cough-heavy.wav"
+    sidecar = real.parent / "._cough-heavy.wav"
+    macosx = root / "__MACOSX" / "20200413" / "abc123" / "cough-heavy.wav"
+    real.parent.mkdir(parents=True)
+    macosx.parent.mkdir(parents=True)
+    real.write_bytes(b"fake wav bytes")
+    sidecar.write_bytes(b"appledouble metadata")
+    macosx.write_bytes(b"appledouble archive metadata")
+
+    assert discover_audio_files(root) == [real]

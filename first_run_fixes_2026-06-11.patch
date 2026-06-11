@@ -1,0 +1,435 @@
+diff --git a/covid_audio_btp/scripts/08_calibrate_branches.py b/covid_audio_btp/scripts/08_calibrate_branches.py
+index b436f00..0d5a821 100644
+--- a/covid_audio_btp/scripts/08_calibrate_branches.py
++++ b/covid_audio_btp/scripts/08_calibrate_branches.py
+@@ -16,6 +16,7 @@ def parse_args() -> argparse.Namespace:
+     parser.add_argument("--validation-predictions", required=True, type=Path)
+     parser.add_argument("--test-predictions", required=True, type=Path)
+     parser.add_argument("--output", type=Path, default=Path("data/outputs/metrics/calibrated_branch_predictions.csv"))
++    parser.add_argument("--validation-output", type=Path, default=Path("data/outputs/metrics/calibrated_branch_predictions_validation.csv"))
+     parser.add_argument("--metrics-output", type=Path, default=Path("data/outputs/metrics/calibration_metrics.csv"))
+     parser.add_argument("--method", choices=["platt", "isotonic", "temperature"], default="platt")
+     return parser.parse_args()
+@@ -34,19 +35,28 @@ def _fit_calibrator(method: str, validation: pd.DataFrame):
+     return PlattCalibrator().fit(validation["probability"].to_numpy(), y_val)
+ 
+ 
+-def _transform(calibrator, method: str, test: pd.DataFrame) -> np.ndarray:
++def _transform(calibrator, method: str, frame: pd.DataFrame) -> np.ndarray:
+     if calibrator is None:
+-        return test["probability"].astype(float).to_numpy()
++        return frame["probability"].astype(float).to_numpy()
+     if method == "temperature":
+-        return calibrator.transform_logits(test["logit"].to_numpy())
+-    return calibrator.transform(test["probability"].to_numpy())
++        return calibrator.transform_logits(frame["logit"].to_numpy())
++    return calibrator.transform(frame["probability"].to_numpy())
++
++
++def _calibrated_copy(frame: pd.DataFrame, calibrator, method: str) -> pd.DataFrame:
++    out = frame.copy()
++    out["raw_probability"] = out["probability"]
++    out["probability"] = _transform(calibrator, method, out)
++    out["calibration_method"] = method if calibrator is not None else "identity_single_class_validation"
++    return out
+ 
+ 
+ def main() -> None:
+     args = parse_args()
+     validation = pd.read_csv(args.validation_predictions)
+     test = pd.read_csv(args.test_predictions)
+-    output_frames = []
++    validation_output_frames = []
++    test_output_frames = []
+     metric_frames = []
+ 
+     group_cols = ["model_name", "modality"]
+@@ -56,29 +66,30 @@ def main() -> None:
+         if test_group.empty:
+             continue
+         calibrator = _fit_calibrator(args.method, val_group)
+-        test_group["raw_probability"] = test_group["probability"]
+-        test_group["probability"] = _transform(calibrator, args.method, test_group)
+-        test_group["calibration_method"] = args.method if calibrator is not None else "identity_single_class_validation"
+-        output_frames.append(test_group)
+-        metrics = evaluate_predictions(test_group)
++        validation_output_frames.append(_calibrated_copy(val_group, calibrator, args.method))
++        calibrated_test = _calibrated_copy(test_group, calibrator, args.method)
++        test_output_frames.append(calibrated_test)
++        metrics = evaluate_predictions(calibrated_test)
+         metrics["model_name"] = model_name
+         metrics["modality"] = modality
+         metrics["calibration_method"] = args.method
+         metric_frames.append(metrics)
+ 
+-    if not output_frames:
++    if not test_output_frames:
+         raise RuntimeError("No calibrated prediction groups were produced. Check ML validation/test prediction files.")
+ 
+     args.output.parent.mkdir(parents=True, exist_ok=True)
+-    pd.concat(output_frames, ignore_index=True).to_csv(args.output, index=False)
++    pd.concat(test_output_frames, ignore_index=True).to_csv(args.output, index=False)
++    if validation_output_frames:
++        pd.concat(validation_output_frames, ignore_index=True).to_csv(args.validation_output, index=False)
+     if metric_frames:
+         pd.concat(metric_frames, ignore_index=True).to_csv(args.metrics_output, index=False)
+     else:
+         pd.DataFrame().to_csv(args.metrics_output, index=False)
+     print(f"Wrote calibrated predictions: {args.output}")
++    print(f"Wrote calibrated validation predictions: {args.validation_output}")
+     print(f"Wrote calibration metrics: {args.metrics_output}")
+ 
+ 
+ if __name__ == "__main__":
+     main()
+-
+diff --git a/covid_audio_btp/scripts/09_run_fusion.py b/covid_audio_btp/scripts/09_run_fusion.py
+index 3c9c691..d68c7b8 100644
+--- a/covid_audio_btp/scripts/09_run_fusion.py
++++ b/covid_audio_btp/scripts/09_run_fusion.py
+@@ -7,35 +7,85 @@ from pathlib import Path
+ import pandas as pd
+ 
+ from covid_audio_btp.fusion import uniform_fusion, validation_weighted_fusion
+-from covid_audio_btp.metrics import evaluate_predictions
++from covid_audio_btp.metrics import best_threshold_by_balanced_accuracy, evaluate_predictions, labels_to_binary
+ 
+ 
+ def parse_args() -> argparse.Namespace:
+     parser = argparse.ArgumentParser(description="Run calibrated multimodal fusion.")
+     parser.add_argument("--predictions", required=True, type=Path)
+     parser.add_argument("--validation-metrics", required=True, type=Path)
++    parser.add_argument("--validation-predictions", type=Path, default=None)
+     parser.add_argument("--output", type=Path, default=Path("data/outputs/metrics/fusion_predictions.csv"))
+     parser.add_argument("--metrics-output", type=Path, default=Path("data/outputs/metrics/fusion_metrics.csv"))
++    parser.add_argument("--thresholds-output", type=Path, default=Path("data/outputs/metrics/fusion_thresholds.csv"))
+     return parser.parse_args()
+ 
+ 
+-def main() -> None:
+-    args = parse_args()
+-    predictions = pd.read_csv(args.predictions)
+-    validation_metrics = pd.read_csv(args.validation_metrics)
++def _run_fusion(predictions: pd.DataFrame, validation_metrics: pd.DataFrame) -> pd.DataFrame:
+     frames = [
+         uniform_fusion(predictions),
+         validation_weighted_fusion(predictions, validation_metrics, metric_column="auprc"),
+     ]
+-    fused = pd.concat(frames, ignore_index=True)
+-    metrics = evaluate_predictions(fused, group_columns=["fusion_method"])
++    return pd.concat(frames, ignore_index=True)
++
++
++def _resolve_validation_predictions(args: argparse.Namespace) -> Path | None:
++    if args.validation_predictions is not None:
++        return args.validation_predictions if args.validation_predictions.exists() else None
++    candidate = args.predictions.with_name("calibrated_branch_predictions_validation.csv")
++    return candidate if candidate.exists() else None
++
++
++def _thresholds_from_validation(validation_fused: pd.DataFrame) -> pd.DataFrame:
++    rows = []
++    for method, group in validation_fused.groupby("fusion_method", dropna=False):
++        if group.empty or not group["label_binary"].isin(["positive", "negative"]).all():
++            threshold = 0.5
++        else:
++            threshold = best_threshold_by_balanced_accuracy(
++                labels_to_binary(group["label_binary"]),
++                group["probability"].astype(float).to_numpy(),
++            )
++        rows.append({"fusion_method": method, "threshold": threshold, "threshold_source": "validation"})
++    return pd.DataFrame(rows)
++
++
++def _evaluate_fused(fused: pd.DataFrame, thresholds: pd.DataFrame | None = None) -> pd.DataFrame:
++    metric_frames = []
++    threshold_map = {}
++    if thresholds is not None and not thresholds.empty:
++        threshold_map = thresholds.set_index("fusion_method")["threshold"].to_dict()
++    for method, group in fused.groupby("fusion_method", dropna=False):
++        threshold = float(threshold_map.get(method, 0.5))
++        metrics = evaluate_predictions(group, threshold=threshold)
++        metrics["fusion_method"] = method
++        metric_frames.append(metrics)
++    return pd.concat(metric_frames, ignore_index=True) if metric_frames else pd.DataFrame()
++
++
++def main() -> None:
++    args = parse_args()
++    predictions = pd.read_csv(args.predictions)
++    validation_metrics = pd.read_csv(args.validation_metrics)
++    fused = _run_fusion(predictions, validation_metrics)
++
++    validation_predictions_path = _resolve_validation_predictions(args)
++    thresholds = None
++    if validation_predictions_path is not None:
++        validation_predictions = pd.read_csv(validation_predictions_path)
++        validation_fused = _run_fusion(validation_predictions, validation_metrics)
++        thresholds = _thresholds_from_validation(validation_fused)
++
++    metrics = _evaluate_fused(fused, thresholds)
+     args.output.parent.mkdir(parents=True, exist_ok=True)
+     fused.to_csv(args.output, index=False)
+     metrics.to_csv(args.metrics_output, index=False)
++    if thresholds is not None:
++        thresholds.to_csv(args.thresholds_output, index=False)
++        print(f"Wrote fusion thresholds: {args.thresholds_output}")
+     print(f"Wrote fusion predictions: {args.output}")
+     print(f"Wrote fusion metrics: {args.metrics_output}")
+ 
+ 
+ if __name__ == "__main__":
+     main()
+-
+diff --git a/covid_audio_btp/scripts/10_shift_and_confounding_checks.py b/covid_audio_btp/scripts/10_shift_and_confounding_checks.py
+index 50cefbd..2ec7908 100644
+--- a/covid_audio_btp/scripts/10_shift_and_confounding_checks.py
++++ b/covid_audio_btp/scripts/10_shift_and_confounding_checks.py
+@@ -9,6 +9,24 @@ import pandas as pd
+ from covid_audio_btp.metrics import evaluate_predictions
+ 
+ 
++QUALITY_SEVERITY = {
++    "ok": 0,
++    "good": 0,
++    "not_audited": 0,
++    "unknown": 1,
++    "": 1,
++    "uncertain": 2,
++    "low_quality": 2,
++    "short": 3,
++    "mostly_silence": 3,
++    "clipped": 3,
++    "bad": 3,
++    "corrupt": 4,
++    "missing": 4,
++    "unreadable": 4,
++}
++
++
+ def parse_args() -> argparse.Namespace:
+     parser = argparse.ArgumentParser(description="Generate quality/subgroup/confounding metric tables.")
+     parser.add_argument("--predictions", required=True, type=Path)
+@@ -31,13 +49,52 @@ def _age_bucket(value: object) -> str:
+     return "60+"
+ 
+ 
++def _first_non_empty(values: pd.Series) -> object:
++    cleaned = values.dropna().astype(str).str.strip()
++    cleaned = cleaned[~cleaned.str.lower().isin({"", "nan", "none", "unknown"})]
++    if cleaned.empty:
++        return "unknown"
++    modes = cleaned.mode(dropna=True)
++    return modes.iloc[0] if not modes.empty else cleaned.iloc[0]
++
++
++def _worst_quality_flag(values: pd.Series) -> str:
++    cleaned = values.dropna().astype(str).str.strip().str.lower()
++    cleaned = cleaned[cleaned != ""]
++    if cleaned.empty:
++        return "unknown"
++    return max(cleaned, key=lambda flag: QUALITY_SEVERITY.get(flag, 2))
++
++
++def merge_predictions_with_metadata(predictions: pd.DataFrame, metadata: pd.DataFrame) -> pd.DataFrame:
++    cols = ["recording_id", "participant_id", "quality_flag", "age", "gender", "country"]
++    available_cols = [c for c in cols if c in metadata.columns]
++    if "recording_id" in predictions.columns and "recording_id" in metadata.columns:
++        right = metadata[available_cols].drop_duplicates("recording_id", keep="first")
++        return predictions.merge(right, on="recording_id", how="left")
++
++    if "participant_id" not in predictions.columns or "participant_id" not in metadata.columns:
++        return predictions.copy()
++
++    aggregations = {}
++    if "quality_flag" in metadata.columns:
++        aggregations["quality_flag"] = _worst_quality_flag
++    for column in ["age", "gender", "country"]:
++        if column in metadata.columns:
++            aggregations[column] = _first_non_empty
++
++    if aggregations:
++        right = metadata.groupby("participant_id", as_index=False).agg(aggregations)
++    else:
++        right = metadata[["participant_id"]].drop_duplicates("participant_id")
++    return predictions.merge(right, on="participant_id", how="left")
++
++
+ def main() -> None:
+     args = parse_args()
+     predictions = pd.read_csv(args.predictions)
+     metadata = pd.read_csv(args.metadata)
+-    cols = ["recording_id", "participant_id", "quality_flag", "age", "gender", "country"]
+-    merge_key = "recording_id" if "recording_id" in predictions.columns else "participant_id"
+-    merged = predictions.merge(metadata[[c for c in cols if c in metadata.columns]], on=merge_key, how="left")
++    merged = merge_predictions_with_metadata(predictions, metadata)
+     if "age" in merged.columns:
+         merged["age_bucket"] = merged["age"].map(_age_bucket)
+     group_columns = [c for c in ["quality_flag", "gender", "age_bucket"] if c in merged.columns]
+@@ -54,4 +111,3 @@ def main() -> None:
+ 
+ if __name__ == "__main__":
+     main()
+-
+diff --git a/covid_audio_btp/src/covid_audio_btp/data_index.py b/covid_audio_btp/src/covid_audio_btp/data_index.py
+index 6d23bca..c791480 100644
+--- a/covid_audio_btp/src/covid_audio_btp/data_index.py
++++ b/covid_audio_btp/src/covid_audio_btp/data_index.py
+@@ -23,7 +23,16 @@ def discover_audio_files(raw_dir: Path) -> list[Path]:
+     raw_dir = Path(raw_dir)
+     if not raw_dir.exists():
+         raise FileNotFoundError(f"Raw directory does not exist: {raw_dir}")
+-    files = [p for p in raw_dir.rglob("*") if p.is_file() and p.suffix.lower() in AUDIO_EXTENSIONS]
++    files = [
++        p
++        for p in raw_dir.rglob("*")
++        if (
++            p.is_file()
++            and p.suffix.lower() in AUDIO_EXTENSIONS
++            and not p.name.startswith("._")
++            and "__MACOSX" not in p.parts
++        )
++    ]
+     return sorted(files)
+ 
+ 
+diff --git a/covid_audio_btp/src/covid_audio_btp/metrics.py b/covid_audio_btp/src/covid_audio_btp/metrics.py
+index 7e88a14..ee05eb3 100644
+--- a/covid_audio_btp/src/covid_audio_btp/metrics.py
++++ b/covid_audio_btp/src/covid_audio_btp/metrics.py
+@@ -32,6 +32,29 @@ def expected_calibration_error(y_true: np.ndarray, y_prob: np.ndarray, n_bins: i
+     return float(ece)
+ 
+ 
++def best_threshold_by_balanced_accuracy(y_true: np.ndarray, y_prob: np.ndarray) -> float:
++    y_true = np.asarray(y_true).astype(int)
++    y_prob = np.asarray(y_prob).astype(float)
++    if y_prob.size == 0 or len(np.unique(y_true)) < 2:
++        return 0.5
++    finite = np.isfinite(y_prob)
++    if not np.any(finite):
++        return 0.5
++    values = np.unique(np.clip(y_prob[finite], 0.0, 1.0))
++    if values.size > 1:
++        mids = (values[:-1] + values[1:]) / 2.0
++        thresholds = np.unique(np.concatenate(([0.0, 0.5, 1.0], values, mids)))
++    else:
++        thresholds = np.unique(np.concatenate(([0.0, 0.5, 1.0], values)))
++    best_threshold = 0.5
++    best_score = -np.inf
++    for threshold in thresholds:
++        score = balanced_accuracy_score(y_true, (y_prob >= threshold).astype(int))
++        if score > best_score or (score == best_score and abs(threshold - 0.5) < abs(best_threshold - 0.5)):
++            best_score = float(score)
++            best_threshold = float(threshold)
++    return best_threshold
++
+ def binary_metric_bundle(y_true: np.ndarray, y_prob: np.ndarray, threshold: float = 0.5) -> dict[str, float]:
+     y_true = np.asarray(y_true).astype(int)
+     y_prob = np.asarray(y_prob).astype(float)
+@@ -69,6 +92,7 @@ def evaluate_predictions(
+     probability_column: str = "probability",
+     label_column: str = "label_binary",
+     group_columns: list[str] | None = None,
++    threshold: float = 0.5,
+ ) -> pd.DataFrame:
+     group_columns = group_columns or []
+     rows = []
+@@ -81,7 +105,7 @@ def evaluate_predictions(
+             continue
+         y_true = labels_to_binary(group[label_column])
+         y_prob = group[probability_column].astype(float).to_numpy()
+-        row = binary_metric_bundle(y_true, y_prob)
++        row = binary_metric_bundle(y_true, y_prob, threshold=threshold)
+         if group_columns:
+             if not isinstance(group_key, tuple):
+                 group_key = (group_key,)
+diff --git a/covid_audio_btp/tests/test_data_index.py b/covid_audio_btp/tests/test_data_index.py
+index 2d9f865..0ecdaf4 100644
+--- a/covid_audio_btp/tests/test_data_index.py
++++ b/covid_audio_btp/tests/test_data_index.py
+@@ -102,3 +102,20 @@ def test_build_audio_index_uses_official_coswara_short_metadata_columns(tmp_path
+     assert comorbidities["asthma"] is False
+     assert row["test_type"] == "rtpcr"
+     assert row["test_status"] == "positive"
++
++
++
++def test_discover_audio_files_ignores_appledouble_and_macosx_sidecars(tmp_path):
++    from covid_audio_btp.data_index import discover_audio_files
++
++    root = tmp_path / "coswara"
++    real = root / "20200413" / "abc123" / "cough-heavy.wav"
++    sidecar = real.parent / "._cough-heavy.wav"
++    macosx = root / "__MACOSX" / "20200413" / "abc123" / "cough-heavy.wav"
++    real.parent.mkdir(parents=True)
++    macosx.parent.mkdir(parents=True)
++    real.write_bytes(b"fake wav bytes")
++    sidecar.write_bytes(b"appledouble metadata")
++    macosx.write_bytes(b"appledouble archive metadata")
++
++    assert discover_audio_files(root) == [real]
+diff --git a/covid_audio_btp/tests/test_metrics.py b/covid_audio_btp/tests/test_metrics.py
+index 698c242..e8581c0 100644
+--- a/covid_audio_btp/tests/test_metrics.py
++++ b/covid_audio_btp/tests/test_metrics.py
+@@ -9,3 +9,16 @@ def test_ece_perfect_predictions_is_low():
+ 
+     assert expected_calibration_error(y_true, y_prob, n_bins=2) < 0.05
+ 
++
++
++
++def test_best_threshold_by_balanced_accuracy_can_move_below_half():
++    from covid_audio_btp.metrics import best_threshold_by_balanced_accuracy
++
++    y_true = np.array([0, 0, 1, 1])
++    y_prob = np.array([0.05, 0.10, 0.25, 0.35])
++
++    threshold = best_threshold_by_balanced_accuracy(y_true, y_prob)
++
++    assert threshold < 0.5
++    assert 0.10 <= threshold <= 0.25
+diff --git a/covid_audio_btp/tests/test_publication_strengthening.py b/covid_audio_btp/tests/test_publication_strengthening.py
+index cd9d750..ffc9ad1 100644
+--- a/covid_audio_btp/tests/test_publication_strengthening.py
++++ b/covid_audio_btp/tests/test_publication_strengthening.py
+@@ -85,3 +85,38 @@ def test_manifest_records_config_and_sha256(tmp_path):
+     assert manifest["artifacts"][0]["path"].endswith("metrics.csv")
+     assert len(manifest["artifacts"][0]["sha256"]) == 64
+     assert "created_at_utc" in manifest
++
++
++
++def test_participant_level_subgroup_merge_does_not_duplicate_fusion_rows():
++    import importlib.util
++
++    script_path = Path(__file__).resolve().parents[1] / "scripts" / "10_shift_and_confounding_checks.py"
++    spec = importlib.util.spec_from_file_location("shift_and_confounding_checks", script_path)
++    module = importlib.util.module_from_spec(spec)
++    assert spec.loader is not None
++    spec.loader.exec_module(module)
++
++    predictions = pd.DataFrame(
++        {
++            "participant_id": ["p1", "p2"],
++            "label_binary": ["positive", "negative"],
++            "probability": [0.8, 0.2],
++            "fusion_method": ["uniform_mean", "uniform_mean"],
++        }
++    )
++    metadata = pd.DataFrame(
++        {
++            "participant_id": ["p1", "p1", "p2", "p2"],
++            "recording_id": ["r1", "r2", "r3", "r4"],
++            "quality_flag": ["ok", "corrupt", "ok", "mostly_silence"],
++            "age": [21, 21, 44, 44],
++            "gender": ["male", "male", "female", "female"],
++        }
++    )
++
++    merged = module.merge_predictions_with_metadata(predictions, metadata)
++
++    assert len(merged) == len(predictions)
++    assert merged.loc[merged["participant_id"] == "p1", "quality_flag"].iloc[0] == "corrupt"
++    assert merged.loc[merged["participant_id"] == "p2", "quality_flag"].iloc[0] == "mostly_silence"

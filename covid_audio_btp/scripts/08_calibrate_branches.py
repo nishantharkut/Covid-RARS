@@ -16,6 +16,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--validation-predictions", required=True, type=Path)
     parser.add_argument("--test-predictions", required=True, type=Path)
     parser.add_argument("--output", type=Path, default=Path("data/outputs/metrics/calibrated_branch_predictions.csv"))
+    parser.add_argument("--validation-output", type=Path, default=Path("data/outputs/metrics/calibrated_branch_predictions_validation.csv"))
     parser.add_argument("--metrics-output", type=Path, default=Path("data/outputs/metrics/calibration_metrics.csv"))
     parser.add_argument("--method", choices=["platt", "isotonic", "temperature"], default="platt")
     return parser.parse_args()
@@ -34,19 +35,28 @@ def _fit_calibrator(method: str, validation: pd.DataFrame):
     return PlattCalibrator().fit(validation["probability"].to_numpy(), y_val)
 
 
-def _transform(calibrator, method: str, test: pd.DataFrame) -> np.ndarray:
+def _transform(calibrator, method: str, frame: pd.DataFrame) -> np.ndarray:
     if calibrator is None:
-        return test["probability"].astype(float).to_numpy()
+        return frame["probability"].astype(float).to_numpy()
     if method == "temperature":
-        return calibrator.transform_logits(test["logit"].to_numpy())
-    return calibrator.transform(test["probability"].to_numpy())
+        return calibrator.transform_logits(frame["logit"].to_numpy())
+    return calibrator.transform(frame["probability"].to_numpy())
+
+
+def _calibrated_copy(frame: pd.DataFrame, calibrator, method: str) -> pd.DataFrame:
+    out = frame.copy()
+    out["raw_probability"] = out["probability"]
+    out["probability"] = _transform(calibrator, method, out)
+    out["calibration_method"] = method if calibrator is not None else "identity_single_class_validation"
+    return out
 
 
 def main() -> None:
     args = parse_args()
     validation = pd.read_csv(args.validation_predictions)
     test = pd.read_csv(args.test_predictions)
-    output_frames = []
+    validation_output_frames = []
+    test_output_frames = []
     metric_frames = []
 
     group_cols = ["model_name", "modality"]
@@ -56,29 +66,30 @@ def main() -> None:
         if test_group.empty:
             continue
         calibrator = _fit_calibrator(args.method, val_group)
-        test_group["raw_probability"] = test_group["probability"]
-        test_group["probability"] = _transform(calibrator, args.method, test_group)
-        test_group["calibration_method"] = args.method if calibrator is not None else "identity_single_class_validation"
-        output_frames.append(test_group)
-        metrics = evaluate_predictions(test_group)
+        validation_output_frames.append(_calibrated_copy(val_group, calibrator, args.method))
+        calibrated_test = _calibrated_copy(test_group, calibrator, args.method)
+        test_output_frames.append(calibrated_test)
+        metrics = evaluate_predictions(calibrated_test)
         metrics["model_name"] = model_name
         metrics["modality"] = modality
         metrics["calibration_method"] = args.method
         metric_frames.append(metrics)
 
-    if not output_frames:
+    if not test_output_frames:
         raise RuntimeError("No calibrated prediction groups were produced. Check ML validation/test prediction files.")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    pd.concat(output_frames, ignore_index=True).to_csv(args.output, index=False)
+    pd.concat(test_output_frames, ignore_index=True).to_csv(args.output, index=False)
+    if validation_output_frames:
+        pd.concat(validation_output_frames, ignore_index=True).to_csv(args.validation_output, index=False)
     if metric_frames:
         pd.concat(metric_frames, ignore_index=True).to_csv(args.metrics_output, index=False)
     else:
         pd.DataFrame().to_csv(args.metrics_output, index=False)
     print(f"Wrote calibrated predictions: {args.output}")
+    print(f"Wrote calibrated validation predictions: {args.validation_output}")
     print(f"Wrote calibration metrics: {args.metrics_output}")
 
 
 if __name__ == "__main__":
     main()
-
