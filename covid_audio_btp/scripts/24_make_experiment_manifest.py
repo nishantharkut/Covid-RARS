@@ -28,6 +28,36 @@ DEFAULT_ARTIFACTS = [
 ]
 
 
+def _dedupe_paths(paths: list[Path]) -> list[Path]:
+    seen: set[str] = set()
+    out: list[Path] = []
+    for path in paths:
+        key = str(path)
+        if key not in seen:
+            seen.add(key)
+            out.append(path)
+    return out
+
+
+def default_artifact_paths(project_root: Path | None = None) -> list[Path]:
+    root = Path(".") if project_root is None else Path(project_root)
+    base = [root / path for path in DEFAULT_ARTIFACTS]
+    metrics_dir = root / "data" / "outputs" / "metrics"
+    tables_dir = root / "reports" / "tables"
+    patterns = [
+        (metrics_dir, "external_model_grid_*_metrics.csv"),
+        (metrics_dir, "external_model_grid_*_bootstrap_ci.csv"),
+        (metrics_dir, "coughvid_internal_*_metrics.csv"),
+        (metrics_dir, "coughvid_internal_*_bootstrap_ci.csv"),
+        (tables_dir, "feature_shift_*_cough.csv"),
+        (tables_dir, "feature_shift_*_summary.csv"),
+    ]
+    discovered: list[Path] = []
+    for directory, pattern in patterns:
+        discovered.extend(sorted(directory.glob(pattern)))
+    return _dedupe_paths([*base, *discovered])
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Write reproducibility manifest with config, package versions, and artifact hashes.")
     parser.add_argument("--output", type=Path, default=Path("reports/experiment_manifest.json"))
@@ -39,7 +69,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    artifacts = args.artifacts if args.artifacts is not None else DEFAULT_ARTIFACTS
+    artifacts = args.artifacts if args.artifacts is not None else default_artifact_paths()
     manifest = build_experiment_manifest(
         config={"run_name": args.run_name, "seed": args.seed},
         artifact_paths=artifacts,

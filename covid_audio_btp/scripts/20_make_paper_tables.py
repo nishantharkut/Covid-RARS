@@ -29,6 +29,39 @@ DEFAULT_CI_PATHS = [
 ]
 
 
+def _dedupe_paths(paths: list[Path]) -> list[Path]:
+    seen: set[str] = set()
+    out: list[Path] = []
+    for path in paths:
+        key = str(path)
+        if key not in seen:
+            seen.add(key)
+            out.append(path)
+    return out
+
+
+def default_metric_paths(metrics_dir: Path = Path("data/outputs/metrics")) -> list[Path]:
+    representation_patterns = [
+        "external_model_grid_*_metrics.csv",
+        "coughvid_internal_*_metrics.csv",
+    ]
+    discovered: list[Path] = []
+    for pattern in representation_patterns:
+        discovered.extend(sorted(metrics_dir.glob(pattern)))
+    return _dedupe_paths([*DEFAULT_METRIC_PATHS, *discovered])
+
+
+def default_ci_paths(metrics_dir: Path = Path("data/outputs/metrics")) -> list[Path]:
+    representation_patterns = [
+        "external_model_grid_*_bootstrap_ci.csv",
+        "coughvid_internal_*_bootstrap_ci.csv",
+    ]
+    discovered: list[Path] = []
+    for pattern in representation_patterns:
+        discovered.extend(sorted(metrics_dir.glob(pattern)))
+    return _dedupe_paths([*DEFAULT_CI_PATHS, *discovered])
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build paper-ready metric tables from experiment CSVs.")
     parser.add_argument("--metrics", nargs="*", type=Path, default=None)
@@ -55,8 +88,8 @@ def _group_columns(metrics: pd.DataFrame) -> list[str]:
 
 def main() -> None:
     args = parse_args()
-    metric_paths = args.metrics if args.metrics is not None else DEFAULT_METRIC_PATHS
-    ci_paths = args.ci if args.ci is not None else DEFAULT_CI_PATHS
+    metric_paths = args.metrics if args.metrics is not None else default_metric_paths()
+    ci_paths = args.ci if args.ci is not None else default_ci_paths()
     metrics = read_existing_csvs(metric_paths)
     ci_table = read_existing_csvs(ci_paths)
     if metrics.empty:
