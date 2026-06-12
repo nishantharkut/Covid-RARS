@@ -1,0 +1,122 @@
+{
+  "created_at_utc": "2026-06-12T11:01:24.404610+00:00",
+  "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
+  "python_executable": "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python",
+  "config": {
+    "run_name": "covid_audio_publication_run",
+    "seed": 42
+  },
+  "packages": {
+    "python": "3.12.3",
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
+    "scikit-learn": "1.9.0",
+    "librosa": "0.11.0",
+    "soundfile": "0.14.0",
+    "torch": "2.11.0+cu128",
+    "torchaudio": "2.11.0+cu128",
+    "xgboost": "3.2.0",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.10",
+    "opensmile": "2.6.0",
+    "shap": "0.52.0"
+  },
+  "artifacts": [
+    {
+      "path": "data/interim/coswara_index.csv",
+      "exists": true,
+      "size_bytes": 14467114,
+      "sha256": "215c79b8b25af27ac83a87947317039097e5152685d9cc03a6407a50059afbdd"
+    },
+    {
+      "path": "data/processed/metadata_clean.csv",
+      "exists": true,
+      "size_bytes": 15192524,
+      "sha256": "a63e24cd9c2b148084bc45d4303f48a205520eda44ea89da4319760da8eda65f"
+    },
+    {
+      "path": "data/processed/audio_quality.csv",
+      "exists": true,
+      "size_bytes": 8643031,
+      "sha256": "bdd1f2daffd13107064f41cbcf9b3fd1ebbf513340908aa28826270bf3d4f178"
+    },
+    {
+      "path": "data/processed/features_mfcc.csv",
+      "exists": true,
+      "size_bytes": 90512724,
+      "sha256": "b8e4136b0f619671a6c010b79d313227dd28de78eebcffb60f0a19bc275654f9"
+    },
+    {
+      "path": "data/outputs/metrics/ml_baseline_metrics.csv",
+      "exists": true,
+      "size_bytes": 2362,
+      "sha256": "0713be8d207e39a3f35664d745ef6b155a3511a36b17fd65161720729a4b3d71"
+    },
+    {
+      "path": "data/outputs/metrics/calibration_metrics.csv",
+      "exists": true,
+      "size_bytes": 2268,
+      "sha256": "52ec8c410a4bf069e0e5f3707e788aba29d0948651b71047fcda25af384e558e"
+    },
+    {
+      "path": "data/outputs/metrics/fusion_metrics.csv",
+      "exists": true,
+      "size_bytes": 538,
+      "sha256": "014a1ab92df9bf02ecd8a421a8c38fd04d37c1ee15c66518c420adbb6f1ad885"
+    },
+    {
+      "path": "data/outputs/metrics/quality_weighted_fusion_metrics.csv",
+      "exists": true,
+      "size_bytes": 326,
+      "sha256": "d8e7a46da2595243909bf4d4fdc04ffc49b49e0f36d476664a84f3eafee28484"
+    },
+    {
+      "path": "data/outputs/metrics/cross_dataset_metrics.csv",
+      "exists": true,
+      "size_bytes": 374,
+      "sha256": "3e913b713cdbd25fe25b8b1a1a9530dfad9b5561475c8d4b7059465977173620"
+    },
+    {
+      "path": "data/outputs/metrics/external_model_grid_metrics.csv",
+      "exists": true,
+      "size_bytes": 6598,
+      "sha256": "9a5d0737a25aa5e779ca3b59a083d16c916d663e7a0d5b04fc229c3f44944403"
+    },
+    {
+      "path": "data/outputs/metrics/external_model_grid_bootstrap_ci.csv",
+      "exists": true,
+      "size_bytes": 12470,
+      "sha256": "bfeff2b8b98ba573a0a9b7b2b0eb2e310fb0820a0659073360f7072201f31c4e"
+    },
+    {
+      "path": "data/outputs/metrics/coughvid_internal_metrics.csv",
+      "exists": true,
+      "size_bytes": 1499,
+      "sha256": "482daf2aad7ec28eb53c5e711e6cfbc6529341112fbfff8f08446a2de14db678"
+    },
+    {
+      "path": "data/outputs/metrics/coughvid_internal_bootstrap_ci.csv",
+      "exists": true,
+      "size_bytes": 2332,
+      "sha256": "4fc2a2ea21440033fa08e2bd0b92bf95aeb36cabd7e2c7f82c9f0bf8c2e54060"
+    },
+    {
+      "path": "reports/tables/feature_shift_report.csv",
+      "exists": true,
+      "size_bytes": 42022,
+      "sha256": "283c0fe329845b114e421593d82ddfe05323bd3bca4c47d78e09e9aa0e164b58"
+    },
+    {
+      "path": "reports/tables/feature_shift_summary.csv",
+      "exists": true,
+      "size_bytes": 113,
+      "sha256": "6aa075b4b0006d04afa708f0e28b3965b8ac1cd24edc91dbea30a3606273a74b"
+    },
+    {
+      "path": "reports/tables/paper_metric_table.csv",
+      "exists": true,
+      "size_bytes": 7192,
+      "sha256": "7430f5b429c1c6407718f6421a433c014e0f415c25e0abef59d2e9117f129906"
+    }
+  ]
+}

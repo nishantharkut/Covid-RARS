@@ -39,7 +39,17 @@ def parse_args() -> argparse.Namespace:
 
 
 def _group_columns(metrics: pd.DataFrame) -> list[str]:
-    candidates = ["table_source", "model_name", "model", "modality", "fusion_method", "dataset", "split"]
+    candidates = [
+        "table_source",
+        "model_name",
+        "model",
+        "modality",
+        "feature_strategy",
+        "fusion_method",
+        "dataset",
+        "split",
+        "calibration_method",
+    ]
     return [col for col in candidates if col in metrics.columns]
 
 

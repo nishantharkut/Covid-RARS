@@ -350,3 +350,28 @@ def test_build_paper_metric_table_formats_point_estimates_and_ci():
     assert table.loc[0, "auprc"] == "0.701 [0.610, 0.800]"
     assert table.loc[0, "brier"] == "0.183"
 
+
+def test_paper_table_keeps_external_feature_strategy_column():
+    from covid_audio_btp.reporting import build_paper_metric_table
+
+    metrics = pd.DataFrame(
+        {
+            "table_source": ["external_model_grid_metrics"],
+            "model_name": ["lightgbm"],
+            "modality": ["cough"],
+            "feature_strategy": ["top_stable_50"],
+            "calibration_method": ["platt"],
+            "auroc": [0.53],
+            "auprc": [0.04],
+        }
+    )
+
+    table = build_paper_metric_table(
+        metrics,
+        group_columns=["table_source", "model_name", "modality", "feature_strategy", "calibration_method"],
+    )
+
+    assert table.loc[0, "feature_strategy"] == "top_stable_50"
+    assert table.loc[0, "calibration_method"] == "platt"
+    assert table.loc[0, "auroc"] == "0.530"
+
