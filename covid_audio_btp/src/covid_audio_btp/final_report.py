@@ -188,7 +188,12 @@ The novelty is not a new neural architecture. The contribution is a controlled, 
 """
 
 
-def _comparison_section() -> str:
+def _comparison_section(related_paper_markdown: str | None = None) -> str:
+    if related_paper_markdown:
+        markdown = related_paper_markdown.strip()
+        if markdown.startswith("# Related-Paper Comparison"):
+            markdown = markdown.replace("# Related-Paper Comparison", "## Related-Paper Comparison", 1)
+        return markdown + "\n"
     return """## Related-Paper Comparison Position
 
 The final paper should compare against the exact related papers listed in the original project document. That comparison should be filled from a structured related-paper table, not from memory. Until that table is added, the correct qualitative comparison is:
@@ -231,7 +236,7 @@ def _next_steps_section() -> str:
 """
 
 
-def build_final_report(evidence: pd.DataFrame) -> str:
+def build_final_report(evidence: pd.DataFrame, related_paper_markdown: str | None = None) -> str:
     evidence = _validate_evidence(evidence)
     sections = [
         "# COVID Audio BTP Final Results Report",
@@ -247,7 +252,7 @@ def build_final_report(evidence: pd.DataFrame) -> str:
         _evidence_table(evidence),
         _interpretation_section(),
         _novelty_section(),
-        _comparison_section(),
+        _comparison_section(related_paper_markdown),
         _publication_readiness_section(),
         _limitations_section(),
         _next_steps_section(),

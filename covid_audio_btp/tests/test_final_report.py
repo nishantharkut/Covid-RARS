@@ -119,6 +119,17 @@ def test_final_report_contains_evidence_driven_sections() -> None:
     assert "calibration_external_transfer_worst" in report
 
 
+def test_final_report_includes_related_paper_table_when_provided() -> None:
+    from covid_audio_btp.final_report import build_final_report
+
+    related = "# Related-Paper Comparison\n\n| paper_id | title |\n| --- | --- |\n| P1 | Base paper |\n"
+
+    report = build_final_report(_toy_evidence(), related_paper_markdown=related)
+
+    assert "## Related-Paper Comparison" in report
+    assert "| P1 | Base paper |" in report
+
+
 def test_summary_report_is_shorter_and_preserves_main_claims() -> None:
     from covid_audio_btp.final_report import build_final_report, build_summary_report
 
