@@ -17,11 +17,15 @@ DEFAULT_METRIC_PATHS = [
     Path("data/outputs/metrics/quality_weighted_fusion_metrics.csv"),
     Path("data/outputs/metrics/metadata_baseline_metrics.csv"),
     Path("data/outputs/metrics/cross_dataset_metrics.csv"),
+    Path("data/outputs/metrics/external_model_grid_metrics.csv"),
+    Path("data/outputs/metrics/coughvid_internal_metrics.csv"),
 ]
 
 DEFAULT_CI_PATHS = [
     Path("data/outputs/metrics/quality_weighted_fusion_bootstrap_ci.csv"),
     Path("data/outputs/metrics/cross_dataset_bootstrap_ci.csv"),
+    Path("data/outputs/metrics/external_model_grid_bootstrap_ci.csv"),
+    Path("data/outputs/metrics/coughvid_internal_bootstrap_ci.csv"),
 ]
 
 

@@ -26,6 +26,10 @@ REQUIRED_IMPORTS = {
 
 OPTIONAL_IMPORTS = {
     "xgboost": "xgboost",
+    "lightgbm": "lightgbm",
+    "catboost": "catboost",
+    "opensmile": "opensmile",
+    "shap": "shap",
     "torch": "torch",
     "torchaudio": "torchaudio",
     "pytest": "pytest",

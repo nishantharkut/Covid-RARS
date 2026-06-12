@@ -1,2 +1,8 @@
 xgboost
+lightgbm
+catboost
+imbalanced-learn
+optuna
+opensmile
+shap
 streamlit

@@ -56,6 +56,10 @@ def build_experiment_manifest(
         "torch",
         "torchaudio",
         "xgboost",
+        "lightgbm",
+        "catboost",
+        "opensmile",
+        "shap",
     ]
     return {
         "created_at_utc": datetime.now(timezone.utc).isoformat(),

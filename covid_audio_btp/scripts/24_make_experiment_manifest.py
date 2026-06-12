@@ -18,6 +18,12 @@ DEFAULT_ARTIFACTS = [
     Path("data/outputs/metrics/fusion_metrics.csv"),
     Path("data/outputs/metrics/quality_weighted_fusion_metrics.csv"),
     Path("data/outputs/metrics/cross_dataset_metrics.csv"),
+    Path("data/outputs/metrics/external_model_grid_metrics.csv"),
+    Path("data/outputs/metrics/external_model_grid_bootstrap_ci.csv"),
+    Path("data/outputs/metrics/coughvid_internal_metrics.csv"),
+    Path("data/outputs/metrics/coughvid_internal_bootstrap_ci.csv"),
+    Path("reports/tables/feature_shift_report.csv"),
+    Path("reports/tables/feature_shift_summary.csv"),
     Path("reports/tables/paper_metric_table.csv"),
 ]
 

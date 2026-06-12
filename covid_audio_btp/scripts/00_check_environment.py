@@ -21,6 +21,10 @@ REQUIRED = [
 
 OPTIONAL = [
     "xgboost",
+    "lightgbm",
+    "catboost",
+    "opensmile",
+    "shap",
     "torch",
     "torchaudio",
     "streamlit",
