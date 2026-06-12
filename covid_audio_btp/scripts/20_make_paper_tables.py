@@ -20,6 +20,7 @@ DEFAULT_METRIC_PATHS = [
     Path("data/outputs/metrics/external_model_grid_metrics.csv"),
     Path("data/outputs/metrics/coughvid_internal_metrics.csv"),
     Path("data/outputs/metrics/metadata_confounding_metrics.csv"),
+    Path("data/outputs/metrics/confounding_controlled_audio_metrics.csv"),
 ]
 
 DEFAULT_CI_PATHS = [
@@ -83,6 +84,7 @@ def _group_columns(metrics: pd.DataFrame) -> list[str]:
         "dataset",
         "split",
         "audit_model",
+        "control_method",
         "calibration_method",
     ]
     return [col for col in candidates if col in metrics.columns]
