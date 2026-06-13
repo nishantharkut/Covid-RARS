@@ -350,6 +350,139 @@ def _add_calibration_rows(rows: list[dict[str, object]], tables: Mapping[str, pd
     )
 
 
+
+def _cap_id(value: object) -> str:
+    try:
+        numeric = float(value)
+    except Exception:
+        return _safe_constraint_id(value)
+    if numeric.is_integer():
+        return str(int(numeric))
+    return str(numeric).replace(".", "_")
+
+
+def _add_domain_shift_rows(rows: list[dict[str, object]], tables: Mapping[str, pd.DataFrame]) -> None:
+    frame = _table(tables, "domain_shift_audit_metrics")
+    best = _best_row(frame, metric="domain_auroc")
+    if best is None:
+        return
+    representation = str(_value(best, "representation", "representation"))
+    _append_metric_row(
+        rows,
+        claim_id=f"domain_shift_{representation}_max",
+        claim=f"{representation} features strongly separate source and external datasets, supporting a dataset-artifact explanation for transfer failure.",
+        evidence_type="domain_shift",
+        artifact="data/outputs/metrics/domain_shift_audit_metrics.csv",
+        comparison=f"{representation} source-vs-external domain classifier",
+        row=best,
+        primary_metric="domain_auroc",
+        secondary_columns=["domain_auprc", "balanced_accuracy", "f1", "accuracy", "brier", "ece", "n_features"],
+        evidence_direction="cautionary",
+        paper_use="Use as mechanistic evidence that representation vectors encode dataset/source artifacts, not only COVID label signal.",
+    )
+
+
+def _add_ipw_sensitivity_rows(rows: list[dict[str, object]], tables: Mapping[str, pd.DataFrame]) -> None:
+    frame = _table(tables, "ipw_sensitivity_metrics")
+    if frame.empty or "control_method" not in frame.columns:
+        return
+    weighted = frame[frame["control_method"].astype(str).eq("ipw_label_propensity")].copy()
+    if weighted.empty:
+        return
+    if "weight_cap" in weighted.columns:
+        weighted["_cap_sort"] = pd.to_numeric(weighted["weight_cap"], errors="coerce")
+        weighted = weighted.sort_values(["_cap_sort", "effective_sample_size"], ascending=[True, False])
+    row = weighted.iloc[0]
+    cap = _value(row, "weight_cap", "unknown")
+    _append_metric_row(
+        rows,
+        claim_id=f"ipw_sensitivity_cap_{_cap_id(cap)}",
+        claim=f"IPW-controlled audio performance remains visible under a stricter weight cap of {cap}, with explicit effective-sample-size reporting.",
+        evidence_type="ipw_sensitivity",
+        artifact="data/outputs/metrics/ipw_sensitivity_metrics.csv",
+        comparison=str(_value(row, "weight_config", "ipw sensitivity")),
+        row=row,
+        primary_metric="auroc",
+        secondary_columns=["auprc", "balanced_accuracy", "sensitivity", "specificity", "f1", "effective_sample_size", "mean_abs_smd_after", "max_abs_smd_after", "max_weight"],
+        evidence_direction="qualified_supportive",
+        paper_use="Use to answer reviewer concerns that the adjusted audio result depends on one arbitrary IPW truncation setting.",
+    )
+
+
+def _add_prevalence_recalibration_rows(rows: list[dict[str, object]], tables: Mapping[str, pd.DataFrame]) -> None:
+    frame = _table(tables, "external_prevalence_recalibration")
+    if frame.empty or "recalibration_method" not in frame.columns:
+        return
+    original = frame[frame["recalibration_method"].astype(str).eq("source_calibrated")].copy()
+    corrected = frame[frame["recalibration_method"].astype(str).eq("target_prevalence_intercept")].copy()
+    if original.empty or corrected.empty:
+        return
+    group_cols = [col for col in ["prediction_source", "model_name", "feature_strategy", "dataset", "split"] if col in frame.columns]
+    if group_cols:
+        merged = corrected.merge(
+            original[group_cols + ["ece", "abs_calibration_gap"]].rename(
+                columns={"ece": "original_ece", "abs_calibration_gap": "original_abs_calibration_gap"}
+            ),
+            on=group_cols,
+            how="left",
+        )
+    else:
+        merged = corrected.copy()
+        merged["original_ece"] = original["ece"].iloc[0]
+        merged["original_abs_calibration_gap"] = original["abs_calibration_gap"].iloc[0]
+    merged["ece_reduction"] = pd.to_numeric(merged["original_ece"], errors="coerce") - pd.to_numeric(merged["ece"], errors="coerce")
+    merged = merged.dropna(subset=["ece_reduction"])
+    if merged.empty:
+        return
+    row = merged.loc[merged["ece_reduction"].idxmax()].copy()
+    row["corrected_ece"] = row.get("ece", np.nan)
+    row["corrected_abs_calibration_gap"] = row.get("abs_calibration_gap", np.nan)
+    rows.append(
+        {
+            "claim_id": "external_prevalence_recalibration_best",
+            "claim": "Target-prevalence intercept correction improves external calibration, but it does not repair discrimination under dataset shift.",
+            "evidence_type": "prevalence_recalibration",
+            "artifact": "reports/tables/external_prevalence_recalibration.csv",
+            "comparison": str(_value(row, "prediction_source", "external predictions")),
+            "primary_metric": "ece_reduction",
+            "primary_value": float(row["ece_reduction"]),
+            "secondary_metrics": _secondary_metrics(row, ["original_ece", "corrected_ece", "corrected_abs_calibration_gap", "auroc", "auprc"]),
+            "n_samples": _int_value(row, "n_samples"),
+            "evidence_direction": "reliability_context",
+            "paper_use": "Use to show that prevalence correction can reduce probability inflation while leaving ranking/generalization limits intact.",
+        }
+    )
+
+
+def _add_paired_bootstrap_rows(rows: list[dict[str, object]], tables: Mapping[str, pd.DataFrame]) -> None:
+    frame = _table(tables, "paired_bootstrap_comparisons")
+    if frame.empty or "metric" not in frame.columns:
+        return
+    candidates = frame[frame["metric"].astype(str).eq("auroc")].copy()
+    if candidates.empty:
+        return
+    candidates["_abs_difference"] = pd.to_numeric(candidates["difference"], errors="coerce").abs()
+    candidates = candidates.dropna(subset=["_abs_difference"])
+    if candidates.empty:
+        return
+    row = candidates.loc[candidates["_abs_difference"].idxmax()]
+    rows.append(
+        {
+            "claim_id": "paired_bootstrap_external_best_vs_baseline",
+            "claim": "Paired bootstrap comparison quantifies whether the selected external model materially improves over the logistic all-feature baseline.",
+            "evidence_type": "paired_bootstrap_comparison",
+            "artifact": "reports/tables/paired_bootstrap_comparisons.csv",
+            "comparison": str(_value(row, "prediction_source", "external predictions")),
+            "primary_metric": "auroc_difference",
+            "primary_value": _float_value(row, "difference"),
+            "secondary_metrics": _secondary_metrics(row, ["ci_low", "ci_high", "p_two_sided_bootstrap", "n_matched"]),
+            "n_samples": _int_value(row, "n_matched"),
+            "evidence_direction": "comparison_context",
+            "paper_use": "Use to avoid overinterpreting small model-ranking differences under paired external evaluation.",
+        }
+    )
+
+
 def build_publication_evidence_matrix(tables: Mapping[str, pd.DataFrame]) -> pd.DataFrame:
     rows: list[dict[str, object]] = []
     _add_quality_fusion_row(rows, tables)
@@ -359,6 +492,10 @@ def build_publication_evidence_matrix(tables: Mapping[str, pd.DataFrame]) -> pd.
     _add_controlled_audio_rows(rows, tables)
     _add_clinical_rows(rows, tables)
     _add_calibration_rows(rows, tables)
+    _add_domain_shift_rows(rows, tables)
+    _add_ipw_sensitivity_rows(rows, tables)
+    _add_prevalence_recalibration_rows(rows, tables)
+    _add_paired_bootstrap_rows(rows, tables)
     matrix = pd.DataFrame(rows)
     if matrix.empty:
         return pd.DataFrame(columns=EVIDENCE_COLUMNS)

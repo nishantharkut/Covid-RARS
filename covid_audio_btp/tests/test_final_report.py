@@ -86,6 +86,46 @@ def _toy_evidence() -> pd.DataFrame:
                 secondary_metrics="specificity=0.907; precision=0.783",
             ),
             _evidence_row(
+                "domain_shift_beats_max",
+                "domain_shift",
+                "domain_auroc",
+                0.990,
+                "cautionary",
+                "BEATs features strongly separate source and external datasets.",
+                n_samples=100,
+                secondary_metrics="domain_auprc=0.980; n_features=128",
+            ),
+            _evidence_row(
+                "ipw_sensitivity_cap_2",
+                "ipw_sensitivity",
+                "auroc",
+                0.760,
+                "qualified_supportive",
+                "IPW audio performance remains visible under stricter weight caps.",
+                n_samples=318,
+                secondary_metrics="effective_sample_size=190.000; max_abs_smd_after=0.300",
+            ),
+            _evidence_row(
+                "external_prevalence_recalibration_best",
+                "prevalence_recalibration",
+                "ece_reduction",
+                0.230,
+                "reliability_context",
+                "Target-prevalence intercept correction improves calibration but not discrimination.",
+                n_samples=8331,
+                secondary_metrics="corrected_ece=0.050; auroc=0.550",
+            ),
+            _evidence_row(
+                "paired_bootstrap_external_best_vs_baseline",
+                "paired_bootstrap_comparison",
+                "auroc_difference",
+                0.020,
+                "comparison_context",
+                "Best external model only modestly differs from logistic all-feature baseline.",
+                n_samples=8331,
+                secondary_metrics="ci_low=-0.010; ci_high=0.050",
+            ),
+            _evidence_row(
                 "calibration_external_transfer_worst",
                 "calibration_under_shift",
                 "ece",
@@ -109,6 +149,7 @@ def test_final_report_contains_evidence_driven_sections() -> None:
     assert "## Pipeline Architecture" in report
     assert "## Decision Log" in report
     assert "## Quantitative Evidence Matrix" in report
+    assert "## Tier-2 Strengthening Analyses" in report
     assert "## Novelty" in report
     assert "## Publication Readiness" in report
     assert "not a clinically deployable diagnostic model" in report
@@ -117,6 +158,8 @@ def test_final_report_contains_evidence_driven_sections() -> None:
     assert "metadata_confounding_full_safe_metadata" in report
     assert "confounding_controlled_audio_ipw" in report
     assert "calibration_external_transfer_worst" in report
+    assert "domain_shift_beats_max" in report
+    assert "external_prevalence_recalibration_best" in report
 
 
 def test_final_report_includes_related_paper_table_when_provided() -> None:

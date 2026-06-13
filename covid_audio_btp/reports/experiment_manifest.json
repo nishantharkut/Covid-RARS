@@ -1,5 +1,5 @@
 {
-  "created_at_utc": "2026-06-12T21:51:58.668741+00:00",
+  "created_at_utc": "2026-06-13T21:51:31.475509+00:00",
   "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
   "python_executable": "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python",
   "config": {
@@ -167,16 +167,70 @@
       "sha256": "f7be0f91c5aa0f67a62b687432f36ec89602d020c69595de7f525a2397f7e825"
     },
     {
+      "path": "data/outputs/metrics/domain_shift_audit_metrics.csv",
+      "exists": true,
+      "size_bytes": 1117,
+      "sha256": "2bf4c93d194211763452a75511f6880850b61ea109d138201a6338894f275b53"
+    },
+    {
+      "path": "data/outputs/metrics/domain_shift_audit_predictions.csv",
+      "exists": true,
+      "size_bytes": 1562771,
+      "sha256": "7c8f52e21fe183fc7c9d8ddff5748f1d2eebdc8f17ceb773dd76710702d16918"
+    },
+    {
+      "path": "reports/tables/domain_shift_feature_importance.csv",
+      "exists": true,
+      "size_bytes": 241115,
+      "sha256": "426d0c164612ff78351e7f0815fccbc3dfd9688ff90a4762c5a83ab0fb09a12e"
+    },
+    {
+      "path": "data/outputs/metrics/ipw_sensitivity_metrics.csv",
+      "exists": true,
+      "size_bytes": 5519,
+      "sha256": "43d2e4090ed2342dc5548ea28b2069678ac5fc352f72ce9568796baadbd994f4"
+    },
+    {
+      "path": "data/outputs/metrics/ipw_sensitivity_weights.csv",
+      "exists": true,
+      "size_bytes": 537174,
+      "sha256": "7518b91a6db2e0500178d4ff5c8dee946f87d3f32f9f191abebee2a70de17dce"
+    },
+    {
+      "path": "reports/tables/ipw_sensitivity_balance.csv",
+      "exists": true,
+      "size_bytes": 61528,
+      "sha256": "6a7dbf4655301c87a02c9d7dbfa9fe1f761d65f9629c3d9aae018f771cb6ea24"
+    },
+    {
+      "path": "reports/tables/external_prevalence_recalibration.csv",
+      "exists": true,
+      "size_bytes": 76901,
+      "sha256": "4b71b056e2ec9b7e9378bb283b87d039c921a72091a4be0a94549c5d87ea3258"
+    },
+    {
+      "path": "data/outputs/metrics/external_prevalence_recalibrated_predictions.csv",
+      "exists": true,
+      "size_bytes": 195690660,
+      "sha256": "69c5b089d50252811ca4436a795a3a5fe355cbf7541a3ecdb309a8a473efe8da"
+    },
+    {
+      "path": "reports/tables/paired_bootstrap_comparisons.csv",
+      "exists": true,
+      "size_bytes": 4938,
+      "sha256": "12370af9f998b6227d3dd7f0ab1c03ac673597be397e2d533e660b102b142dc0"
+    },
+    {
       "path": "reports/tables/publication_evidence_matrix.csv",
       "exists": true,
-      "size_bytes": 9745,
-      "sha256": "3c594e89666a25e1fcd1ba03684bbd4bd6019993355b01f4b8002d0b77eb47ae"
+      "size_bytes": 11956,
+      "sha256": "572fec4b61bce21121bfcc92965fbc00421944f4b7bd5374023a6ebad54ca4cd"
     },
     {
       "path": "reports/tables/publication_evidence_matrix.md",
       "exists": true,
-      "size_bytes": 10064,
-      "sha256": "7d8ced59d0523aec987fbcf6f4fe64b8e8ce7c63fb04fc4a836bb0d39889556d"
+      "size_bytes": 12312,
+      "sha256": "c77975e3cc30029f7873107ec7332fae4d9acdf3566505bc81a678655c845251"
     },
     {
       "path": "reports/tables/related_paper_comparison.csv",
@@ -193,14 +247,14 @@
     {
       "path": "reports/final/BTP_PUBLICATION_RESULTS_REPORT.md",
       "exists": true,
-      "size_bytes": 25308,
-      "sha256": "7d8f48e2487e39150154743ea95a92eaee61a26c9a63b223f2d4885cb35b99f5"
+      "size_bytes": 27874,
+      "sha256": "b88aea9da3f16972ec08dae4dfe0c761fb623903b78124a35099c387f706d9cd"
     },
     {
       "path": "reports/final/BTP_PUBLICATION_RESULTS_SUMMARY.md",
       "exists": true,
-      "size_bytes": 560,
-      "sha256": "915c408e3fb73b4eb86e8be9ce7bc28ef1dd7b9ed79261f4c13b523d8dc8a10b"
+      "size_bytes": 783,
+      "sha256": "90f19ec3329a0dfb925ff909eb191a28ef7f8aba6d1cee605c8f1cd84a454144"
     },
     {
       "path": "reports/tables/feature_shift_report.csv",
@@ -217,8 +271,8 @@
     {
       "path": "reports/tables/paper_metric_table.csv",
       "exists": true,
-      "size_bytes": 35387,
-      "sha256": "9122bcc2a64de7ce0681f6bccb31aaf5bc60d50d9c55b6f1da08a860cb6eed00"
+      "size_bytes": 70193,
+      "sha256": "b0ad4139f8190c874453ecfec36fff054cf507a3551cb3cb51dc882c1bb7652a"
     },
     {
       "path": "data/outputs/metrics/external_model_grid_beats_metrics.csv",

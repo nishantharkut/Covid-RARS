@@ -67,6 +67,70 @@ def test_publication_evidence_matrix_summarizes_core_claims() -> None:
                 }
             ]
         ),
+
+        "domain_shift_audit_metrics": pd.DataFrame(
+            [
+                {
+                    "representation": "beats",
+                    "domain_auroc": 0.99,
+                    "domain_auprc": 0.98,
+                    "balanced_accuracy": 0.95,
+                    "f1": 0.95,
+                    "n_samples": 100,
+                    "n_features": 128,
+                }
+            ]
+        ),
+        "ipw_sensitivity_metrics": pd.DataFrame(
+            [
+                _metric_row(
+                    control_method="ipw_label_propensity",
+                    weight_config="ipw_cap_2_q_1",
+                    weight_cap=2.0,
+                    auroc=0.76,
+                    auprc=0.50,
+                    effective_sample_size=190.0,
+                    mean_abs_smd_after=0.12,
+                    max_abs_smd_after=0.30,
+                    n_samples=318,
+                )
+            ]
+        ),
+        "external_prevalence_recalibration": pd.DataFrame(
+            [
+                {
+                    "prediction_source": "external_model_grid_beats_predictions",
+                    "recalibration_method": "source_calibrated",
+                    "ece": 0.28,
+                    "abs_calibration_gap": 0.28,
+                    "auroc": 0.55,
+                    "auprc": 0.04,
+                    "n_samples": 8331,
+                },
+                {
+                    "prediction_source": "external_model_grid_beats_predictions",
+                    "recalibration_method": "target_prevalence_intercept",
+                    "ece": 0.05,
+                    "abs_calibration_gap": 0.03,
+                    "auroc": 0.55,
+                    "auprc": 0.04,
+                    "n_samples": 8331,
+                },
+            ]
+        ),
+        "paired_bootstrap_comparisons": pd.DataFrame(
+            [
+                {
+                    "prediction_source": "external_model_grid_beats_predictions",
+                    "comparison_type": "best_auroc_vs_logistic_all",
+                    "metric": "auroc",
+                    "difference": 0.02,
+                    "ci_low": -0.01,
+                    "ci_high": 0.05,
+                    "n_matched": 8331,
+                }
+            ]
+        ),
         "calibration_under_shift_summary": pd.DataFrame(
             [
                 {
@@ -109,6 +173,10 @@ def test_publication_evidence_matrix_summarizes_core_claims() -> None:
     assert "clinical_fusion_specificity_0_900" in claim_ids
     assert "calibration_quality_weighted_fusion" in claim_ids
     assert "calibration_external_transfer_worst" in claim_ids
+    assert "domain_shift_beats_max" in claim_ids
+    assert "ipw_sensitivity_cap_2" in claim_ids
+    assert "external_prevalence_recalibration_best" in claim_ids
+    assert "paired_bootstrap_external_best_vs_baseline" in claim_ids
 
     beats = matrix[matrix["claim_id"] == "external_transfer_beats_best"].iloc[0]
     assert beats["primary_metric"] == "auroc"

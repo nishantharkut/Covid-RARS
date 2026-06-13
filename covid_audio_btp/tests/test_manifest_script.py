@@ -28,6 +28,14 @@ def test_default_artifact_paths_discovers_representation_outputs(tmp_path) -> No
     assert tmp_path / "reports" / "tables" / "calibration_under_shift_bins.csv" in artifacts
     assert tmp_path / "reports" / "tables" / "calibration_under_shift_summary.csv" in artifacts
     assert tmp_path / "reports" / "tables" / "clinical_operating_points.csv" in artifacts
+    assert tmp_path / "data" / "outputs" / "metrics" / "domain_shift_audit_metrics.csv" in artifacts
+    assert tmp_path / "data" / "outputs" / "metrics" / "domain_shift_audit_predictions.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "domain_shift_feature_importance.csv" in artifacts
+    assert tmp_path / "data" / "outputs" / "metrics" / "ipw_sensitivity_metrics.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "ipw_sensitivity_balance.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "external_prevalence_recalibration.csv" in artifacts
+    assert tmp_path / "data" / "outputs" / "metrics" / "external_prevalence_recalibrated_predictions.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "paired_bootstrap_comparisons.csv" in artifacts
     assert tmp_path / "reports" / "tables" / "publication_evidence_matrix.csv" in artifacts
     assert tmp_path / "reports" / "tables" / "publication_evidence_matrix.md" in artifacts
     assert tmp_path / "reports" / "tables" / "related_paper_comparison.csv" in artifacts

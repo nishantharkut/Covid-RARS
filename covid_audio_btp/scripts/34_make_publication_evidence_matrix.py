@@ -27,6 +27,10 @@ def default_input_paths(project_root: Path = Path(".")) -> dict[str, Path]:
         "confounding_controlled_audio_metrics": metrics / "confounding_controlled_audio_metrics.csv",
         "clinical_operating_points": tables / "clinical_operating_points.csv",
         "calibration_under_shift_summary": tables / "calibration_under_shift_summary.csv",
+        "domain_shift_audit_metrics": metrics / "domain_shift_audit_metrics.csv",
+        "ipw_sensitivity_metrics": metrics / "ipw_sensitivity_metrics.csv",
+        "external_prevalence_recalibration": tables / "external_prevalence_recalibration.csv",
+        "paired_bootstrap_comparisons": tables / "paired_bootstrap_comparisons.csv",
     }
 
 
