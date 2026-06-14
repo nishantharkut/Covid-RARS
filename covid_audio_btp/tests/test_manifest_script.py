@@ -29,6 +29,9 @@ def test_default_artifact_paths_discovers_representation_outputs(tmp_path) -> No
     assert tmp_path / "reports" / "tables" / "calibration_under_shift_summary.csv" in artifacts
     assert tmp_path / "reports" / "tables" / "clinical_operating_points.csv" in artifacts
     assert tmp_path / "data" / "outputs" / "metrics" / "domain_shift_audit_metrics.csv" in artifacts
+    assert tmp_path / "data" / "outputs" / "metrics" / "domain_adaptation_baseline_metrics.csv" in artifacts
+    assert tmp_path / "data" / "outputs" / "metrics" / "domain_adaptation_baseline_predictions.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "domain_adaptation_mmd.csv" in artifacts
     assert tmp_path / "data" / "outputs" / "metrics" / "domain_shift_audit_predictions.csv" in artifacts
     assert tmp_path / "reports" / "tables" / "domain_shift_feature_importance.csv" in artifacts
     assert tmp_path / "data" / "outputs" / "metrics" / "ipw_sensitivity_metrics.csv" in artifacts

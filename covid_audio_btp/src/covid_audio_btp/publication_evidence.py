@@ -382,6 +382,61 @@ def _add_domain_shift_rows(rows: list[dict[str, object]], tables: Mapping[str, p
     )
 
 
+def _add_domain_adaptation_rows(rows: list[dict[str, object]], tables: Mapping[str, pd.DataFrame]) -> None:
+    frame = _table(tables, "domain_adaptation_baseline_metrics")
+    if frame.empty or "adaptation_method" not in frame.columns:
+        return
+    coral = frame[frame["adaptation_method"].astype(str).eq("coral")].copy()
+    source = frame[frame["adaptation_method"].astype(str).eq("source_only")].copy()
+    if coral.empty:
+        return
+    group_cols = [col for col in ["representation", "model_name", "feature_strategy"] if col in frame.columns]
+    if not source.empty and group_cols:
+        merged = coral.merge(
+            source[group_cols + ["auroc", "auprc"]].rename(
+                columns={"auroc": "source_only_auroc", "auprc": "source_only_auprc"}
+            ),
+            on=group_cols,
+            how="left",
+        )
+    else:
+        merged = coral.copy()
+        merged["source_only_auroc"] = np.nan
+        merged["source_only_auprc"] = np.nan
+    merged["auroc_delta_vs_source_only"] = pd.to_numeric(merged["auroc"], errors="coerce") - pd.to_numeric(
+        merged["source_only_auroc"], errors="coerce"
+    )
+    best = _best_row(merged, metric="auroc")
+    if best is None:
+        return
+    representation = str(_value(best, "representation", "representation"))
+    model = str(_value(best, "model_name", "model"))
+    strategy = str(_value(best, "feature_strategy", "all"))
+    _append_metric_row(
+        rows,
+        claim_id="domain_adaptation_coral_best",
+        claim="CORAL alignment tests whether simple unsupervised covariance alignment can reduce the external transfer gap.",
+        evidence_type="domain_adaptation",
+        artifact="data/outputs/metrics/domain_adaptation_baseline_metrics.csv",
+        comparison=f"{representation} / {model} / {strategy} / CORAL",
+        row=best,
+        primary_metric="auroc",
+        secondary_columns=[
+            "source_only_auroc",
+            "auroc_delta_vs_source_only",
+            "auprc",
+            "balanced_accuracy",
+            "f1",
+            "mmd_before",
+            "mmd_after",
+            "mmd_reduction",
+            "n_features",
+        ],
+        evidence_direction="adaptation_context",
+        paper_use="Use to answer whether a standard unsupervised domain-adaptation baseline closes the Coswara-to-COUGHVID gap; report small or negative gains as evidence that covariance alignment is insufficient.",
+    )
+
+
 def _add_ipw_sensitivity_rows(rows: list[dict[str, object]], tables: Mapping[str, pd.DataFrame]) -> None:
     frame = _table(tables, "ipw_sensitivity_metrics")
     if frame.empty or "control_method" not in frame.columns:
@@ -493,6 +548,7 @@ def build_publication_evidence_matrix(tables: Mapping[str, pd.DataFrame]) -> pd.
     _add_clinical_rows(rows, tables)
     _add_calibration_rows(rows, tables)
     _add_domain_shift_rows(rows, tables)
+    _add_domain_adaptation_rows(rows, tables)
     _add_ipw_sensitivity_rows(rows, tables)
     _add_prevalence_recalibration_rows(rows, tables)
     _add_paired_bootstrap_rows(rows, tables)

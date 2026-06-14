@@ -81,6 +81,40 @@ def test_publication_evidence_matrix_summarizes_core_claims() -> None:
                 }
             ]
         ),
+        "domain_adaptation_baseline_metrics": pd.DataFrame(
+            [
+                {
+                    "representation": "beats",
+                    "model_name": "logistic_regression",
+                    "feature_strategy": "drop_high_shift",
+                    "adaptation_method": "coral",
+                    "auroc": 0.57,
+                    "auprc": 0.05,
+                    "balanced_accuracy": 0.53,
+                    "f1": 0.08,
+                    "n_samples": 8331,
+                    "n_features": 128,
+                    "mmd_before": 0.40,
+                    "mmd_after": 0.18,
+                    "mmd_reduction": 0.22,
+                },
+                {
+                    "representation": "beats",
+                    "model_name": "logistic_regression",
+                    "feature_strategy": "drop_high_shift",
+                    "adaptation_method": "source_only",
+                    "auroc": 0.55,
+                    "auprc": 0.04,
+                    "balanced_accuracy": 0.51,
+                    "f1": 0.07,
+                    "n_samples": 8331,
+                    "n_features": 128,
+                    "mmd_before": 0.40,
+                    "mmd_after": 0.40,
+                    "mmd_reduction": 0.0,
+                },
+            ]
+        ),
         "ipw_sensitivity_metrics": pd.DataFrame(
             [
                 _metric_row(
@@ -174,6 +208,7 @@ def test_publication_evidence_matrix_summarizes_core_claims() -> None:
     assert "calibration_quality_weighted_fusion" in claim_ids
     assert "calibration_external_transfer_worst" in claim_ids
     assert "domain_shift_beats_max" in claim_ids
+    assert "domain_adaptation_coral_best" in claim_ids
     assert "ipw_sensitivity_cap_2" in claim_ids
     assert "external_prevalence_recalibration_best" in claim_ids
     assert "paired_bootstrap_external_best_vs_baseline" in claim_ids

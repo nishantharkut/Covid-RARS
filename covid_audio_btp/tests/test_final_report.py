@@ -96,6 +96,16 @@ def _toy_evidence() -> pd.DataFrame:
                 secondary_metrics="domain_auprc=0.980; n_features=128",
             ),
             _evidence_row(
+                "domain_adaptation_coral_best",
+                "domain_adaptation",
+                "auroc",
+                0.570,
+                "adaptation_context",
+                "CORAL tests whether second-order alignment can close the external transfer gap.",
+                n_samples=8331,
+                secondary_metrics="mmd_reduction=0.220; source_only_auroc=0.550",
+            ),
+            _evidence_row(
                 "ipw_sensitivity_cap_2",
                 "ipw_sensitivity",
                 "auroc",
@@ -159,6 +169,7 @@ def test_final_report_contains_evidence_driven_sections() -> None:
     assert "confounding_controlled_audio_ipw" in report
     assert "calibration_external_transfer_worst" in report
     assert "domain_shift_beats_max" in report
+    assert "domain_adaptation_coral_best" in report
     assert "external_prevalence_recalibration_best" in report
 
 

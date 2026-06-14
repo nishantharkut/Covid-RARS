@@ -15,7 +15,7 @@ The pipeline is organized as an evidence-first audio ML workflow:
 5. Run COUGHVID internal baselines to separate representation capacity from dataset shift.
 6. Audit metadata confounding, then evaluate quality-weighted audio after inverse-propensity weighting.
 7. Report clinical operating points and calibration-under-shift to avoid relying only on AUROC.
-8. Add Tier-2 strengthening analyses: dataset-domain separability, IPW sensitivity, prevalence recalibration, and paired bootstrap comparisons.
+8. Add Tier-2 strengthening analyses: dataset-domain separability, CORAL/MMD domain adaptation, IPW sensitivity, prevalence recalibration, and paired bootstrap comparisons.
 
 This architecture supports a robustness and external-validation study. It does not support a clinical-deployment claim.
 
@@ -28,7 +28,7 @@ This architecture supports a robustness and external-validation study. It does n
 - wav2vec2 was treated as a lower-priority speech-biased option because the current scientific question is cough/audio representation robustness, not speech recognition transfer.
 - External validation was prioritized over leaderboard tuning because Coswara-to-COUGHVID transfer is the central generalization test.
 - Metadata confounding, IPW control, operating points, and calibration shift were added because medical-audio claims require reliability and bias checks, not only accuracy metrics.
-- Domain-shift classification, IPW sensitivity, prevalence recalibration, and paired bootstrap comparisons were added to make the robustness story harder to dismiss as a single-analysis artifact.
+- Domain-shift classification, CORAL/MMD domain adaptation, IPW sensitivity, prevalence recalibration, and paired bootstrap comparisons were added to make the robustness story harder to dismiss as a single-analysis artifact.
 
 ## Quantitative Results
 
@@ -78,6 +78,7 @@ This architecture supports a robustness and external-validation study. It does n
 | claim_id | evidence_type | comparison | primary_metric | primary_value | secondary_metrics | n_samples |
 | --- | --- | --- | --- | --- | --- | --- |
 | domain_shift_beats_max | domain_shift | beats source-vs-external domain classifier | domain_auroc | 0.966 | domain_auprc=0.981; balanced_accuracy=0.904; f1=0.929; accuracy=0.906; brier=0.069; ece=0.043; n_features=772.000 | 3728 |
+| domain_adaptation_coral_best | domain_adaptation | opensmile_egemaps / logistic_regression / drop_high_shift / CORAL | auroc | 0.551 | source_only_auroc=0.552; auroc_delta_vs_source_only=-0.001; auprc=0.040; balanced_accuracy=0.529; f1=0.072; mmd_before=0.005; mmd_after=0.025; mmd_reduction=-0.020; n_features=90.000 | 8331 |
 | ipw_sensitivity_cap_2 | ipw_sensitivity | ipw_cap_2_q_0.95 | auroc | 0.807 | auprc=0.624; balanced_accuracy=0.742; sensitivity=0.679; specificity=0.804; f1=0.541; effective_sample_size=238.745; mean_abs_smd_after=0.149; max_abs_smd_after=0.724; max_weight=2.530 | 318 |
 | external_prevalence_recalibration_best | prevalence_recalibration | external_model_grid_predictions | ece_reduction | 0.285 | original_ece=0.286; corrected_ece=0.001; corrected_abs_calibration_gap=0.001; auroc=0.484; auprc=0.036 | 8331 |
 | paired_bootstrap_external_best_vs_baseline | paired_bootstrap_comparison | external_model_grid_predictions | auroc_difference | 0.025 | ci_low=-0.024; ci_high=0.072; p_two_sided_bootstrap=0.304; n_matched=8331.000 | 8331 |
@@ -105,6 +106,7 @@ This architecture supports a robustness and external-validation study. It does n
 | calibration_quality_weighted_fusion | calibration | ece | 0.150 | 318 | mixed |
 | calibration_external_transfer_worst | calibration_under_shift | ece | 0.286 | 8331 | cautionary |
 | domain_shift_beats_max | domain_shift | domain_auroc | 0.966 | 3728 | cautionary |
+| domain_adaptation_coral_best | domain_adaptation | auroc | 0.551 | 8331 | adaptation_context |
 | ipw_sensitivity_cap_2 | ipw_sensitivity | auroc | 0.807 | 318 | qualified_supportive |
 | external_prevalence_recalibration_best | prevalence_recalibration | ece_reduction | 0.285 | 8331 | reliability_context |
 | paired_bootstrap_external_best_vs_baseline | paired_bootstrap_comparison | auroc_difference | 0.025 | 8331 | comparison_context |
@@ -126,6 +128,7 @@ The novelty is not a new neural architecture. The contribution is a controlled, 
 - Clinical operating-point reporting instead of AUROC-only reporting.
 - Calibration-under-shift analysis showing that external probabilities should not be interpreted as calibrated risk.
 - Dataset-domain separability audit showing whether learned representations encode source artifacts.
+- CORAL/MMD domain-adaptation baseline testing whether standard covariance alignment closes the external transfer gap.
 - IPW sensitivity analysis across stricter weight caps and clipping choices.
 - External prevalence-recalibration analysis separating probability inflation from discrimination collapse.
 - Paired bootstrap comparisons to avoid overinterpreting small model-ranking differences.
@@ -170,12 +173,13 @@ Non-defensible claim: this system is ready for clinical diagnosis, screening dep
 - COUGHVID and Coswara labels, collection protocols, and class prevalences differ.
 - IPW sensitivity still controls only measured confounders; unmeasured device, prompt-following, and room-acoustic effects may remain.
 - Domain-shift classification shows separability, not the complete causal source of shift.
+- CORAL/MMD alignment tests a standard UDA baseline, but does not prove all domain-adaptation methods would fail.
 - Related-paper quantitative comparison still needs careful citation formatting based on the exact papers from the original document.
 - The current system is a research prototype, not a medical device.
 
 ## Remaining Work
 
-1. Run the Tier-2 strengthening scripts and regenerate the paper tables, evidence matrix, manifest, and final report.
+1. Run the final Tier-2 scripts, including the domain-adaptation baseline, and regenerate the paper tables, evidence matrix, manifest, and final report.
 2. Convert this report into the final BTP manuscript sections.
 3. Keep the central claim conservative: robustness analysis, not clinical deployment.
 4. Archive final artifacts and Git tags after the final report and related-paper table are frozen.

@@ -23,6 +23,7 @@ DEFAULT_METRIC_PATHS = [
     Path("data/outputs/metrics/confounding_controlled_audio_metrics.csv"),
     Path("reports/tables/calibration_under_shift_summary.csv"),
     Path("data/outputs/metrics/domain_shift_audit_metrics.csv"),
+    Path("data/outputs/metrics/domain_adaptation_baseline_metrics.csv"),
     Path("data/outputs/metrics/ipw_sensitivity_metrics.csv"),
     Path("reports/tables/external_prevalence_recalibration.csv"),
 ]

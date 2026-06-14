@@ -1,5 +1,5 @@
 {
-  "created_at_utc": "2026-06-13T21:51:31.475509+00:00",
+  "created_at_utc": "2026-06-14T03:43:53.306730+00:00",
   "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
   "python_executable": "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python",
   "config": {
@@ -185,6 +185,24 @@
       "sha256": "426d0c164612ff78351e7f0815fccbc3dfd9688ff90a4762c5a83ab0fb09a12e"
     },
     {
+      "path": "data/outputs/metrics/domain_adaptation_baseline_metrics.csv",
+      "exists": true,
+      "size_bytes": 5585,
+      "sha256": "67f02579fced1b651253d1d64e78cb91766c7f92ba720024243789daa6c28b3b"
+    },
+    {
+      "path": "data/outputs/metrics/domain_adaptation_baseline_predictions.csv",
+      "exists": true,
+      "size_bytes": 23992427,
+      "sha256": "f3f913f8322b56339aa4c23efc603431877cf2fdc5c4e29a9693591a69b8afea"
+    },
+    {
+      "path": "reports/tables/domain_adaptation_mmd.csv",
+      "exists": true,
+      "size_bytes": 1053,
+      "sha256": "6629d7b2dfa0fbfb600f422246ee92d8a1654796a0f2b08f584dc9125ca52cd5"
+    },
+    {
       "path": "data/outputs/metrics/ipw_sensitivity_metrics.csv",
       "exists": true,
       "size_bytes": 5519,
@@ -223,14 +241,14 @@
     {
       "path": "reports/tables/publication_evidence_matrix.csv",
       "exists": true,
-      "size_bytes": 11956,
-      "sha256": "572fec4b61bce21121bfcc92965fbc00421944f4b7bd5374023a6ebad54ca4cd"
+      "size_bytes": 12665,
+      "sha256": "430eff23d542d8f3328e907cd0d2fc7fa9e899b5abba1534786c6106e66a0b2e"
     },
     {
       "path": "reports/tables/publication_evidence_matrix.md",
       "exists": true,
-      "size_bytes": 12312,
-      "sha256": "c77975e3cc30029f7873107ec7332fae4d9acdf3566505bc81a678655c845251"
+      "size_bytes": 13032,
+      "sha256": "74ab51b24aa65d086260b654b441010ab059c06c920155bdbe286a9481f78644"
     },
     {
       "path": "reports/tables/related_paper_comparison.csv",
@@ -247,14 +265,14 @@
     {
       "path": "reports/final/BTP_PUBLICATION_RESULTS_REPORT.md",
       "exists": true,
-      "size_bytes": 27874,
-      "sha256": "b88aea9da3f16972ec08dae4dfe0c761fb623903b78124a35099c387f706d9cd"
+      "size_bytes": 28626,
+      "sha256": "ffe0d5318bd96d426c5dbe32de3b4054a1d2eb4fb73aef97c3fde7e30c2b3943"
     },
     {
       "path": "reports/final/BTP_PUBLICATION_RESULTS_SUMMARY.md",
       "exists": true,
-      "size_bytes": 783,
-      "sha256": "90f19ec3329a0dfb925ff909eb191a28ef7f8aba6d1cee605c8f1cd84a454144"
+      "size_bytes": 895,
+      "sha256": "044af824831f5787a69444e901e50c6918e999a1b3be6c6a05f580f826a584b5"
     },
     {
       "path": "reports/tables/feature_shift_report.csv",
@@ -271,8 +289,8 @@
     {
       "path": "reports/tables/paper_metric_table.csv",
       "exists": true,
-      "size_bytes": 70193,
-      "sha256": "b0ad4139f8190c874453ecfec36fff054cf507a3551cb3cb51dc882c1bb7652a"
+      "size_bytes": 72465,
+      "sha256": "5e1fa2e257250aa07d3228389c882383623c04a2ba12e60ab20766d648210a15"
     },
     {
       "path": "data/outputs/metrics/external_model_grid_beats_metrics.csv",

@@ -26,6 +26,7 @@ def test_default_metric_paths_discovers_representation_outputs(tmp_path) -> None
 
     assert Path("reports/tables/calibration_under_shift_summary.csv") in metric_paths
     assert Path("data/outputs/metrics/domain_shift_audit_metrics.csv") in metric_paths
+    assert Path("data/outputs/metrics/domain_adaptation_baseline_metrics.csv") in metric_paths
     assert Path("data/outputs/metrics/ipw_sensitivity_metrics.csv") in metric_paths
     assert Path("reports/tables/external_prevalence_recalibration.csv") in metric_paths
     assert metrics_dir / "external_model_grid_opensmile_egemaps_metrics.csv" in metric_paths
