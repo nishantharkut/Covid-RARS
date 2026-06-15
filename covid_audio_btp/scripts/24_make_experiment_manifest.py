@@ -57,6 +57,7 @@ DEFAULT_ARTIFACTS = [
     Path("reports/tables/manuscript_unknown_label_summary.csv"),
     Path("reports/tables/manuscript_unknown_label_balance.csv"),
     Path("reports/final/MANUSCRIPT_SUPPORT_ANALYSES.md"),
+    Path("reports/final/BTP_PHASED_RESULTS_BRIEF_2026-06-15.md"),
     Path("reports/tables/feature_shift_report.csv"),
     Path("reports/tables/feature_shift_summary.csv"),
     Path("reports/tables/paper_metric_table.csv"),

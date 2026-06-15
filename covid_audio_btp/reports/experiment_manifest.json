@@ -1,5 +1,5 @@
 {
-  "created_at_utc": "2026-06-15T19:43:57.923567+00:00",
+  "created_at_utc": "2026-06-15T20:15:49.704588+00:00",
   "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
   "python_executable": "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python",
   "config": {
@@ -309,6 +309,12 @@
       "exists": true,
       "size_bytes": 3548,
       "sha256": "6198511f129958e77c05554468869cd4228cc326fb152614a31b8bd1af1e7fe8"
+    },
+    {
+      "path": "reports/final/BTP_PHASED_RESULTS_BRIEF_2026-06-15.md",
+      "exists": true,
+      "size_bytes": 13316,
+      "sha256": "6eae270e4a5f136ce55d5400eb99eb3c5031c66ef230cc0e489a028f3d3c60cf"
     },
     {
       "path": "reports/tables/feature_shift_report.csv",
