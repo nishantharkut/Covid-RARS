@@ -1,5 +1,5 @@
 {
-  "created_at_utc": "2026-06-14T03:43:53.306730+00:00",
+  "created_at_utc": "2026-06-15T19:43:57.923567+00:00",
   "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
   "python_executable": "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python",
   "config": {
@@ -273,6 +273,42 @@
       "exists": true,
       "size_bytes": 895,
       "sha256": "044af824831f5787a69444e901e50c6918e999a1b3be6c6a05f580f826a584b5"
+    },
+    {
+      "path": "reports/tables/manuscript_demographic_protocol_linear_shap.csv",
+      "exists": true,
+      "size_bytes": 7909,
+      "sha256": "b9f39a207cf72e3b0747bc260fb8b224c4caec0539579f5d7a7310d3d7740338"
+    },
+    {
+      "path": "reports/tables/manuscript_ipw_residual_smd.csv",
+      "exists": true,
+      "size_bytes": 6233,
+      "sha256": "7c386e537ab9833959657b4bc66af3067af6c37a417441fbfc91abef9b29dbf8"
+    },
+    {
+      "path": "reports/tables/manuscript_external_auprc_lift.csv",
+      "exists": true,
+      "size_bytes": 709,
+      "sha256": "d08d3322b7bd0202ae63646a1888af0476ab5f75713841ad4716a353427c56a5"
+    },
+    {
+      "path": "reports/tables/manuscript_unknown_label_summary.csv",
+      "exists": true,
+      "size_bytes": 501,
+      "sha256": "a7c71cdf386be29e277fc2ac8367518024a48b277f3dafd5c2a4776b6a3d7862"
+    },
+    {
+      "path": "reports/tables/manuscript_unknown_label_balance.csv",
+      "exists": true,
+      "size_bytes": 8415,
+      "sha256": "cab917fd8605974c89607ae59d1db82eb7fccd2ab2829142ef62419184b1fecd"
+    },
+    {
+      "path": "reports/final/MANUSCRIPT_SUPPORT_ANALYSES.md",
+      "exists": true,
+      "size_bytes": 3548,
+      "sha256": "6198511f129958e77c05554468869cd4228cc326fb152614a31b8bd1af1e7fe8"
     },
     {
       "path": "reports/tables/feature_shift_report.csv",
