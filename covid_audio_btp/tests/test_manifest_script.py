@@ -52,6 +52,20 @@ def test_default_artifact_paths_discovers_representation_outputs(tmp_path) -> No
     assert tmp_path / "reports" / "tables" / "manuscript_unknown_label_balance.csv" in artifacts
     assert tmp_path / "reports" / "final" / "MANUSCRIPT_SUPPORT_ANALYSES.md" in artifacts
     assert tmp_path / "reports" / "final" / "BTP_PHASED_RESULTS_BRIEF_2026-06-15.md" in artifacts
+    assert tmp_path / "data" / "outputs" / "metrics" / "temporal_holdout_metrics.csv" in artifacts
+    assert tmp_path / "data" / "outputs" / "metrics" / "temporal_holdout_predictions.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_holdout_split_summary.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_holdout_modality_coverage.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_holdout_metadata_feature_importance.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_holdout_metadata_group_summary.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_metadata_ablation.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_stability_summary.csv" in artifacts
+    assert tmp_path / "data" / "outputs" / "metrics" / "temporal_holdout_bootstrap_ci.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_external_unification.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_stress_test_summary.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_metadata_feature_attribution_comparison.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_stress_test_significance.csv" in artifacts
+    assert tmp_path / "reports" / "final" / "TEMPORAL_ROBUSTNESS_CAUSAL_CHAIN.md" in artifacts
     assert metrics_dir / "external_model_grid_beats_metrics.csv" in artifacts
     assert metrics_dir / "coughvid_internal_panns_cnn14_bootstrap_ci.csv" in artifacts
     assert tables_dir / "feature_shift_beats_cough.csv" in artifacts

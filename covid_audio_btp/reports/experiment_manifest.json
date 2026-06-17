@@ -1,5 +1,5 @@
 {
-  "created_at_utc": "2026-06-15T20:15:49.704588+00:00",
+  "created_at_utc": "2026-06-17T19:26:28.951575+00:00",
   "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
   "python_executable": "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python",
   "config": {
@@ -317,6 +317,90 @@
       "sha256": "6eae270e4a5f136ce55d5400eb99eb3c5031c66ef230cc0e489a028f3d3c60cf"
     },
     {
+      "path": "data/outputs/metrics/temporal_holdout_metrics.csv",
+      "exists": true,
+      "size_bytes": 16445,
+      "sha256": "f83e7bb2c9e16d31facac533cbedd46b8420b499ce600be8944bea3f9c6268ac"
+    },
+    {
+      "path": "data/outputs/metrics/temporal_holdout_predictions.csv",
+      "exists": true,
+      "size_bytes": 15949542,
+      "sha256": "72f609f6e7df6e925a6b723d104eb5e6911f544c7deff842a65865d0622630d3"
+    },
+    {
+      "path": "reports/tables/temporal_holdout_split_summary.csv",
+      "exists": true,
+      "size_bytes": 967,
+      "sha256": "39d181f51bdb69c9ff103c4253403a826210433c10c4b7f83e0e8879b010384f"
+    },
+    {
+      "path": "reports/tables/temporal_holdout_modality_coverage.csv",
+      "exists": true,
+      "size_bytes": 1686,
+      "sha256": "01052732376b2db0753b8f057d3d58ddbdebd0850b3ed9b27256c4f04739641a"
+    },
+    {
+      "path": "reports/tables/temporal_holdout_metadata_feature_importance.csv",
+      "exists": true,
+      "size_bytes": 48052,
+      "sha256": "2c97fb30c2cf199520e6ec0c3a2a7b2ecf4fbdfad4c515a0b402165091180d5c"
+    },
+    {
+      "path": "reports/tables/temporal_holdout_metadata_group_summary.csv",
+      "exists": true,
+      "size_bytes": 4376,
+      "sha256": "2bb137b572da3c20bb71bba3ab4b29417ac9f9c7473b7e3eac8b4cc8f5576595"
+    },
+    {
+      "path": "reports/tables/temporal_metadata_ablation.csv",
+      "exists": true,
+      "size_bytes": 15930,
+      "sha256": "9d29a98e95b51a56da733b8c373affa4e849758bb86495fe19b7db9f8247c9e1"
+    },
+    {
+      "path": "reports/tables/temporal_stability_summary.csv",
+      "exists": true,
+      "size_bytes": 12337,
+      "sha256": "3cfe7a48e8339a0bb29a925af6867b647af4120ed0ca3142299839af09062e93"
+    },
+    {
+      "path": "data/outputs/metrics/temporal_holdout_bootstrap_ci.csv",
+      "exists": true,
+      "size_bytes": 43684,
+      "sha256": "0cf92c450e5b0b60e18d7ee59cf2fa1f25bd673500532e376b4839b261b13713"
+    },
+    {
+      "path": "reports/tables/temporal_external_unification.csv",
+      "exists": true,
+      "size_bytes": 1256,
+      "sha256": "88b83d348d3b46c04a4c31abcab35185bc8ab2cbfb1598a743a89b102c2bd708"
+    },
+    {
+      "path": "reports/tables/temporal_stress_test_summary.csv",
+      "exists": true,
+      "size_bytes": 1431,
+      "sha256": "efc8d7da8b79936b70f930863c1d5148cef3d5429b83831d4b0c05711c8b20c8"
+    },
+    {
+      "path": "reports/tables/temporal_metadata_feature_attribution_comparison.csv",
+      "exists": true,
+      "size_bytes": 27170,
+      "sha256": "d56a9310b6d445a0f58cff626e2800533726791ea4363b6d77f6d762202ec5da"
+    },
+    {
+      "path": "reports/tables/temporal_stress_test_significance.csv",
+      "exists": true,
+      "size_bytes": 345,
+      "sha256": "e797b0321d74035dad94a080ee7a1353ac19f02a64bdb0acd61e6875ac0b05d3"
+    },
+    {
+      "path": "reports/final/TEMPORAL_ROBUSTNESS_CAUSAL_CHAIN.md",
+      "exists": true,
+      "size_bytes": 965,
+      "sha256": "197865855133957505b36d5d460a8c818d646290efee203016539ab2922d758f"
+    },
+    {
       "path": "reports/tables/feature_shift_report.csv",
       "exists": true,
       "size_bytes": 42022,
@@ -331,8 +415,8 @@
     {
       "path": "reports/tables/paper_metric_table.csv",
       "exists": true,
-      "size_bytes": 72465,
-      "sha256": "5e1fa2e257250aa07d3228389c882383623c04a2ba12e60ab20766d648210a15"
+      "size_bytes": 93767,
+      "sha256": "0cfbfdce9381317f2f41dbfb157f259f2c8ae483c8c0853344caa514ab57cf14"
     },
     {
       "path": "data/outputs/metrics/external_model_grid_beats_metrics.csv",

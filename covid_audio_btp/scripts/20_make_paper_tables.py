@@ -26,6 +26,8 @@ DEFAULT_METRIC_PATHS = [
     Path("data/outputs/metrics/domain_adaptation_baseline_metrics.csv"),
     Path("data/outputs/metrics/ipw_sensitivity_metrics.csv"),
     Path("reports/tables/external_prevalence_recalibration.csv"),
+    Path("data/outputs/metrics/temporal_holdout_metrics.csv"),
+    Path("reports/tables/temporal_metadata_ablation.csv"),
 ]
 
 DEFAULT_CI_PATHS = [
@@ -34,6 +36,7 @@ DEFAULT_CI_PATHS = [
     Path("data/outputs/metrics/external_model_grid_bootstrap_ci.csv"),
     Path("data/outputs/metrics/coughvid_internal_bootstrap_ci.csv"),
     Path("data/outputs/metrics/confounding_controlled_audio_bootstrap_ci.csv"),
+    Path("data/outputs/metrics/temporal_holdout_bootstrap_ci.csv"),
 ]
 
 
@@ -82,10 +85,16 @@ def parse_args() -> argparse.Namespace:
 def _group_columns(metrics: pd.DataFrame) -> list[str]:
     candidates = [
         "table_source",
+        "evaluation_protocol",
+        "analysis_family",
         "model_name",
         "model",
         "modality",
+        "modality_combination",
         "feature_strategy",
+        "base_feature_set",
+        "ablation_name",
+        "removed_features",
         "fusion_method",
         "dataset",
         "split",
