@@ -69,6 +69,14 @@ def test_default_artifact_paths_discovers_representation_outputs(tmp_path) -> No
     assert tmp_path / "reports" / "tables" / "temporal_month_year_ablation_paper_table.csv" in artifacts
     assert tmp_path / "reports" / "figures" / "temporal_stress_test_figure.svg" in artifacts
     assert tmp_path / "reports" / "final" / "TEMPORAL_RESULTS_SECTION_DRAFT.md" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_month_label_shift.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_month_covariate_shift.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_matched_cohort_metrics.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_failure_modes_by_shift.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_uncertainty_under_shift.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_month_ablation_effect_sizes.csv" in artifacts
+    assert tmp_path / "reports" / "final" / "TEMPORAL_MONTH_CAUSAL_DAG.md" in artifacts
+    assert tmp_path / "reports" / "final" / "TEMPORAL_SHORTCUT_THEORY.md" in artifacts
     assert metrics_dir / "external_model_grid_beats_metrics.csv" in artifacts
     assert metrics_dir / "coughvid_internal_panns_cnn14_bootstrap_ci.csv" in artifacts
     assert tables_dir / "feature_shift_beats_cough.csv" in artifacts

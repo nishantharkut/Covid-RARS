@@ -31,6 +31,7 @@ def test_default_metric_paths_discovers_representation_outputs(tmp_path) -> None
     assert Path("reports/tables/external_prevalence_recalibration.csv") in metric_paths
     assert Path("data/outputs/metrics/temporal_holdout_metrics.csv") in metric_paths
     assert Path("reports/tables/temporal_metadata_ablation.csv") in metric_paths
+    assert Path("reports/tables/temporal_matched_cohort_metrics.csv") in metric_paths
     assert metrics_dir / "external_model_grid_opensmile_egemaps_metrics.csv" in metric_paths
     assert metrics_dir / "coughvid_internal_beats_metrics.csv" in metric_paths
     assert Path("data/outputs/metrics/temporal_holdout_bootstrap_ci.csv") in ci_paths

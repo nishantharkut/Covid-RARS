@@ -28,6 +28,7 @@ DEFAULT_METRIC_PATHS = [
     Path("reports/tables/external_prevalence_recalibration.csv"),
     Path("data/outputs/metrics/temporal_holdout_metrics.csv"),
     Path("reports/tables/temporal_metadata_ablation.csv"),
+    Path("reports/tables/temporal_matched_cohort_metrics.csv"),
 ]
 
 DEFAULT_CI_PATHS = [

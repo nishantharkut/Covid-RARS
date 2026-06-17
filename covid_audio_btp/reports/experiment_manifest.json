@@ -1,5 +1,5 @@
 {
-  "created_at_utc": "2026-06-17T20:00:33.953044+00:00",
+  "created_at_utc": "2026-06-17T20:20:43.244135+00:00",
   "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
   "python_executable": "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python",
   "config": {
@@ -419,6 +419,54 @@
       "sha256": "fe827a21df97738b3af2f4d42a78b3fa2b8c1538704d84f02b9611afa0e346b7"
     },
     {
+      "path": "reports/tables/temporal_month_label_shift.csv",
+      "exists": true,
+      "size_bytes": 2732,
+      "sha256": "4a0b5b0a3b6e8a468538d98b6050ca30820af1494fad6f79086f4c335266f6e8"
+    },
+    {
+      "path": "reports/tables/temporal_month_covariate_shift.csv",
+      "exists": true,
+      "size_bytes": 19726,
+      "sha256": "6789bb03b99fa015acc667635dfb221f913ba48604bacb9dee2c84b1e63aabce"
+    },
+    {
+      "path": "reports/tables/temporal_matched_cohort_metrics.csv",
+      "exists": true,
+      "size_bytes": 1474,
+      "sha256": "332eeb88babdf55a10ab819f683b317a4c686e4de0c3773ffd1eb5745b627c71"
+    },
+    {
+      "path": "reports/tables/temporal_failure_modes_by_shift.csv",
+      "exists": true,
+      "size_bytes": 1484,
+      "sha256": "54ae404ad7fcc26bf30aee844365f46309c7c93e1263c1b5ee59ffbcbcaf85c8"
+    },
+    {
+      "path": "reports/tables/temporal_uncertainty_under_shift.csv",
+      "exists": true,
+      "size_bytes": 481,
+      "sha256": "516306edc3eaeefefd8cb0c6f29107e9bbb12f9bc5338232b911d18bb9ae9e55"
+    },
+    {
+      "path": "reports/tables/temporal_month_ablation_effect_sizes.csv",
+      "exists": true,
+      "size_bytes": 537,
+      "sha256": "cc2d6df8404767b1654eed2f045a014c0bce0fcc567f3174ada4cdd45bd04287"
+    },
+    {
+      "path": "reports/final/TEMPORAL_MONTH_CAUSAL_DAG.md",
+      "exists": true,
+      "size_bytes": 922,
+      "sha256": "1abea6af926c644ab3d5c68f18af592ce1b1a06800afe6ab5792ba3ea6caa0f1"
+    },
+    {
+      "path": "reports/final/TEMPORAL_SHORTCUT_THEORY.md",
+      "exists": true,
+      "size_bytes": 632,
+      "sha256": "f80ea4acc1c12db29eb637f926529393355ecc57080179595df8a7c897f5f1e6"
+    },
+    {
       "path": "reports/tables/feature_shift_report.csv",
       "exists": true,
       "size_bytes": 42022,
@@ -433,8 +481,8 @@
     {
       "path": "reports/tables/paper_metric_table.csv",
       "exists": true,
-      "size_bytes": 93767,
-      "sha256": "0cfbfdce9381317f2f41dbfb157f259f2c8ae483c8c0853344caa514ab57cf14"
+      "size_bytes": 94525,
+      "sha256": "7fe0a9bb17271985c25d03eb8d0ec79ed5e02e9c301773d2e046c964724d534f"
     },
     {
       "path": "data/outputs/metrics/external_model_grid_beats_metrics.csv",

@@ -1,0 +1,13 @@
+evaluation_protocol,prediction_outcome,n_rows,mean_probability,mean_age,mean_symptom_count,top_month,top_country,top_quality_flag
+existing_participant_split,false_negative,20,0.4112334789624028,34.3,3.5,2022-01,India,ok
+existing_participant_split,false_positive,48,0.5918556524454486,31.75,0.08333333333333333,2020-04,India,ok
+existing_participant_split,true_negative,167,0.3400220177181623,34.131736526946106,0.10179640718562874,2020-04,India,ok
+existing_participant_split,true_positive,83,0.681889107734189,40.397590361445786,2.9397590361445785,2021-07,India,ok
+temporal_early_to_late,false_negative,167,0.2763440720846094,37.82634730538922,3.2574850299401197,2022-01,India,ok
+temporal_early_to_late,false_positive,33,0.5827443781864634,32.515151515151516,0.7878787878787878,2022-01,India,ok
+temporal_early_to_late,true_negative,50,0.25803973239093086,31.62,0.66,2021-08,India,ok
+temporal_early_to_late,true_positive,174,0.556747661307462,40.0,3.4597701149425286,2022-01,India,ok
+time_stratified_participant_split,false_negative,38,0.3273738261433523,37.36842105263158,2.6842105263157894,2022-01,India,ok
+time_stratified_participant_split,false_positive,88,0.5789862222021777,34.39772727272727,0.23863636363636365,2020-04,India,ok
+time_stratified_participant_split,true_negative,213,0.29643602103614436,32.85446009389671,0.12206572769953052,2020-04,India,ok
+time_stratified_participant_split,true_positive,105,0.6631929113539654,38.76190476190476,3.057142857142857,2022-01,India,ok
