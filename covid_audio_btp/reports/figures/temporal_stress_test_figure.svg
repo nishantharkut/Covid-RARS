@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="645" viewBox="0 0 900 645">
+<style>
+text{font-family:Arial,Helvetica,sans-serif;fill:#111827}.title{font-size:24px;font-weight:700}.label{font-size:18px;font-weight:700}.metric{font-size:16px}.note{font-size:13px;fill:#4b5563}.box{fill:#ffffff;stroke:#111827;stroke-width:1.5}.arrow{stroke:#111827;stroke-width:2;fill:none}
+</style>
+<text x="450" y="38" text-anchor="middle" class="title">COVID Audio Temporal Robustness Stress Test</text>
+<rect x="190.0" y="56.0" width="520" height="72" rx="6" class="box"/>
+<text x="450" y="82" text-anchor="middle" class="label">Participant split</text>
+<text x="450" y="107" text-anchor="middle" class="metric">AUROC 0.873  95% CI 0.833-0.914 · AUPRC lift 0.483</text>
+<path d="M450 138.0 L450 162.0" class="arrow"/>
+<path d="M443 154.0 L450 164.0 L457 154.0" fill="none" stroke="#111827" stroke-width="2"/>
+<rect x="190.0" y="176.0" width="520" height="72" rx="6" class="box"/>
+<text x="450" y="202" text-anchor="middle" class="label">Time-stratified split</text>
+<text x="450" y="227" text-anchor="middle" class="metric">AUROC 0.787  95% CI 0.738-0.829 · AUPRC lift 0.348</text>
+<path d="M450 258.0 L450 282.0" class="arrow"/>
+<path d="M443 274.0 L450 284.0 L457 274.0" fill="none" stroke="#111827" stroke-width="2"/>
+<rect x="190.0" y="296.0" width="520" height="72" rx="6" class="box"/>
+<text x="450" y="322" text-anchor="middle" class="label">Temporal holdout</text>
+<text x="450" y="347" text-anchor="middle" class="metric">AUROC 0.566  95% CI 0.492-0.634 · AUPRC lift 0.018</text>
+<path d="M450 378.0 L450 402.0" class="arrow"/>
+<path d="M443 394.0 L450 404.0 L457 394.0" fill="none" stroke="#111827" stroke-width="2"/>
+<rect x="190.0" y="416.0" width="520" height="72" rx="6" class="box"/>
+<text x="450" y="442" text-anchor="middle" class="label">External transfer</text>
+<text x="450" y="467" text-anchor="middle" class="metric">AUROC 0.553 · AUPRC lift 0.005</text>
+<text x="450" y="617" text-anchor="middle" class="note">Participant performance weakens under calendar control and collapses under temporal/external stress.</text>
+</svg>

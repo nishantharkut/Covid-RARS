@@ -66,6 +66,9 @@ def test_default_artifact_paths_discovers_representation_outputs(tmp_path) -> No
     assert tmp_path / "reports" / "tables" / "temporal_metadata_feature_attribution_comparison.csv" in artifacts
     assert tmp_path / "reports" / "tables" / "temporal_stress_test_significance.csv" in artifacts
     assert tmp_path / "reports" / "final" / "TEMPORAL_ROBUSTNESS_CAUSAL_CHAIN.md" in artifacts
+    assert tmp_path / "reports" / "tables" / "temporal_month_year_ablation_paper_table.csv" in artifacts
+    assert tmp_path / "reports" / "figures" / "temporal_stress_test_figure.svg" in artifacts
+    assert tmp_path / "reports" / "final" / "TEMPORAL_RESULTS_SECTION_DRAFT.md" in artifacts
     assert metrics_dir / "external_model_grid_beats_metrics.csv" in artifacts
     assert metrics_dir / "coughvid_internal_panns_cnn14_bootstrap_ci.csv" in artifacts
     assert tables_dir / "feature_shift_beats_cough.csv" in artifacts

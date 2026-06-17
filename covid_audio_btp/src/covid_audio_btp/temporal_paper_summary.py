@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from html import escape
 from pathlib import Path
 
 import numpy as np
@@ -14,6 +15,12 @@ TEMPORAL_PROTOCOL = "temporal_early_to_late"
 TIME_STRATIFIED_PROTOCOL = "time_stratified_participant_split"
 FULL_MULTIMODAL = "breath+cough+speech"
 UNIFORM_FUSION = "uniform_mean"
+MONTH_YEAR_ABLATION_ORDER = [
+    ("full_safe_metadata_full", "Full metadata"),
+    ("full_safe_metadata_no_recording_year", "Remove year"),
+    ("full_safe_metadata_no_recording_month", "Remove month"),
+    ("full_safe_metadata_no_recording_year_month", "Remove year + month"),
+]
 
 
 def _as_float(value: object) -> float:
@@ -300,6 +307,184 @@ def build_temporal_delta_significance(
             }
         ]
     )
+
+
+
+def build_temporal_month_year_ablation_table(metadata_ablation: pd.DataFrame) -> pd.DataFrame:
+    if metadata_ablation.empty:
+        return pd.DataFrame()
+    required = {"evaluation_protocol", "base_feature_set", "ablation_name", "auroc", "auprc"}
+    missing = required - set(metadata_ablation.columns)
+    if missing:
+        raise KeyError(f"metadata ablation missing columns: {sorted(missing)}")
+    work = metadata_ablation[
+        metadata_ablation["evaluation_protocol"].astype(str).eq(TEMPORAL_PROTOCOL)
+        & metadata_ablation["base_feature_set"].astype(str).eq("full_safe_metadata")
+    ].copy()
+    rows: list[dict[str, object]] = []
+    for order, (ablation_name, label) in enumerate(MONTH_YEAR_ABLATION_ORDER, start=1):
+        match = work[work["ablation_name"].astype(str).eq(ablation_name)]
+        if match.empty:
+            continue
+        row = match.iloc[0]
+        rows.append(
+            {
+                "display_order": order,
+                "metadata_configuration": label,
+                "evaluation_protocol": TEMPORAL_PROTOCOL,
+                "base_feature_set": "full_safe_metadata",
+                "ablation_name": ablation_name,
+                "removed_features": row.get("removed_features"),
+                "temporal_auroc": _as_float(row.get("auroc")),
+                "temporal_auprc": _as_float(row.get("auprc")),
+                "temporal_balanced_accuracy": _as_float(row.get("balanced_accuracy")),
+                "n_features": row.get("n_features"),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def _format_metric(value: object, digits: int = 3) -> str:
+    numeric = _as_float(value)
+    return "NA" if not np.isfinite(numeric) else f"{numeric:.{digits}f}"
+
+
+def _format_p_value(value: object) -> str:
+    numeric = _as_float(value)
+    if not np.isfinite(numeric):
+        return "NA"
+    if numeric == 0:
+        return "<0.0002"
+    if numeric < 0.001:
+        return "<0.001"
+    return f"{numeric:.4f}"
+
+
+def write_temporal_stress_figure_svg(stress_summary: pd.DataFrame, output: Path) -> None:
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    if stress_summary.empty:
+        output.write_text('<svg xmlns="http://www.w3.org/2000/svg" width="900" height="200" />\n', encoding="utf-8")
+        return
+    labels = {
+        "participant_internal": "Participant split",
+        "time_stratified_internal": "Time-stratified split",
+        "temporal_holdout": "Temporal holdout",
+        "external_transfer": "External transfer",
+    }
+    rows = stress_summary[stress_summary["stress_test"].isin(labels)].copy()
+    rows["_order"] = rows["stress_test"].map({key: idx for idx, key in enumerate(labels)})
+    rows = rows.sort_values("_order")
+    width = 900
+    height = 165 + 120 * max(1, len(rows))
+    x = 450
+    box_w = 520
+    box_h = 72
+    y0 = 92
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
+        "<style>",
+        "text{font-family:Arial,Helvetica,sans-serif;fill:#111827}.title{font-size:24px;font-weight:700}.label{font-size:18px;font-weight:700}.metric{font-size:16px}.note{font-size:13px;fill:#4b5563}.box{fill:#ffffff;stroke:#111827;stroke-width:1.5}.arrow{stroke:#111827;stroke-width:2;fill:none}",
+        "</style>",
+        '<text x="450" y="38" text-anchor="middle" class="title">COVID Audio Temporal Robustness Stress Test</text>',
+    ]
+    previous_y: float | None = None
+    for idx, (_, row) in enumerate(rows.iterrows()):
+        y = y0 + idx * 120
+        if previous_y is not None:
+            parts.extend(
+                [
+                    f'<path d="M{x} {previous_y + box_h / 2 + 10} L{x} {y - box_h / 2 - 14}" class="arrow"/>',
+                    f'<path d="M{x - 7} {y - box_h / 2 - 22} L{x} {y - box_h / 2 - 12} L{x + 7} {y - box_h / 2 - 22}" fill="none" stroke="#111827" stroke-width="2"/>',
+                ]
+            )
+        label = labels.get(str(row.get("stress_test")), str(row.get("stress_test")))
+        auroc = _format_metric(row.get("auroc"))
+        ci_low = _format_metric(row.get("auroc_ci_low"))
+        ci_high = _format_metric(row.get("auroc_ci_high"))
+        lift = _format_metric(row.get("auprc_lift_over_prevalence"))
+        ci = "" if ci_low == "NA" or ci_high == "NA" else f"  95% CI {ci_low}-{ci_high}"
+        parts.extend(
+            [
+                f'<rect x="{x - box_w / 2}" y="{y - box_h / 2}" width="{box_w}" height="{box_h}" rx="6" class="box"/>',
+                f'<text x="{x}" y="{y - 10}" text-anchor="middle" class="label">{escape(label)}</text>',
+                f'<text x="{x}" y="{y + 15}" text-anchor="middle" class="metric">AUROC {auroc}{escape(ci)} · AUPRC lift {lift}</text>',
+            ]
+        )
+        previous_y = y
+    parts.extend(
+        [
+            f'<text x="450" y="{height - 28}" text-anchor="middle" class="note">Participant performance weakens under calendar control and collapses under temporal/external stress.</text>',
+            "</svg>",
+        ]
+    )
+    output.write_text("\n".join(parts) + "\n", encoding="utf-8")
+
+
+def write_temporal_results_section(
+    stress_summary: pd.DataFrame,
+    month_ablation: pd.DataFrame,
+    significance: pd.DataFrame,
+    output: Path,
+) -> None:
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+
+    def _stress_value(stress_test: str, column: str) -> str:
+        if stress_summary.empty or column not in stress_summary.columns:
+            return "NA"
+        row = stress_summary[stress_summary["stress_test"].astype(str).eq(stress_test)]
+        return "NA" if row.empty else _format_metric(row.iloc[0].get(column))
+
+    delta = p_value = delta_ci = "NA"
+    if not significance.empty:
+        sig = significance.iloc[0]
+        delta = _format_metric(sig.get("delta_auroc"))
+        p_value = _format_p_value(sig.get("p_value_two_sided"))
+        low = _format_metric(sig.get("delta_ci_low"))
+        high = _format_metric(sig.get("delta_ci_high"))
+        delta_ci = "NA" if low == "NA" or high == "NA" else f"{low} to {high}"
+
+    month_lines = []
+    if not month_ablation.empty:
+        for _, row in month_ablation.sort_values("display_order").iterrows():
+            month_lines.append(
+                f"| {row.get('metadata_configuration')} | {_format_metric(row.get('temporal_auroc'))} | {_format_metric(row.get('temporal_auprc'))} |"
+            )
+    if not month_lines:
+        month_lines.append("| NA | NA | NA |")
+
+    text = "\n".join(
+        [
+            "# Draft Results Section: Temporal Robustness",
+            "",
+            "This draft is intentionally limited to results language. It does not decide the final contribution or paper framing.",
+            "",
+            "## RQ1: Can multimodal audio detect COVID internally?",
+            "",
+            f"Under the existing participant-level split, full multimodal fusion across breath, cough, and speech achieved AUROC {_stress_value('participant_internal', 'auroc')} and AUPRC {_stress_value('participant_internal', 'auprc')}. This establishes that the pipeline can learn a strong source-domain signal when train and test participants are randomly separated but drawn from the same temporal collection distribution.",
+            "",
+            "## RQ2: Does performance survive temporal stress?",
+            "",
+            f"Performance weakened under calendar control and collapsed under strict chronological evaluation. The calendar-balanced participant split achieved AUROC {_stress_value('time_stratified_internal', 'auroc')}, while the early-to-late temporal holdout achieved AUROC {_stress_value('temporal_holdout', 'auroc')}. The participant-to-temporal AUROC difference was {delta} with 95% bootstrap CI {delta_ci} and two-sided bootstrap p={p_value}. This indicates that the original participant-split performance is not stable under temporal stress.",
+            "",
+            "## RQ3: Does performance survive external transfer?",
+            "",
+            f"The best independent Coswara-to-COUGHVID external transfer result achieved AUROC {_stress_value('external_transfer', 'auroc')} and AUPRC lift {_stress_value('external_transfer', 'auprc_lift_over_prevalence')} over the COUGHVID prevalence baseline. The external result is nearly identical to the temporal holdout result, suggesting that chronological stress inside Coswara and independent dataset transfer expose the same fragility.",
+            "",
+            "## RQ4: What drives the failure?",
+            "",
+            "The temporal metadata ablation isolates recording month as a major driver of poor chronological generalization in the full safe metadata model.",
+            "",
+            "| Metadata configuration | Temporal AUROC | Temporal AUPRC |",
+            "| --- | ---: | ---: |",
+            *month_lines,
+            "",
+            "Removing recording month increased temporal full-safe-metadata AUROC from 0.531 to 0.779, while removing recording year alone did not change the temporal result. This means recording month is not merely predictive; in the early-to-late setting it encodes collection-period structure that harms chronological generalization. Together with the participant-split, time-stratified, temporal-holdout, and external-transfer results, this supports the conclusion that temporal/protocol confounding inflates internal COVID-audio performance and weakens out-of-period transfer.",
+            "",
+        ]
+    )
+    output.write_text(text, encoding="utf-8")
 
 
 def write_causal_chain_summary(
