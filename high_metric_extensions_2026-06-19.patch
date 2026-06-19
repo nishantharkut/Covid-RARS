@@ -1,0 +1,854 @@
+diff --git a/covid_audio_btp/scripts/47_run_strong_baseline.py b/covid_audio_btp/scripts/47_run_strong_baseline.py
+index d821600..71bfa02 100755
+--- a/covid_audio_btp/scripts/47_run_strong_baseline.py
++++ b/covid_audio_btp/scripts/47_run_strong_baseline.py
+@@ -30,6 +30,17 @@ def parse_args() -> argparse.Namespace:
+         default=3,
+         help="Average the top-k validation models per modality as an additional model candidate.",
+     )
++    parser.add_argument(
++        "--feature-level-fusion",
++        action="store_true",
++        help="Train multimodal classifiers on concatenated participant-level modality features before prediction fusion.",
++    )
++    parser.add_argument(
++        "--global-stack-top-k",
++        type=int,
++        default=0,
++        help="Fit validation-trained global stackers over the top-k validation prediction sources.",
++    )
+     parser.add_argument(
+         "--metrics-output",
+         type=Path,
+@@ -76,6 +87,8 @@ def main() -> None:
+         random_state=args.random_state,
+         optuna_trials=args.optuna_trials,
+         ensemble_top_k=args.ensemble_top_k,
++        enable_feature_level_fusion=args.feature_level_fusion,
++        global_stack_top_k=args.global_stack_top_k,
+     )
+     save_strong_baseline_result(
+         result,
+diff --git a/covid_audio_btp/scripts/48_run_strong_baseline_e2e.py b/covid_audio_btp/scripts/48_run_strong_baseline_e2e.py
+index b0ef352..e18efe3 100755
+--- a/covid_audio_btp/scripts/48_run_strong_baseline_e2e.py
++++ b/covid_audio_btp/scripts/48_run_strong_baseline_e2e.py
+@@ -30,6 +30,10 @@ def parse_args() -> argparse.Namespace:
+     parser.add_argument("--cnn-batch-size", type=int, default=32)
+     parser.add_argument("--optuna-trials", type=int, default=25)
+     parser.add_argument("--ensemble-top-k", type=int, default=3)
++    parser.add_argument("--augment-train-copies", type=int, default=0)
++    parser.add_argument("--augmentation-seed", type=int, default=42)
++    parser.add_argument("--feature-level-fusion", action="store_true")
++    parser.add_argument("--global-stack-top-k", type=int, default=0)
+     parser.add_argument("--skip-validation", action="store_true")
+     parser.add_argument("--modalities", nargs="+", default=["cough", "breath", "speech"])
+     parser.add_argument(
+@@ -147,6 +151,10 @@ def _ensure_processed_inputs(args: argparse.Namespace) -> None:
+             "data/processed/metadata_with_quality.csv",
+             "--output",
+             "data/processed/features_strong_acoustic.csv",
++            "--augment-train-copies",
++            str(args.augment_train_copies),
++            "--augmentation-seed",
++            str(args.augmentation_seed),
+         ]
+     )
+ 
+@@ -210,6 +218,10 @@ def main() -> None:
+         "--ensemble-top-k",
+         str(args.ensemble_top_k),
+     ]
++    if args.feature_level_fusion:
++        strong_cmd.append("--feature-level-fusion")
++    if args.global_stack_top_k:
++        strong_cmd.extend(["--global-stack-top-k", str(args.global_stack_top_k)])
+     if args.require_quality_ok:
+         strong_cmd.append("--require-quality-ok")
+     _run(strong_cmd)
+diff --git a/covid_audio_btp/scripts/49_extract_strong_features.py b/covid_audio_btp/scripts/49_extract_strong_features.py
+index 6c4890f..694ae82 100644
+--- a/covid_audio_btp/scripts/49_extract_strong_features.py
++++ b/covid_audio_btp/scripts/49_extract_strong_features.py
+@@ -15,6 +15,13 @@ def parse_args() -> argparse.Namespace:
+     parser.add_argument("--output", type=Path, default=Path("data/processed/features_strong_acoustic.csv"))
+     parser.add_argument("--quality-mode", choices=["all_samples", "quality_ok_only"], default="all_samples")
+     parser.add_argument("--progress-interval", type=int, default=250)
++    parser.add_argument(
++        "--augment-train-copies",
++        type=int,
++        default=0,
++        help="Create this many deterministic augmented copies for training rows only.",
++    )
++    parser.add_argument("--augmentation-seed", type=int, default=42)
+     return parser.parse_args()
+ 
+ 
+@@ -25,6 +32,8 @@ def main() -> None:
+         metadata,
+         quality_mode=args.quality_mode,
+         progress_interval=args.progress_interval,
++        augment_train_copies=args.augment_train_copies,
++        augmentation_seed=args.augmentation_seed,
+     )
+     args.output.parent.mkdir(parents=True, exist_ok=True)
+     features.to_csv(args.output, index=False)
+diff --git a/covid_audio_btp/src/covid_audio_btp/features.py b/covid_audio_btp/src/covid_audio_btp/features.py
+index 2ff2bc5..7fd0455 100644
+--- a/covid_audio_btp/src/covid_audio_btp/features.py
++++ b/covid_audio_btp/src/covid_audio_btp/features.py
+@@ -89,10 +89,11 @@ def feature_columns(feature_df: pd.DataFrame) -> list[str]:
+         "label_binary",
+         "split",
+         "segmentation_method",
++        "is_augmented",
++        "augmentation_seed",
+     }
+     return [
+         col
+         for col in feature_df.columns
+         if col not in excluded and pd.api.types.is_numeric_dtype(feature_df[col])
+     ]
+-
+diff --git a/covid_audio_btp/src/covid_audio_btp/strong_baseline.py b/covid_audio_btp/src/covid_audio_btp/strong_baseline.py
+index 44ea553..0d427e4 100644
+--- a/covid_audio_btp/src/covid_audio_btp/strong_baseline.py
++++ b/covid_audio_btp/src/covid_audio_btp/strong_baseline.py
+@@ -238,7 +238,6 @@ def _make_model(model_name: str, random_state: int = 42) -> Pipeline:
+                             C=2.0,
+                             gamma="scale",
+                             kernel="rbf",
+-                            probability=False,
+                             class_weight="balanced",
+                             random_state=random_state,
+                         ),
+@@ -430,6 +429,36 @@ def _prediction_frame(
+     )
+ 
+ 
++def _participant_prediction_frame(
++    source: pd.DataFrame,
++    probabilities: np.ndarray,
++    model_name: str,
++    split: str,
++    analysis_family: str,
++    modality_combination: str,
++    fusion_method: str | None = None,
++) -> pd.DataFrame:
++    out = pd.DataFrame(
++        {
++            "recording_id": source["participant_id"].astype(str) + f"::{modality_combination}",
++            "participant_id": source["participant_id"].astype(str).to_numpy(),
++            "dataset": source.get("dataset", pd.Series(["coswara"] * len(source))).to_numpy(),
++            "modality": "multimodal",
++            "submodality": modality_combination,
++            "label_binary": source["label_binary"].to_numpy(),
++            "split": split,
++            "model_name": model_name,
++            "analysis_family": analysis_family,
++            "evaluation_protocol": "clean_internal_protocol",
++            "modality_combination": modality_combination,
++            "probability": probabilities,
++        }
++    )
++    if fusion_method is not None:
++        out["fusion_method"] = fusion_method
++    return out
++
++
+ def _has_two_classes(df: pd.DataFrame) -> bool:
+     return df["label_binary"].isin(["positive", "negative"]).all() and df["label_binary"].nunique() == 2
+ 
+@@ -560,12 +589,21 @@ def _prepare_features_for_protocol(
+         "evaluation_protocol",
+         "label_protocol",
+     ]
+-    protocol_map = protocol.metadata[protocol_cols].drop_duplicates("recording_id")
+-    prepared = features.drop(columns=[c for c in ["label_binary", "split"] if c in features.columns]).merge(
++    protocol_map = (
++        protocol.metadata[protocol_cols]
++        .drop_duplicates("recording_id")
++        .rename(columns={"recording_id": "_protocol_recording_id"})
++    )
++    merge_features = features.copy()
++    merge_features["_protocol_recording_id"] = merge_features.get(
++        "source_recording_id",
++        merge_features["recording_id"],
++    ).fillna(merge_features["recording_id"]).astype(str)
++    prepared = merge_features.drop(columns=[c for c in ["label_binary", "split"] if c in merge_features.columns]).merge(
+         protocol_map,
+-        on="recording_id",
++        on="_protocol_recording_id",
+         how="inner",
+-    )
++    ).drop(columns=["_protocol_recording_id"])
+     return prepared, protocol
+ 
+ 
+@@ -745,6 +783,133 @@ def select_best_modality_models(metrics: pd.DataFrame, selection_metric: str = "
+     )
+ 
+ 
++def _participant_feature_matrix(features: pd.DataFrame, combo: tuple[str, ...], cols: list[str]) -> pd.DataFrame:
++    merged: pd.DataFrame | None = None
++    for modality in combo:
++        modality_df = features[
++            features["modality"].astype(str).eq(str(modality))
++            & features["label_binary"].isin(["positive", "negative"])
++            & features["split"].isin(["train", "validation", "test"])
++        ].copy()
++        if modality_df.empty:
++            return pd.DataFrame()
++        grouped = (
++            modality_df.groupby(["participant_id", "label_binary", "split"], dropna=False)[cols]
++            .mean()
++            .reset_index()
++        )
++        grouped = grouped.rename(columns={col: f"{modality}__{col}" for col in cols})
++        if merged is None:
++            merged = grouped
++        else:
++            merged = merged.merge(grouped, on=["participant_id", "label_binary", "split"], how="inner")
++    return merged if merged is not None else pd.DataFrame()
++
++
++def train_feature_level_fusion_models(
++    features: pd.DataFrame,
++    modalities: Iterable[str] = DEFAULT_MODALITIES,
++    model_names: Iterable[str] = DEFAULT_MODEL_NAMES,
++    random_state: int = 42,
++    optuna_trials: int = 25,
++) -> tuple[pd.DataFrame, pd.DataFrame]:
++    cols = feature_columns(features)
++    if not cols:
++        return pd.DataFrame(), pd.DataFrame()
++
++    metric_rows: list[dict[str, object]] = []
++    prediction_frames: list[pd.DataFrame] = []
++    modality_list = [str(m) for m in modalities]
++
++    for size in range(2, len(modality_list) + 1):
++        for combo in combinations(modality_list, size):
++            matrix = _participant_feature_matrix(features, combo, cols)
++            if matrix.empty:
++                continue
++            train = matrix[matrix["split"].eq("train")].copy()
++            validation = matrix[matrix["split"].eq("validation")].copy()
++            test = matrix[matrix["split"].eq("test")].copy()
++            if train.empty or validation.empty or test.empty or not _has_two_classes(train):
++                continue
++
++            combo_name = "+".join(combo)
++            x_cols = [col for col in matrix.columns if col not in {"participant_id", "label_binary", "split"}]
++            x_train = train[x_cols].fillna(0.0)
++            y_train = labels_to_binary(train["label_binary"])
++            x_validation = validation[x_cols].fillna(0.0)
++            y_validation = labels_to_binary(validation["label_binary"])
++            x_test = test[x_cols].fillna(0.0)
++
++            for model_name in model_names:
++                try:
++                    if str(model_name) == "optuna_validation_search":
++                        model = _fit_optuna_model(
++                            x_train,
++                            y_train,
++                            x_validation,
++                            y_validation,
++                            random_state=random_state,
++                            n_trials=optuna_trials,
++                        )
++                    else:
++                        model = _make_model(str(model_name), random_state=random_state)
++                    model.fit(x_train, y_train)
++                except Exception as exc:
++                    metric_rows.append(
++                        {
++                            "evaluation_protocol": "clean_internal_protocol",
++                            "analysis_family": "strong_feature_level_fusion",
++                            "model_name": model_name,
++                            "modality": "multimodal",
++                            "modality_combination": combo_name,
++                            "metric_split": "skipped",
++                            "skipped": True,
++                            "skip_reason": str(exc),
++                        }
++                    )
++                    continue
++
++                val_prob = _predict_probability(model, x_validation)
++                test_prob = _predict_probability(model, x_test)
++                if validation["label_binary"].nunique() < 2:
++                    continue
++                threshold = best_threshold_by_balanced_accuracy(y_validation, val_prob)
++                for split_name, frame, probs in (
++                    ("validation", validation, val_prob),
++                    ("test", test, test_prob),
++                ):
++                    pred = _participant_prediction_frame(
++                        frame,
++                        probs,
++                        model_name=str(model_name),
++                        split=split_name,
++                        analysis_family="strong_feature_level_fusion",
++                        modality_combination=combo_name,
++                    )
++                    prediction_frames.append(pred)
++                    metric_rows.append(
++                        _metric_row(
++                            pred,
++                            threshold=threshold,
++                            extra={
++                                "evaluation_protocol": "clean_internal_protocol",
++                                "analysis_family": "strong_feature_level_fusion",
++                                "model_name": model_name,
++                                "modality": "multimodal",
++                                "modality_combination": combo_name,
++                                "metric_split": split_name,
++                                "threshold_source": "validation_balanced_accuracy",
++                                "skipped": False,
++                                "n_features": float(len(x_cols)),
++                            },
++                        )
++                    )
++
++    metrics = pd.DataFrame(metric_rows)
++    predictions = pd.concat(prediction_frames, ignore_index=True) if prediction_frames else pd.DataFrame()
++    return metrics, predictions
++
++
+ def _selected_predictions(predictions: pd.DataFrame, selection: pd.DataFrame) -> pd.DataFrame:
+     if predictions.empty or selection.empty:
+         return predictions.iloc[0:0].copy()
+@@ -883,6 +1048,135 @@ def run_strong_fusion(
+     return metrics, predictions
+ 
+ 
++STACK_SOURCE_COLS = [
++    "analysis_family",
++    "model_name",
++    "modality",
++    "modality_combination",
++    "fusion_method",
++]
++
++
++def _add_stack_source_key(frame: pd.DataFrame) -> pd.DataFrame:
++    out = frame.copy()
++    for col in STACK_SOURCE_COLS:
++        if col not in out.columns:
++            out[col] = ""
++    out["stack_source_key"] = out[STACK_SOURCE_COLS].fillna("").astype(str).agg("||".join, axis=1)
++    return out
++
++
++def run_global_prediction_stacker(
++    metrics: pd.DataFrame,
++    predictions: pd.DataFrame,
++    top_k: int,
++) -> tuple[pd.DataFrame, pd.DataFrame]:
++    if top_k < 2 or metrics.empty or predictions.empty:
++        return pd.DataFrame(), pd.DataFrame()
++
++    skipped = metrics["skipped"].fillna(False).astype(bool) if "skipped" in metrics.columns else False
++    candidates = metrics[
++        metrics["metric_split"].eq("validation")
++        & metrics["analysis_family"].isin(
++            ["strong_audio_modality", "strong_multimodal_fusion", "strong_feature_level_fusion"]
++        )
++        & ~skipped
++    ].copy()
++    if candidates.empty:
++        return pd.DataFrame(), pd.DataFrame()
++    candidates = _add_stack_source_key(candidates)
++    candidates["auroc"] = pd.to_numeric(candidates["auroc"], errors="coerce")
++    candidates["auprc"] = pd.to_numeric(candidates["auprc"], errors="coerce")
++    ranked = candidates.sort_values(["auroc", "auprc", "stack_source_key"], ascending=[False, False, True])
++    selected_keys = list(dict.fromkeys(ranked["stack_source_key"].dropna().astype(str).head(top_k)))
++    if len(selected_keys) < 2:
++        return pd.DataFrame(), pd.DataFrame()
++
++    pred = _add_stack_source_key(predictions)
++    pred = pred[pred["stack_source_key"].isin(selected_keys) & pred["split"].isin(["validation", "test"])].copy()
++    if pred.empty:
++        return pd.DataFrame(), pd.DataFrame()
++    participant = (
++        pred.groupby(["participant_id", "label_binary", "split", "stack_source_key"], dropna=False)
++        .agg(probability=("probability", "mean"))
++        .reset_index()
++    )
++    matrix = participant.pivot_table(
++        index=["participant_id", "label_binary", "split"],
++        columns="stack_source_key",
++        values="probability",
++        aggfunc="mean",
++    ).reset_index()
++    matrix.columns.name = None
++    val = matrix[matrix["split"].eq("validation")].dropna(subset=selected_keys).copy()
++    test = matrix[matrix["split"].eq("test")].dropna(subset=selected_keys).copy()
++    if val.empty or test.empty or val["label_binary"].nunique() < 2:
++        return pd.DataFrame(), pd.DataFrame()
++
++    val_x = val[selected_keys].to_numpy(dtype=float)
++    test_x = test[selected_keys].to_numpy(dtype=float)
++    val_y = labels_to_binary(val["label_binary"])
++    ranked_weights = ranked.drop_duplicates("stack_source_key").set_index("stack_source_key")["auroc"].to_dict()
++    raw_weights = np.asarray([max(float(ranked_weights.get(key, 0.5)) - 0.5, 0.01) for key in selected_keys])
++    weights = raw_weights / raw_weights.sum()
++
++    fusion_specs: list[tuple[str, np.ndarray, np.ndarray]] = [
++        ("top_global_uniform_mean", val_x.mean(axis=1), test_x.mean(axis=1)),
++        ("top_global_validation_weighted_auroc", np.average(val_x, axis=1, weights=weights), np.average(test_x, axis=1, weights=weights)),
++    ]
++    if len(val) >= 8:
++        stacker = LogisticRegression(class_weight="balanced", max_iter=2000, random_state=42)
++        stacker.fit(val_x, val_y)
++        fusion_specs.append(
++            (
++                "top_global_stacked_logistic_validation",
++                stacker.predict_proba(val_x)[:, 1],
++                stacker.predict_proba(test_x)[:, 1],
++            )
++        )
++
++    metric_rows: list[dict[str, object]] = []
++    prediction_rows: list[pd.DataFrame] = []
++    selected_label = ";".join(selected_keys)
++    for method, val_prob, test_prob in fusion_specs:
++        threshold = best_threshold_by_balanced_accuracy(val_y, val_prob)
++        for split_name, frame, probs in (("validation", val, val_prob), ("test", test, test_prob)):
++            pred_frame = _participant_prediction_frame(
++                frame,
++                probs,
++                model_name=f"top_{len(selected_keys)}_global_stack",
++                split=split_name,
++                analysis_family="strong_global_stacking",
++                modality_combination="global_prediction_stack",
++                fusion_method=method,
++            )
++            pred_frame["ensemble_members"] = selected_label
++            prediction_rows.append(pred_frame)
++            metric_rows.append(
++                _metric_row(
++                    pred_frame,
++                    threshold=threshold,
++                    extra={
++                        "evaluation_protocol": "clean_internal_protocol",
++                        "analysis_family": "strong_global_stacking",
++                        "model_name": f"top_{len(selected_keys)}_global_stack",
++                        "modality": "multimodal",
++                        "modality_combination": "global_prediction_stack",
++                        "fusion_method": method,
++                        "metric_split": split_name,
++                        "threshold_source": "validation_balanced_accuracy",
++                        "skipped": False,
++                        "n_ensemble_models": float(len(selected_keys)),
++                        "ensemble_members": selected_label,
++                    },
++                )
++            )
++
++    metrics_out = pd.DataFrame(metric_rows)
++    predictions_out = pd.concat(prediction_rows, ignore_index=True) if prediction_rows else pd.DataFrame()
++    return metrics_out, predictions_out
++
++
+ def run_strong_baseline(
+     features: pd.DataFrame,
+     metadata: pd.DataFrame | None = None,
+@@ -892,6 +1186,8 @@ def run_strong_baseline(
+     random_state: int = 42,
+     optuna_trials: int = 25,
+     ensemble_top_k: int = 3,
++    enable_feature_level_fusion: bool = False,
++    global_stack_top_k: int = 0,
+ ) -> StrongBaselineResult:
+     prepared, protocol = _prepare_features_for_protocol(
+         features,
+@@ -918,8 +1214,33 @@ def run_strong_baseline(
+     )
+     selected = _selected_predictions(modality_predictions, selection)
+     fusion_metrics, fusion_predictions = run_strong_fusion(selected, selection, modalities=modalities)
+-    metrics = pd.concat([modality_metrics, fusion_metrics], ignore_index=True, sort=False)
+-    predictions = pd.concat([modality_predictions, fusion_predictions], ignore_index=True, sort=False)
++    metric_frames = [modality_metrics, fusion_metrics]
++    prediction_frames = [modality_predictions, fusion_predictions]
++
++    if enable_feature_level_fusion:
++        early_metrics, early_predictions = train_feature_level_fusion_models(
++            prepared,
++            modalities=modalities,
++            model_names=model_names,
++            random_state=random_state,
++            optuna_trials=optuna_trials,
++        )
++        metric_frames.append(early_metrics)
++        prediction_frames.append(early_predictions)
++
++    metrics = pd.concat([frame for frame in metric_frames if not frame.empty], ignore_index=True, sort=False)
++    predictions = pd.concat([frame for frame in prediction_frames if not frame.empty], ignore_index=True, sort=False)
++
++    if global_stack_top_k >= 2:
++        stack_metrics, stack_predictions = run_global_prediction_stacker(
++            metrics,
++            predictions,
++            top_k=global_stack_top_k,
++        )
++        if not stack_metrics.empty:
++            metrics = pd.concat([metrics, stack_metrics], ignore_index=True, sort=False)
++        if not stack_predictions.empty:
++            predictions = pd.concat([predictions, stack_predictions], ignore_index=True, sort=False)
+ 
+     return StrongBaselineResult(
+         metrics=metrics,
+diff --git a/covid_audio_btp/src/covid_audio_btp/strong_features.py b/covid_audio_btp/src/covid_audio_btp/strong_features.py
+index 8a9327d..e517a4b 100644
+--- a/covid_audio_btp/src/covid_audio_btp/strong_features.py
++++ b/covid_audio_btp/src/covid_audio_btp/strong_features.py
+@@ -1,5 +1,6 @@
+ from __future__ import annotations
+ 
++import hashlib
+ from pathlib import Path
+ 
+ import librosa
+@@ -117,27 +118,120 @@ def extract_extended_acoustic_features(
+     return {key: float(value) if np.isfinite(value) else 0.0 for key, value in features.items()}
+ 
+ 
++def _stable_seed(*parts: object, base_seed: int = 42) -> int:
++    text = "::".join(str(part) for part in parts)
++    digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
++    return (int(digest[:12], 16) + int(base_seed)) % (2**32 - 1)
++
++
++def augment_waveform(
++    y: np.ndarray,
++    sample_rate: int,
++    augmentation_id: str,
++    seed: int,
++) -> np.ndarray:
++    """Apply lightweight deterministic audio augmentation for training rows.
++
++    The transformations intentionally avoid changing validation/test data.
++    They are conservative enough for cough, breath, and speech: small time
++    stretch, small pitch shift, and low-amplitude additive noise.
++    """
++    arr = np.asarray(y, dtype=np.float32)
++    if arr.size == 0:
++        return arr
++    rng = np.random.default_rng(int(seed))
++    kind = str(augmentation_id)
++    out = arr.copy()
++    if kind.endswith("1") or kind.endswith("4"):
++        rate = float(rng.uniform(0.92, 1.08))
++        try:
++            out = librosa.effects.time_stretch(out, rate=rate).astype(np.float32, copy=False)
++        except Exception:
++            out = arr.copy()
++    elif kind.endswith("2") or kind.endswith("5"):
++        steps = float(rng.uniform(-1.5, 1.5))
++        try:
++            out = librosa.effects.pitch_shift(out, sr=sample_rate, n_steps=steps).astype(np.float32, copy=False)
++        except Exception:
++            out = arr.copy()
++    else:
++        noise_scale = float(rng.uniform(0.001, 0.012))
++        out = (out + rng.normal(0.0, noise_scale, size=out.shape)).astype(np.float32, copy=False)
++
++    if out.size == 0:
++        out = arr.copy()
++    peak = float(np.max(np.abs(out))) if out.size else 0.0
++    if peak > 1.0:
++        out = out / peak
++    return np.nan_to_num(out, nan=0.0, posinf=0.0, neginf=0.0).astype(np.float32, copy=False)
++
++
+ def extract_strong_features_for_row(row: pd.Series) -> dict[str, object]:
+     y, sample_rate, _ = load_audio(Path(row["audio_path"]))
+     processed, event_info = preprocess_for_features(y, sample_rate, str(row.get("modality", "unknown")))
++    is_augmented = bool(row.get("is_augmented", False))
++    augmentation_id = str(row.get("augmentation_id", "original"))
++    if is_augmented:
++        seed = int(row.get("augmentation_seed", _stable_seed(row.get("recording_id", ""), augmentation_id)))
++        processed = augment_waveform(processed, sample_rate, augmentation_id=augmentation_id, seed=seed)
+     features = extract_extended_acoustic_features(processed, sample_rate=sample_rate)
+     return {
+         "recording_id": row["recording_id"],
++        "source_recording_id": row.get("source_recording_id", row["recording_id"]),
+         "participant_id": row["participant_id"],
+         "dataset": row.get("dataset", "coswara"),
+         "modality": row.get("modality", "unknown"),
+         "submodality": row.get("submodality", "unknown"),
+         "label_binary": row.get("label_binary", "unknown"),
+         "split": row.get("split", "unused"),
++        "is_augmented": is_augmented,
++        "augmentation_id": augmentation_id,
+         **event_info,
+         **features,
+     }
+ 
+ 
++def _expand_training_augmentations(
++    metadata: pd.DataFrame,
++    augment_train_copies: int,
++    augmentation_seed: int,
++) -> pd.DataFrame:
++    if augment_train_copies <= 0 or metadata.empty:
++        out = metadata.copy()
++        out["source_recording_id"] = out["recording_id"].astype(str)
++        out["is_augmented"] = False
++        out["augmentation_id"] = "original"
++        out["augmentation_seed"] = int(augmentation_seed)
++        return out
++
++    rows: list[pd.Series] = []
++    for _, source_row in metadata.iterrows():
++        original = source_row.copy()
++        original["source_recording_id"] = str(source_row["recording_id"])
++        original["is_augmented"] = False
++        original["augmentation_id"] = "original"
++        original["augmentation_seed"] = int(augmentation_seed)
++        rows.append(original)
++        if str(source_row.get("split", "")).lower() != "train":
++            continue
++        for copy_idx in range(1, int(augment_train_copies) + 1):
++            augmented = source_row.copy()
++            source_id = str(source_row["recording_id"])
++            augmented["source_recording_id"] = source_id
++            augmented["recording_id"] = f"{source_id}::aug{copy_idx}"
++            augmented["is_augmented"] = True
++            augmented["augmentation_id"] = f"aug{copy_idx}"
++            augmented["augmentation_seed"] = _stable_seed(source_id, copy_idx, base_seed=augmentation_seed)
++            rows.append(augmented)
++    return pd.DataFrame(rows).reset_index(drop=True)
++
++
+ def build_strong_feature_table(
+     metadata: pd.DataFrame,
+     quality_mode: str = "all_samples",
+     progress_interval: int = 250,
++    augment_train_copies: int = 0,
++    augmentation_seed: int = 42,
+ ) -> pd.DataFrame:
+     df = metadata.copy()
+     df = df[df["label_binary"].isin(["positive", "negative"])]
+@@ -146,6 +240,11 @@ def build_strong_feature_table(
+     elif quality_mode not in {"all_samples", "quality_ok_only"}:
+         raise ValueError(f"Unknown quality_mode: {quality_mode}")
+ 
++    df = _expand_training_augmentations(
++        df,
++        augment_train_copies=int(augment_train_copies),
++        augmentation_seed=int(augmentation_seed),
++    )
+     rows: list[dict[str, object]] = []
+     total = len(df)
+     for idx, (_, row) in enumerate(df.iterrows(), start=1):
+diff --git a/covid_audio_btp/tests/test_strong_baseline.py b/covid_audio_btp/tests/test_strong_baseline.py
+index 2b10ad3..77d5de6 100644
+--- a/covid_audio_btp/tests/test_strong_baseline.py
++++ b/covid_audio_btp/tests/test_strong_baseline.py
+@@ -108,6 +108,77 @@ def test_strong_baseline_selects_models_and_runs_all_fusion_combinations() -> No
+     assert test_rows["n_participants"].notna().all()
+ 
+ 
++def test_feature_level_fusion_trains_multimodal_models_before_prediction_fusion() -> None:
++    from covid_audio_btp.strong_baseline import run_strong_baseline
++
++    metadata = _metadata_frame(48)
++    features = _feature_frame(metadata)
++    result = run_strong_baseline(
++        features,
++        metadata=metadata,
++        model_names=["logistic_l2_f80"],
++        enable_feature_level_fusion=True,
++        global_stack_top_k=0,
++        random_state=0,
++    )
++
++    early = result.metrics[result.metrics["analysis_family"].eq("strong_feature_level_fusion")]
++
++    assert not early.empty
++    assert {
++        "cough+breath",
++        "cough+speech",
++        "breath+speech",
++        "cough+breath+speech",
++    }.issubset(set(early["modality_combination"]))
++    assert {"validation", "test"}.issubset(set(early["metric_split"]))
++    assert early["threshold_source"].eq("validation_balanced_accuracy").all()
++
++
++def test_augmented_rows_survive_clean_protocol_merge_by_source_recording_id() -> None:
++    from covid_audio_btp.strong_baseline import _prepare_features_for_protocol
++
++    metadata = _metadata_frame(18)
++    features = _feature_frame(metadata)
++    train_features = features[features["split"].eq("train")].head(2).copy()
++    train_features["source_recording_id"] = train_features["recording_id"].astype(str)
++    train_features["recording_id"] = train_features["recording_id"].astype(str) + "::aug1"
++    train_features["is_augmented"] = True
++    augmented = pd.concat([features, train_features], ignore_index=True)
++
++    prepared, _ = _prepare_features_for_protocol(
++        augmented,
++        metadata=metadata,
++        modalities=["cough", "breath", "speech"],
++        require_quality_ok=False,
++    )
++
++    assert set(train_features["recording_id"].astype(str)).issubset(set(prepared["recording_id"].astype(str)))
++    assert prepared[prepared["recording_id"].astype(str).str.contains("::aug1")]["split"].eq("train").all()
++
++
++def test_global_stacker_uses_validation_predictions_and_reports_test_metrics() -> None:
++    from covid_audio_btp.strong_baseline import run_strong_baseline
++
++    metadata = _metadata_frame(54)
++    features = _feature_frame(metadata)
++    result = run_strong_baseline(
++        features,
++        metadata=metadata,
++        model_names=["logistic_l2_f80", "extra_trees_f100"],
++        enable_feature_level_fusion=True,
++        global_stack_top_k=4,
++        random_state=0,
++    )
++
++    stacked = result.metrics[result.metrics["analysis_family"].eq("strong_global_stacking")]
++
++    assert not stacked.empty
++    assert {"validation", "test"}.issubset(set(stacked["metric_split"]))
++    assert stacked["model_name"].astype(str).str.contains("global").all()
++    assert stacked["threshold_source"].eq("validation_balanced_accuracy").all()
++
++
+ def test_strong_baseline_cli_writes_expected_outputs(tmp_path: Path, monkeypatch) -> None:
+     metadata = _metadata_frame(36)
+     features = _feature_frame(metadata)
+@@ -137,6 +208,9 @@ def test_strong_baseline_cli_writes_expected_outputs(tmp_path: Path, monkeypatch
+         str(metadata_path),
+         "--model-names",
+         "logistic_l2_f80",
++        "--feature-level-fusion",
++        "--global-stack-top-k",
++        "4",
+     ]
+     for flag, path in outputs.items():
+         argv.extend([flag, str(path)])
+@@ -242,6 +316,85 @@ def test_extended_acoustic_feature_bank_contains_paper_style_features() -> None:
+     assert all(np.isfinite(value) for value in features.values())
+ 
+ 
++def test_strong_feature_extraction_augments_training_rows_only(monkeypatch) -> None:
++    import covid_audio_btp.strong_features as strong_features
++
++    metadata = pd.DataFrame(
++        [
++            {
++                "recording_id": "train_a",
++                "participant_id": "p_train_a",
++                "dataset": "coswara",
++                "modality": "cough",
++                "submodality": "cough",
++                "label_binary": "positive",
++                "split": "train",
++                "audio_path": "dummy.wav",
++            },
++            {
++                "recording_id": "train_b",
++                "participant_id": "p_train_b",
++                "dataset": "coswara",
++                "modality": "cough",
++                "submodality": "cough",
++                "label_binary": "negative",
++                "split": "train",
++                "audio_path": "dummy.wav",
++            },
++            {
++                "recording_id": "validation_a",
++                "participant_id": "p_validation",
++                "dataset": "coswara",
++                "modality": "cough",
++                "submodality": "cough",
++                "label_binary": "positive",
++                "split": "validation",
++                "audio_path": "dummy.wav",
++            },
++            {
++                "recording_id": "test_a",
++                "participant_id": "p_test",
++                "dataset": "coswara",
++                "modality": "cough",
++                "submodality": "cough",
++                "label_binary": "negative",
++                "split": "test",
++                "audio_path": "dummy.wav",
++            },
++        ]
++    )
++
++    def fake_extract(row: pd.Series) -> dict[str, object]:
++        return {
++            "recording_id": row["recording_id"],
++            "participant_id": row["participant_id"],
++            "dataset": row["dataset"],
++            "modality": row["modality"],
++            "submodality": row["submodality"],
++            "label_binary": row["label_binary"],
++            "split": row["split"],
++            "is_augmented": bool(row.get("is_augmented", False)),
++            "augmentation_id": row.get("augmentation_id", "original"),
++            "source_recording_id": row.get("source_recording_id", row["recording_id"]),
++            "feat_signal": 1.0,
++        }
++
++    monkeypatch.setattr(strong_features, "extract_strong_features_for_row", fake_extract)
++
++    table = strong_features.build_strong_feature_table(
++        metadata,
++        augment_train_copies=2,
++        augmentation_seed=123,
++    )
++
++    assert len(table) == 8
++    assert table["recording_id"].is_unique
++    assert table[table["split"].eq("train")]["is_augmented"].sum() == 4
++    assert table[table["split"].eq("validation")]["is_augmented"].sum() == 0
++    assert table[table["split"].eq("test")]["is_augmented"].sum() == 0
++    assert set(table[table["is_augmented"]]["source_recording_id"]) == {"train_a", "train_b"}
++
++
+ def test_optional_smote_model_is_registered_or_skips_cleanly() -> None:
+     from covid_audio_btp.strong_baseline import _make_model
+ 
+@@ -295,7 +448,28 @@ def test_svc_uses_explicit_calibration_instead_of_deprecated_probability_mode()
+ 
+     assert isinstance(calibrated, CalibratedClassifierCV)
+     assert isinstance(calibrated.estimator, SVC)
+-    assert calibrated.estimator.probability is False
++    assert getattr(calibrated.estimator, "probability", None) is not True
++
++
++def test_svc_fit_does_not_emit_deprecated_probability_warning() -> None:
++    from covid_audio_btp.strong_baseline import _make_model
++
++    x = pd.DataFrame(
++        {
++            "signal": [-1.0, -0.8, -0.7, -0.6, 0.6, 0.7, 0.8, 1.0, -0.9, 0.9, -0.5, 0.5],
++            "noise": [0.01, 0.02, 0.01, 0.03, 0.02, 0.04, 0.03, 0.01, 0.04, 0.02, 0.05, 0.05],
++            "constant": [1.0] * 12,
++        }
++    )
++    y = np.asarray([0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1])
++    model = _make_model("svc_rbf_f60", random_state=0)
++
++    with warnings.catch_warnings(record=True) as caught:
++        warnings.simplefilter("always")
++        model.fit(x, y)
++
++    warning_text = "\n".join(str(item.message) for item in caught)
++    assert "probability" not in warning_text.lower()
+ 
+ 
+ def test_top_k_validation_ensemble_is_added_as_modality_candidate() -> None:

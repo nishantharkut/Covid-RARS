@@ -89,10 +89,11 @@ def feature_columns(feature_df: pd.DataFrame) -> list[str]:
         "label_binary",
         "split",
         "segmentation_method",
+        "is_augmented",
+        "augmentation_seed",
     }
     return [
         col
         for col in feature_df.columns
         if col not in excluded and pd.api.types.is_numeric_dtype(feature_df[col])
     ]
-

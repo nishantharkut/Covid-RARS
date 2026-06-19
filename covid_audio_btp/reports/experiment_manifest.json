@@ -1,5 +1,5 @@
 {
-  "created_at_utc": "2026-06-17T20:20:43.244135+00:00",
+  "created_at_utc": "2026-06-19T13:40:06.202718+00:00",
   "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
   "python_executable": "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python",
   "config": {
@@ -31,8 +31,8 @@
     {
       "path": "data/processed/metadata_clean.csv",
       "exists": true,
-      "size_bytes": 15192524,
-      "sha256": "a63e24cd9c2b148084bc45d4303f48a205520eda44ea89da4319760da8eda65f"
+      "size_bytes": 15102294,
+      "sha256": "e3d2b18d20f2b99d6f70f3cc54bccf8f07102b124cc11a61156172f10e65a8b1"
     },
     {
       "path": "data/processed/audio_quality.csv",
@@ -45,6 +45,12 @@
       "exists": true,
       "size_bytes": 90512724,
       "sha256": "b8e4136b0f619671a6c010b79d313227dd28de78eebcffb60f0a19bc275654f9"
+    },
+    {
+      "path": "data/processed/features_strong_acoustic.csv",
+      "exists": true,
+      "size_bytes": 708443493,
+      "sha256": "3c04113bbc32fdb64c0f4e8b978a11130e7262081475cf6871d4809157714198"
     },
     {
       "path": "data/outputs/metrics/ml_baseline_metrics.csv",
@@ -467,6 +473,36 @@
       "sha256": "f80ea4acc1c12db29eb637f926529393355ecc57080179595df8a7c897f5f1e6"
     },
     {
+      "path": "data/outputs/metrics/strong_baseline_metrics.csv",
+      "exists": true,
+      "size_bytes": 73121,
+      "sha256": "80ff515555fde3ea637a5aeb0ccca90277455cb2744fe5e41fe9ae7075aaaf6e"
+    },
+    {
+      "path": "data/outputs/metrics/strong_baseline_predictions.csv",
+      "exists": true,
+      "size_bytes": 22965626,
+      "sha256": "886c4237bf9dc53903ba73ea1e1494737b05c7aa49594e0d676283c61a712b7d"
+    },
+    {
+      "path": "reports/tables/strong_baseline_model_selection.csv",
+      "exists": true,
+      "size_bytes": 549,
+      "sha256": "bd18f3f84b38cf1722098bd931b2a1281e8f29e33853c084327a8d81711af539"
+    },
+    {
+      "path": "reports/tables/strong_baseline_protocol_audit.csv",
+      "exists": true,
+      "size_bytes": 2678,
+      "sha256": "9b6449ce6653bb17f430d0a8a1cb223060251af98fb45fe566db759a13038ab7"
+    },
+    {
+      "path": "reports/tables/strong_baseline_participant_audit.csv",
+      "exists": true,
+      "size_bytes": 1286,
+      "sha256": "5259771824886c9be7fd1efe27380d5e58b31ea69907978f199a038d96b53d34"
+    },
+    {
       "path": "reports/tables/feature_shift_report.csv",
       "exists": true,
       "size_bytes": 42022,
@@ -481,8 +517,8 @@
     {
       "path": "reports/tables/paper_metric_table.csv",
       "exists": true,
-      "size_bytes": 94525,
-      "sha256": "7fe0a9bb17271985c25d03eb8d0ec79ed5e02e9c301773d2e046c964724d534f"
+      "size_bytes": 130859,
+      "sha256": "0e9f2b16253e7b829e1cb1f191fb3e9a6399c3a97621dadb13c9d3434b20e8f9"
     },
     {
       "path": "data/outputs/metrics/external_model_grid_beats_metrics.csv",
@@ -555,6 +591,198 @@
       "exists": true,
       "size_bytes": 2352,
       "sha256": "e0a5ea59cf77df00df26ff046bb9d7c0dfcf8ae609cc23a89d521ac883b93c79"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_metrics_10epoch_cough.csv",
+      "exists": true,
+      "size_bytes": 312,
+      "sha256": "77ddc74516d3a41fae4fffe45eb2c213853e55a9cac63d4df73a718efa709eb7"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_metrics_cnn_bigru_breath.csv",
+      "exists": true,
+      "size_bytes": 515,
+      "sha256": "8a6dc05effd4247dd91952d954d36e5a85fbc21ed4f0cf64aaf0842593999f3c"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_metrics_cnn_bigru_cough.csv",
+      "exists": true,
+      "size_bytes": 510,
+      "sha256": "3dacc127a7281532d54fc9b0a441808ee1cf49fea2c32937b5d230918a1ffec3"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_metrics_cnn_bigru_speech.csv",
+      "exists": true,
+      "size_bytes": 513,
+      "sha256": "353ae0643b1829d0f8ef561980dcca7c8b686a5e7f0408781ca3854469e3282d"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_metrics_residual_cnn_breath.csv",
+      "exists": true,
+      "size_bytes": 501,
+      "sha256": "36e91ebd6cdf4ef5fbf2bbfc621c67aca230a105e99ed1424d16ce75caa1f755"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_metrics_residual_cnn_cough.csv",
+      "exists": true,
+      "size_bytes": 517,
+      "sha256": "2773b72d78deaff057702a1f87c0fd5c260011f5f030e5ee284e587857f1ef59"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_metrics_residual_cnn_speech.csv",
+      "exists": true,
+      "size_bytes": 525,
+      "sha256": "3c78ef93b9e891182c1a8754202582aa558346f8387ca642cef8c6105e6ef48c"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_metrics_smoke_cough.csv",
+      "exists": true,
+      "size_bytes": 311,
+      "sha256": "75c333d435aa431861cb21f5808716fa93c7823fbc59e86a5cec5f98174dbf14"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_validation_10epoch_cough.csv",
+      "exists": true,
+      "size_bytes": 77993,
+      "sha256": "95216026aa006ad7d4bdedeee26c64dff00ba25e64a99cca1ad1b443e65b4696"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_validation_cnn_bigru_breath.csv",
+      "exists": true,
+      "size_bytes": 83834,
+      "sha256": "37de45d20312862c5ab162e4d02d15e6445b423d897d11066cc637bcfb814d91"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_validation_cnn_bigru_cough.csv",
+      "exists": true,
+      "size_bytes": 83027,
+      "sha256": "c6395908114d4034460c280b447539e3ffd4f456e75bc4676272311724f129f1"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_validation_cnn_bigru_speech.csv",
+      "exists": true,
+      "size_bytes": 210386,
+      "sha256": "8faea99fcf0c5847c5308a8e95ec43cf53faa1fa187b305303295e6e5e7a2023"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_validation_residual_cnn_breath.csv",
+      "exists": true,
+      "size_bytes": 87335,
+      "sha256": "a86456d286200289d8f62b412ee7da5564fa925e58494fed31d158abfd660713"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_validation_residual_cnn_cough.csv",
+      "exists": true,
+      "size_bytes": 87000,
+      "sha256": "643a386f90a9712172f2738744b1f570052e2d7f43ada5cecd66dd09046b052a"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_validation_residual_cnn_speech.csv",
+      "exists": true,
+      "size_bytes": 219164,
+      "sha256": "0cac656749130f17dc88030483bf1f41f285d4bd5dd1f5c30b1b72e88c80dac9"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_validation_smoke_cough.csv",
+      "exists": true,
+      "size_bytes": 77749,
+      "sha256": "bf19ca73bbc17d0ddc71ee9eca9708ccb973ca459dc6d9d5e9ad3e8370f3489c"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_test_10epoch_cough.csv",
+      "exists": true,
+      "size_bytes": 74385,
+      "sha256": "dea5ba6578b9139a2dad98313463e6ef0cb040d553faeff7fbb83b5a364ad277"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_test_cnn_bigru_breath.csv",
+      "exists": true,
+      "size_bytes": 80200,
+      "sha256": "b10274ee29124069dee06e9b2861d2ee7fdc8f6698812541881955b09f6aaa6d"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_test_cnn_bigru_cough.csv",
+      "exists": true,
+      "size_bytes": 79419,
+      "sha256": "aa817c7e42c25577e18dedb9f2d02c86c2f18bfa8465f8516c9fb0fbb9176378"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_test_cnn_bigru_speech.csv",
+      "exists": true,
+      "size_bytes": 201296,
+      "sha256": "43bda50d68a91b801cb8bf00bdf94160c3e5943bb0418ddb26d8ff0fc50b6b76"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_test_residual_cnn_breath.csv",
+      "exists": true,
+      "size_bytes": 83755,
+      "sha256": "e94e60c60b265fce0249a0a25e5e0901ee3ecce3825bb9ec7323442974a0f7d8"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_test_residual_cnn_cough.csv",
+      "exists": true,
+      "size_bytes": 83450,
+      "sha256": "22090481ee96c8e2d36cd464b21a26eeef2794e098b27e45375c0ab1ecc863b4"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_test_residual_cnn_speech.csv",
+      "exists": true,
+      "size_bytes": 210093,
+      "sha256": "a25c2c671c56fadd13a55176cc269539d91bdf5a6f941938e660acc9dc30c3fd"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_logits_test_smoke_cough.csv",
+      "exists": true,
+      "size_bytes": 74161,
+      "sha256": "8be0b3c874add7689279f4cc8013ef7ce681cb6b356d212fa6ac8c54be9554fd"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_training_history_10epoch_cough.csv",
+      "exists": true,
+      "size_bytes": 430,
+      "sha256": "52019a5d1e1861ff807cd72478d0c5fcc718c476943485d69de9920db142f4ec"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_training_history_cnn_bigru_breath.csv",
+      "exists": true,
+      "size_bytes": 343,
+      "sha256": "66c7c5e4ac034dc157f73e3b3e53a4ef79a82f211364c4bded6c0fb1d3b7b5d5"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_training_history_cnn_bigru_cough.csv",
+      "exists": true,
+      "size_bytes": 343,
+      "sha256": "1423893312f09f1cb5cbea81a6393d6427820463c9128f9adcf8be74dc81bbc7"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_training_history_cnn_bigru_speech.csv",
+      "exists": true,
+      "size_bytes": 343,
+      "sha256": "ae28fcdad35651136aca6436f55b304c2ed513d0de729121e930b1e147e90ad2"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_training_history_residual_cnn_breath.csv",
+      "exists": true,
+      "size_bytes": 342,
+      "sha256": "549b6f5109fc87a3140882739ee6b90ff081f1a41410d41ab92d590bb741609a"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_training_history_residual_cnn_cough.csv",
+      "exists": true,
+      "size_bytes": 345,
+      "sha256": "67c2d16d12385a6e01ad5070fc1b0de563dd07dd0dbb4f69cf0415767ed39092"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_training_history_residual_cnn_speech.csv",
+      "exists": true,
+      "size_bytes": 344,
+      "sha256": "424b4bac8247a95e2e02d1946782a6247a000ca818044a84cad1969ab04dc200"
+    },
+    {
+      "path": "data/outputs/metrics/cnn_training_history_smoke_cough.csv",
+      "exists": true,
+      "size_bytes": 73,
+      "sha256": "1ed0473524e987c3bead43dab963a23cfeee1ed8d06d03c54c49b275f0ba92f3"
     },
     {
       "path": "reports/tables/feature_shift_beats_cough.csv",

@@ -7,10 +7,11 @@ import pandas as pd
 import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
+from sklearn.metrics import roc_auc_score
 
 from covid_audio_btp.datasets import SpectrogramTableDataset
-from covid_audio_btp.metrics import binary_metric_bundle
-from covid_audio_btp.models_cnn import CompactSpectrogramCNN
+from covid_audio_btp.metrics import best_threshold_by_balanced_accuracy, binary_metric_bundle
+from covid_audio_btp.models_cnn import make_spectrogram_model
 
 
 class TorchSpectrogramDataset(Dataset):
@@ -32,7 +33,7 @@ class TorchSpectrogramDataset(Dataset):
 
 @dataclass
 class CNNTrainArtifacts:
-    model: CompactSpectrogramCNN
+    model: nn.Module
     metrics: dict[str, float | str]
     validation_predictions: pd.DataFrame
     test_predictions: pd.DataFrame
@@ -56,13 +57,37 @@ def _collect_logits(model: nn.Module, loader: DataLoader, device: str) -> tuple[
     return recording_ids, participant_ids, np.asarray(logits_list), np.asarray(labels_list)
 
 
+def _augment_batch(x: torch.Tensor, noise_std: float = 0.015, freq_mask: int = 6, time_mask: int = 12) -> torch.Tensor:
+    augmented = x.clone()
+    if noise_std > 0:
+        augmented = augmented + torch.randn_like(augmented) * noise_std
+    _, _, n_freq, n_time = augmented.shape
+    if freq_mask > 0 and n_freq > 1:
+        width = min(freq_mask, max(1, n_freq // 4))
+        start = torch.randint(0, max(1, n_freq - width + 1), (1,), device=augmented.device).item()
+        augmented[:, :, start : start + width, :] = 0.0
+    if time_mask > 0 and n_time > 1:
+        width = min(time_mask, max(1, n_time // 5))
+        start = torch.randint(0, max(1, n_time - width + 1), (1,), device=augmented.device).item()
+        augmented[:, :, :, start : start + width] = 0.0
+    return augmented
+
+
+def _safe_auroc(y_true: np.ndarray, probabilities: np.ndarray) -> float:
+    if len(np.unique(y_true.astype(int))) < 2:
+        return float("nan")
+    return float(roc_auc_score(y_true.astype(int), probabilities))
+
+
 def train_cnn_for_modality(
     spectrogram_index: pd.DataFrame,
     modality: str,
+    architecture: str = "compact_cnn",
     max_epochs: int = 50,
     patience: int = 8,
     batch_size: int = 32,
     learning_rate: float = 1e-3,
+    augment: bool = True,
     device: str | None = None,
 ) -> CNNTrainArtifacts:
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
@@ -81,11 +106,12 @@ def train_cnn_for_modality(
     negatives = max(1, int(len(labels) - labels.sum()))
     pos_weight = torch.tensor([negatives / positives], dtype=torch.float32, device=device)
 
-    model = CompactSpectrogramCNN().to(device)
+    model = make_spectrogram_model(architecture).to(device)
     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=1e-4)
 
     best_state = None
+    best_val_auroc = -np.inf
     best_val_loss = float("inf")
     bad_epochs = 0
     history_rows = []
@@ -96,6 +122,8 @@ def train_cnn_for_modality(
         for x, y, _, _ in train_loader:
             x = x.to(device)
             y = y.to(device)
+            if augment:
+                x = _augment_batch(x)
             optimizer.zero_grad()
             logits = model(x)
             loss = criterion(logits, y)
@@ -105,10 +133,22 @@ def train_cnn_for_modality(
 
         _, _, val_logits, val_y = _collect_logits(model, val_loader, device)
         val_loss = float(criterion(torch.tensor(val_logits, dtype=torch.float32, device=device), torch.tensor(val_y, dtype=torch.float32, device=device)).detach().cpu())
+        val_prob = 1.0 / (1.0 + np.exp(-val_logits))
+        val_auroc = _safe_auroc(val_y, val_prob)
         history_rows.append(
-            {"epoch": epoch, "train_loss": float(np.mean(train_losses)), "validation_loss": val_loss}
+            {
+                "epoch": epoch,
+                "train_loss": float(np.mean(train_losses)),
+                "validation_loss": val_loss,
+                "validation_auroc": val_auroc,
+            }
         )
-        if val_loss < best_val_loss:
+        improved = (
+            np.isfinite(val_auroc)
+            and (val_auroc > best_val_auroc or (val_auroc == best_val_auroc and val_loss < best_val_loss))
+        )
+        if improved or (not np.isfinite(val_auroc) and val_loss < best_val_loss):
+            best_val_auroc = val_auroc if np.isfinite(val_auroc) else best_val_auroc
             best_val_loss = val_loss
             best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
             bad_epochs = 0
@@ -124,8 +164,20 @@ def train_cnn_for_modality(
     test_rec, test_part, test_logits, test_y = _collect_logits(model, test_loader, device)
     val_prob = 1.0 / (1.0 + np.exp(-val_logits))
     test_prob = 1.0 / (1.0 + np.exp(-test_logits))
-    metrics = binary_metric_bundle(test_y.astype(int), test_prob)
-    metrics.update({"model_name": "compact_cnn", "modality": modality})
+    threshold = best_threshold_by_balanced_accuracy(val_y.astype(int), val_prob)
+    validation_metrics = binary_metric_bundle(val_y.astype(int), val_prob, threshold=threshold)
+    metrics = binary_metric_bundle(test_y.astype(int), test_prob, threshold=threshold)
+    metrics.update(
+        {
+            "model_name": architecture,
+            "architecture": architecture,
+            "modality": modality,
+            "validation_auroc": validation_metrics.get("auroc"),
+            "validation_auprc": validation_metrics.get("auprc"),
+            "validation_balanced_accuracy": validation_metrics.get("balanced_accuracy"),
+            "threshold_source": "validation_balanced_accuracy",
+        }
+    )
 
     def pred_frame(rec_ids, part_ids, logits, probs, y, split):
         return pd.DataFrame(
@@ -135,7 +187,8 @@ def train_cnn_for_modality(
                 "modality": modality,
                 "label_binary": np.where(y.astype(int) == 1, "positive", "negative"),
                 "split": split,
-                "model_name": "compact_cnn",
+                "model_name": architecture,
+                "architecture": architecture,
                 "logit": logits,
                 "probability": probs,
             }
@@ -148,4 +201,3 @@ def train_cnn_for_modality(
         test_predictions=pred_frame(test_rec, test_part, test_logits, test_prob, test_y, "test"),
         history=pd.DataFrame(history_rows),
     )
-

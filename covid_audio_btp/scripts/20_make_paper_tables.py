@@ -29,6 +29,7 @@ DEFAULT_METRIC_PATHS = [
     Path("data/outputs/metrics/temporal_holdout_metrics.csv"),
     Path("reports/tables/temporal_metadata_ablation.csv"),
     Path("reports/tables/temporal_matched_cohort_metrics.csv"),
+    Path("data/outputs/metrics/strong_baseline_metrics.csv"),
 ]
 
 DEFAULT_CI_PATHS = [
@@ -56,6 +57,7 @@ def default_metric_paths(metrics_dir: Path = Path("data/outputs/metrics")) -> li
     representation_patterns = [
         "external_model_grid_*_metrics.csv",
         "coughvid_internal_*_metrics.csv",
+        "cnn_metrics_*.csv",
     ]
     discovered: list[Path] = []
     for pattern in representation_patterns:

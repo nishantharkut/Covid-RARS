@@ -11,9 +11,10 @@ from covid_audio_btp.train_cnn import train_cnn_for_modality
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Train compact CNN on saved log-mel spectrograms.")
+    parser = argparse.ArgumentParser(description="Train deep CNN/CRNN models on saved log-mel spectrograms.")
     parser.add_argument("--spectrogram-index", required=True, type=Path)
     parser.add_argument("--modality", default="cough")
+    parser.add_argument("--architecture", choices=["compact_cnn", "residual_cnn", "cnn_bigru"], default="compact_cnn")
     parser.add_argument("--models-dir", type=Path, default=Path("data/outputs/models"))
     parser.add_argument("--metrics-output", type=Path, default=Path("data/outputs/metrics/cnn_metrics.csv"))
     parser.add_argument("--validation-output", type=Path, default=Path("data/outputs/metrics/cnn_logits_validation.csv"))
@@ -21,6 +22,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--history-output", type=Path, default=Path("data/outputs/metrics/cnn_training_history.csv"))
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--no-augment", action="store_true")
     return parser.parse_args()
 
 
@@ -33,10 +35,12 @@ def main() -> None:
     artifacts = train_cnn_for_modality(
         spec_index,
         modality=args.modality,
+        architecture=args.architecture,
         max_epochs=args.epochs,
         batch_size=args.batch_size,
+        augment=not args.no_augment,
     )
-    torch.save(artifacts.model.state_dict(), args.models_dir / f"compact_cnn_{args.modality}.pt")
+    torch.save(artifacts.model.state_dict(), args.models_dir / f"{args.architecture}_{args.modality}.pt")
     pd.DataFrame([artifacts.metrics]).to_csv(args.metrics_output, index=False)
     artifacts.validation_predictions.to_csv(args.validation_output, index=False)
     artifacts.test_predictions.to_csv(args.test_output, index=False)
@@ -46,4 +50,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

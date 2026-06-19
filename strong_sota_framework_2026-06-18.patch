@@ -1,0 +1,2298 @@
+diff --git a/covid_audio_btp/run_strong_baseline_e2e.sh b/covid_audio_btp/run_strong_baseline_e2e.sh
+new file mode 100755
+index 0000000..445e967
+--- /dev/null
++++ b/covid_audio_btp/run_strong_baseline_e2e.sh
+@@ -0,0 +1,36 @@
++#!/usr/bin/env bash
++set -euo pipefail
++
++ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++cd "$ROOT_DIR"
++
++PYTHON_BIN="${PYTHON_BIN:-python3}"
++VENV_DIR="${VENV_DIR:-.venv}"
++
++if [ ! -x "$VENV_DIR/bin/python" ]; then
++  "$PYTHON_BIN" -m venv "$VENV_DIR"
++fi
++
++"$VENV_DIR/bin/python" -m pip install --upgrade pip setuptools wheel
++"$VENV_DIR/bin/python" -m pip install -r requirements-dev.txt
++INSTALL_OPTIONAL="${INSTALL_OPTIONAL:-auto}"
++if [ "$INSTALL_OPTIONAL" != "skip" ]; then
++  "$VENV_DIR/bin/python" -m pip install -r requirements-optional.txt
++fi
++"$VENV_DIR/bin/python" -m pip install -e .
++
++INSTALL_TORCH="${INSTALL_TORCH:-auto}"
++TORCH_INDEX_URL="${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cpu}"
++if [ "$INSTALL_TORCH" != "skip" ]; then
++  if ! "$VENV_DIR/bin/python" - <<'PY'
++try:
++    import torch  # noqa: F401
++except Exception:
++    raise SystemExit(1)
++PY
++  then
++    "$VENV_DIR/bin/python" -m pip install torch --index-url "$TORCH_INDEX_URL"
++  fi
++fi
++
++"$VENV_DIR/bin/python" scripts/48_run_strong_baseline_e2e.py "$@"
+diff --git a/covid_audio_btp/scripts/07_train_cnn.py b/covid_audio_btp/scripts/07_train_cnn.py
+index a1ff9be..4701105 100644
+--- a/covid_audio_btp/scripts/07_train_cnn.py
++++ b/covid_audio_btp/scripts/07_train_cnn.py
+@@ -11,9 +11,10 @@ from covid_audio_btp.train_cnn import train_cnn_for_modality
+ 
+ 
+ def parse_args() -> argparse.Namespace:
+-    parser = argparse.ArgumentParser(description="Train compact CNN on saved log-mel spectrograms.")
++    parser = argparse.ArgumentParser(description="Train deep CNN/CRNN models on saved log-mel spectrograms.")
+     parser.add_argument("--spectrogram-index", required=True, type=Path)
+     parser.add_argument("--modality", default="cough")
++    parser.add_argument("--architecture", choices=["compact_cnn", "residual_cnn", "cnn_bigru"], default="compact_cnn")
+     parser.add_argument("--models-dir", type=Path, default=Path("data/outputs/models"))
+     parser.add_argument("--metrics-output", type=Path, default=Path("data/outputs/metrics/cnn_metrics.csv"))
+     parser.add_argument("--validation-output", type=Path, default=Path("data/outputs/metrics/cnn_logits_validation.csv"))
+@@ -21,6 +22,7 @@ def parse_args() -> argparse.Namespace:
+     parser.add_argument("--history-output", type=Path, default=Path("data/outputs/metrics/cnn_training_history.csv"))
+     parser.add_argument("--epochs", type=int, default=50)
+     parser.add_argument("--batch-size", type=int, default=32)
++    parser.add_argument("--no-augment", action="store_true")
+     return parser.parse_args()
+ 
+ 
+@@ -33,10 +35,12 @@ def main() -> None:
+     artifacts = train_cnn_for_modality(
+         spec_index,
+         modality=args.modality,
++        architecture=args.architecture,
+         max_epochs=args.epochs,
+         batch_size=args.batch_size,
++        augment=not args.no_augment,
+     )
+-    torch.save(artifacts.model.state_dict(), args.models_dir / f"compact_cnn_{args.modality}.pt")
++    torch.save(artifacts.model.state_dict(), args.models_dir / f"{args.architecture}_{args.modality}.pt")
+     pd.DataFrame([artifacts.metrics]).to_csv(args.metrics_output, index=False)
+     artifacts.validation_predictions.to_csv(args.validation_output, index=False)
+     artifacts.test_predictions.to_csv(args.test_output, index=False)
+@@ -46,4 +50,3 @@ def main() -> None:
+ 
+ if __name__ == "__main__":
+     main()
+-
+diff --git a/covid_audio_btp/scripts/20_make_paper_tables.py b/covid_audio_btp/scripts/20_make_paper_tables.py
+index 7fdeacd..95461cc 100644
+--- a/covid_audio_btp/scripts/20_make_paper_tables.py
++++ b/covid_audio_btp/scripts/20_make_paper_tables.py
+@@ -29,6 +29,7 @@ DEFAULT_METRIC_PATHS = [
+     Path("data/outputs/metrics/temporal_holdout_metrics.csv"),
+     Path("reports/tables/temporal_metadata_ablation.csv"),
+     Path("reports/tables/temporal_matched_cohort_metrics.csv"),
++    Path("data/outputs/metrics/strong_baseline_metrics.csv"),
+ ]
+ 
+ DEFAULT_CI_PATHS = [
+@@ -56,6 +57,7 @@ def default_metric_paths(metrics_dir: Path = Path("data/outputs/metrics")) -> li
+     representation_patterns = [
+         "external_model_grid_*_metrics.csv",
+         "coughvid_internal_*_metrics.csv",
++        "cnn_metrics_*.csv",
+     ]
+     discovered: list[Path] = []
+     for pattern in representation_patterns:
+diff --git a/covid_audio_btp/scripts/24_make_experiment_manifest.py b/covid_audio_btp/scripts/24_make_experiment_manifest.py
+index 6dee6dc..8684adb 100644
+--- a/covid_audio_btp/scripts/24_make_experiment_manifest.py
++++ b/covid_audio_btp/scripts/24_make_experiment_manifest.py
+@@ -13,6 +13,7 @@ DEFAULT_ARTIFACTS = [
+     Path("data/processed/metadata_clean.csv"),
+     Path("data/processed/audio_quality.csv"),
+     Path("data/processed/features_mfcc.csv"),
++    Path("data/processed/features_strong_acoustic.csv"),
+     Path("data/outputs/metrics/ml_baseline_metrics.csv"),
+     Path("data/outputs/metrics/calibration_metrics.csv"),
+     Path("data/outputs/metrics/fusion_metrics.csv"),
+@@ -83,6 +84,11 @@ DEFAULT_ARTIFACTS = [
+     Path("reports/tables/temporal_month_ablation_effect_sizes.csv"),
+     Path("reports/final/TEMPORAL_MONTH_CAUSAL_DAG.md"),
+     Path("reports/final/TEMPORAL_SHORTCUT_THEORY.md"),
++    Path("data/outputs/metrics/strong_baseline_metrics.csv"),
++    Path("data/outputs/metrics/strong_baseline_predictions.csv"),
++    Path("reports/tables/strong_baseline_model_selection.csv"),
++    Path("reports/tables/strong_baseline_protocol_audit.csv"),
++    Path("reports/tables/strong_baseline_participant_audit.csv"),
+     Path("reports/tables/feature_shift_report.csv"),
+     Path("reports/tables/feature_shift_summary.csv"),
+     Path("reports/tables/paper_metric_table.csv"),
+@@ -110,6 +116,10 @@ def default_artifact_paths(project_root: Path | None = None) -> list[Path]:
+         (metrics_dir, "external_model_grid_*_bootstrap_ci.csv"),
+         (metrics_dir, "coughvid_internal_*_metrics.csv"),
+         (metrics_dir, "coughvid_internal_*_bootstrap_ci.csv"),
++        (metrics_dir, "cnn_metrics_*.csv"),
++        (metrics_dir, "cnn_logits_validation_*.csv"),
++        (metrics_dir, "cnn_logits_test_*.csv"),
++        (metrics_dir, "cnn_training_history_*.csv"),
+         (tables_dir, "feature_shift_*_cough.csv"),
+         (tables_dir, "feature_shift_*_summary.csv"),
+     ]
+diff --git a/covid_audio_btp/scripts/47_run_strong_baseline.py b/covid_audio_btp/scripts/47_run_strong_baseline.py
+new file mode 100755
+index 0000000..276b010
+--- /dev/null
++++ b/covid_audio_btp/scripts/47_run_strong_baseline.py
+@@ -0,0 +1,88 @@
++#!/usr/bin/env python
++from __future__ import annotations
++
++import argparse
++from pathlib import Path
++
++import pandas as pd
++
++from covid_audio_btp.strong_baseline import DEFAULT_MODEL_NAMES, run_strong_baseline, save_strong_baseline_result
++
++
++def parse_args() -> argparse.Namespace:
++    parser = argparse.ArgumentParser(
++        description="Run the paper-comparable strong internal Coswara baseline."
++    )
++    parser.add_argument("--features", type=Path, default=Path("data/processed/features_strong_acoustic.csv"))
++    parser.add_argument("--metadata", type=Path, default=Path("data/processed/metadata_with_quality.csv"))
++    parser.add_argument("--modalities", nargs="+", default=["cough", "breath", "speech"])
++    parser.add_argument(
++        "--model-names",
++        nargs="+",
++        default=list(DEFAULT_MODEL_NAMES),
++    )
++    parser.add_argument("--require-quality-ok", action="store_true")
++    parser.add_argument("--random-state", type=int, default=42)
++    parser.add_argument("--optuna-trials", type=int, default=25)
++    parser.add_argument(
++        "--metrics-output",
++        type=Path,
++        default=Path("data/outputs/metrics/strong_baseline_metrics.csv"),
++    )
++    parser.add_argument(
++        "--predictions-output",
++        type=Path,
++        default=Path("data/outputs/metrics/strong_baseline_predictions.csv"),
++    )
++    parser.add_argument(
++        "--selection-output",
++        type=Path,
++        default=Path("reports/tables/strong_baseline_model_selection.csv"),
++    )
++    parser.add_argument(
++        "--protocol-audit-output",
++        type=Path,
++        default=Path("reports/tables/strong_baseline_protocol_audit.csv"),
++    )
++    parser.add_argument(
++        "--participant-audit-output",
++        type=Path,
++        default=Path("reports/tables/strong_baseline_participant_audit.csv"),
++    )
++    return parser.parse_args()
++
++
++def main() -> None:
++    args = parse_args()
++    if not args.features.exists():
++        raise FileNotFoundError(
++            f"Feature table not found: {args.features}. Run the E2E wrapper with --raw-dir, "
++            "or run scripts/05_extract_features.py first."
++        )
++    features = pd.read_csv(args.features)
++    metadata = pd.read_csv(args.metadata) if args.metadata.exists() else None
++    result = run_strong_baseline(
++        features=features,
++        metadata=metadata,
++        modalities=args.modalities,
++        model_names=args.model_names,
++        require_quality_ok=args.require_quality_ok,
++        random_state=args.random_state,
++        optuna_trials=args.optuna_trials,
++    )
++    save_strong_baseline_result(
++        result,
++        metrics_output=args.metrics_output,
++        predictions_output=args.predictions_output,
++        selection_output=args.selection_output,
++        protocol_audit_output=args.protocol_audit_output,
++        participant_audit_output=args.participant_audit_output,
++    )
++    print(f"Wrote strong baseline metrics: {args.metrics_output} ({len(result.metrics)} rows)")
++    print(f"Wrote strong baseline predictions: {args.predictions_output} ({len(result.predictions)} rows)")
++    print(f"Wrote strong baseline model selection: {args.selection_output} ({len(result.selection)} rows)")
++    print(f"Wrote strong baseline protocol audit: {args.protocol_audit_output}")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/covid_audio_btp/scripts/48_run_strong_baseline_e2e.py b/covid_audio_btp/scripts/48_run_strong_baseline_e2e.py
+new file mode 100755
+index 0000000..84a5358
+--- /dev/null
++++ b/covid_audio_btp/scripts/48_run_strong_baseline_e2e.py
+@@ -0,0 +1,237 @@
++#!/usr/bin/env python
++from __future__ import annotations
++
++import argparse
++import subprocess
++import sys
++from pathlib import Path
++
++
++PROJECT_ROOT = Path(__file__).resolve().parents[1]
++
++
++def parse_args() -> argparse.Namespace:
++    parser = argparse.ArgumentParser(
++        description="One-command paper-comparable strong-baseline pipeline."
++    )
++    parser.add_argument("--raw-dir", type=Path, default=None, help="Coswara raw directory; required if features are absent.")
++    parser.add_argument("--features", type=Path, default=Path("data/processed/features_strong_acoustic.csv"))
++    parser.add_argument("--metadata", type=Path, default=Path("data/processed/metadata_with_quality.csv"))
++    parser.add_argument("--rebuild-features", action="store_true")
++    parser.add_argument("--require-quality-ok", action="store_true")
++    parser.add_argument("--skip-cnn", action="store_true", help="Skip the compact spectrogram CNN branch.")
++    parser.add_argument(
++        "--cnn-architectures",
++        nargs="+",
++        default=["residual_cnn", "cnn_bigru"],
++        choices=["compact_cnn", "residual_cnn", "cnn_bigru"],
++    )
++    parser.add_argument("--cnn-epochs", type=int, default=50)
++    parser.add_argument("--cnn-batch-size", type=int, default=32)
++    parser.add_argument("--optuna-trials", type=int, default=25)
++    parser.add_argument("--skip-validation", action="store_true")
++    parser.add_argument("--modalities", nargs="+", default=["cough", "breath", "speech"])
++    parser.add_argument(
++        "--model-names",
++        nargs="+",
++        default=[
++            "logistic_l2_f80",
++            "logistic_smote_f80",
++            "extra_trees_f100",
++            "extra_trees_smote_f100",
++            "random_forest_f80",
++            "random_forest_smote_f80",
++            "svc_rbf_f60",
++            "xgboost_smote_f80",
++            "lightgbm_smote_f80",
++            "catboost_smote_f80",
++            "optuna_validation_search",
++        ],
++    )
++    return parser.parse_args()
++
++
++def _run(args: list[str]) -> None:
++    print("+ " + " ".join(args), flush=True)
++    subprocess.run(args, cwd=PROJECT_ROOT, check=True)
++
++
++def _path(path: Path) -> str:
++    return str(path)
++
++
++def _torch_available() -> bool:
++    try:
++        __import__("torch")
++    except Exception:
++        return False
++    return True
++
++
++def _ensure_processed_inputs(args: argparse.Namespace) -> None:
++    features_path = PROJECT_ROOT / args.features
++    metadata_path = PROJECT_ROOT / args.metadata
++    if features_path.exists() and metadata_path.exists() and not args.rebuild_features:
++        print(f"Using existing features: {args.features}")
++        print(f"Using existing metadata: {args.metadata}")
++        return
++    legacy_features = PROJECT_ROOT / "data" / "processed" / "features_mfcc.csv"
++    if args.raw_dir is None and legacy_features.exists() and metadata_path.exists() and not args.rebuild_features:
++        print(
++            "WARNING: extended features are absent and --raw-dir was not provided; "
++            "falling back to data/processed/features_mfcc.csv."
++        )
++        args.features = Path("data/processed/features_mfcc.csv")
++        return
++    if args.raw_dir is None:
++        raise FileNotFoundError(
++            "Processed features/metadata are missing. Provide --raw-dir to build them, "
++            "or run the preprocessing scripts manually first."
++        )
++
++    raw_dir = args.raw_dir
++    _run([sys.executable, "scripts/01_build_coswara_index.py", "--raw-dir", _path(raw_dir), "--output", "data/interim/coswara_index.csv"])
++    _run(
++        [
++            sys.executable,
++            "scripts/02_clean_metadata.py",
++            "--index",
++            "data/interim/coswara_index.csv",
++            "--output",
++            "data/processed/metadata_clean.csv",
++            "--availability-output",
++            "data/processed/modality_availability.csv",
++        ]
++    )
++    _run(
++        [
++            sys.executable,
++            "scripts/03_create_splits.py",
++            "--metadata",
++            "data/processed/metadata_clean.csv",
++            "--output",
++            "data/processed/split_manifest.csv",
++            "--metadata-output",
++            "data/processed/metadata_with_split.csv",
++        ]
++    )
++    _run(
++        [
++            sys.executable,
++            "scripts/04_quality_audit.py",
++            "--metadata",
++            "data/processed/metadata_with_split.csv",
++            "--output",
++            "data/processed/audio_quality.csv",
++            "--metadata-output",
++            "data/processed/metadata_with_quality.csv",
++        ]
++    )
++    extract_cmd = [
++        sys.executable,
++        "scripts/05_extract_features.py",
++        "--metadata",
++        "data/processed/metadata_with_quality.csv",
++        "--features-output",
++        "data/processed/features_mfcc.csv",
++    ]
++    if args.skip_cnn or not _torch_available():
++        extract_cmd.append("--skip-spectrograms")
++    _run(extract_cmd)
++    _run(
++        [
++            sys.executable,
++            "scripts/49_extract_strong_features.py",
++            "--metadata",
++            "data/processed/metadata_with_quality.csv",
++            "--output",
++            "data/processed/features_strong_acoustic.csv",
++        ]
++    )
++
++
++def _run_cnn_branch(args: argparse.Namespace) -> None:
++    if args.skip_cnn:
++        print("Skipping compact CNN branch because --skip-cnn was provided.")
++        return
++    if not _torch_available():
++        print("Skipping compact CNN branch because torch is not installed in this environment.")
++        return
++    spectrogram_index = PROJECT_ROOT / "data" / "processed" / "spectrogram_index.csv"
++    if not spectrogram_index.exists():
++        print("Skipping compact CNN branch because data/processed/spectrogram_index.csv is absent.")
++        return
++    for architecture in args.cnn_architectures:
++        for modality in args.modalities:
++            _run(
++                [
++                    sys.executable,
++                    "scripts/07_train_cnn.py",
++                    "--spectrogram-index",
++                    "data/processed/spectrogram_index.csv",
++                    "--modality",
++                    str(modality),
++                    "--architecture",
++                    str(architecture),
++                    "--metrics-output",
++                    f"data/outputs/metrics/cnn_metrics_{architecture}_{modality}.csv",
++                    "--validation-output",
++                    f"data/outputs/metrics/cnn_logits_validation_{architecture}_{modality}.csv",
++                    "--test-output",
++                    f"data/outputs/metrics/cnn_logits_test_{architecture}_{modality}.csv",
++                    "--history-output",
++                    f"data/outputs/metrics/cnn_training_history_{architecture}_{modality}.csv",
++                    "--epochs",
++                    str(args.cnn_epochs),
++                    "--batch-size",
++                    str(args.cnn_batch_size),
++                ]
++            )
++
++
++def main() -> None:
++    args = parse_args()
++    _ensure_processed_inputs(args)
++
++    strong_cmd = [
++        sys.executable,
++        "scripts/47_run_strong_baseline.py",
++        "--features",
++        _path(args.features),
++        "--metadata",
++        _path(args.metadata),
++        "--modalities",
++        *args.modalities,
++        "--model-names",
++        *args.model_names,
++        "--optuna-trials",
++        str(args.optuna_trials),
++    ]
++    if args.require_quality_ok:
++        strong_cmd.append("--require-quality-ok")
++    _run(strong_cmd)
++    _run_cnn_branch(args)
++
++    _run([sys.executable, "scripts/20_make_paper_tables.py"])
++    _run([sys.executable, "scripts/24_make_experiment_manifest.py"])
++    core_validation_inputs = [
++        PROJECT_ROOT / "data" / "interim" / "coswara_index.csv",
++        PROJECT_ROOT / "data" / "processed" / "metadata_clean.csv",
++    ]
++    if not args.skip_validation and all(path.exists() for path in core_validation_inputs):
++        _run([sys.executable, "scripts/12_validate_artifacts.py", "--strict"])
++    elif not args.skip_validation:
++        missing = ", ".join(str(path.relative_to(PROJECT_ROOT)) for path in core_validation_inputs if not path.exists())
++        print(f"Skipping strict artifact validation because core preprocessing artifacts are absent: {missing}")
++
++    print("\nStrong paper-comparable baseline pipeline completed.")
++    print("Primary outputs:")
++    print("- data/outputs/metrics/strong_baseline_metrics.csv")
++    print("- data/outputs/metrics/strong_baseline_predictions.csv")
++    print("- reports/tables/strong_baseline_model_selection.csv")
++    print("- reports/tables/strong_baseline_protocol_audit.csv")
++    print("- reports/tables/paper_metric_table.csv")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/covid_audio_btp/scripts/49_extract_strong_features.py b/covid_audio_btp/scripts/49_extract_strong_features.py
+new file mode 100644
+index 0000000..4b850e6
+--- /dev/null
++++ b/covid_audio_btp/scripts/49_extract_strong_features.py
+@@ -0,0 +1,31 @@
++#!/usr/bin/env python
++from __future__ import annotations
++
++import argparse
++from pathlib import Path
++
++import pandas as pd
++
++from covid_audio_btp.strong_features import build_strong_feature_table
++
++
++def parse_args() -> argparse.Namespace:
++    parser = argparse.ArgumentParser(description="Extract extended paper-style acoustic features.")
++    parser.add_argument("--metadata", required=True, type=Path)
++    parser.add_argument("--output", type=Path, default=Path("data/processed/features_strong_acoustic.csv"))
++    parser.add_argument("--quality-mode", choices=["all_samples", "quality_ok_only"], default="all_samples")
++    return parser.parse_args()
++
++
++def main() -> None:
++    args = parse_args()
++    metadata = pd.read_csv(args.metadata)
++    features = build_strong_feature_table(metadata, quality_mode=args.quality_mode)
++    args.output.parent.mkdir(parents=True, exist_ok=True)
++    features.to_csv(args.output, index=False)
++    print(f"Wrote strong acoustic features: {args.output} ({len(features)} rows, {features.shape[1]} columns)")
++
++
++if __name__ == "__main__":
++    main()
++
+diff --git a/covid_audio_btp/src/covid_audio_btp/models_cnn.py b/covid_audio_btp/src/covid_audio_btp/models_cnn.py
+index e1c046c..678e5f1 100644
+--- a/covid_audio_btp/src/covid_audio_btp/models_cnn.py
++++ b/covid_audio_btp/src/covid_audio_btp/models_cnn.py
+@@ -26,3 +26,115 @@ class CompactSpectrogramCNN(nn.Module):
+     def forward(self, x: torch.Tensor) -> torch.Tensor:
+         return self.classifier(self.features(x)).squeeze(1)
+ 
++
++class ResidualBlock(nn.Module):
++    def __init__(self, channels: int, dropout: float = 0.10) -> None:
++        super().__init__()
++        self.block = nn.Sequential(
++            nn.Conv2d(channels, channels, kernel_size=3, padding=1, bias=False),
++            nn.BatchNorm2d(channels),
++            nn.ReLU(inplace=True),
++            nn.Dropout2d(dropout),
++            nn.Conv2d(channels, channels, kernel_size=3, padding=1, bias=False),
++            nn.BatchNorm2d(channels),
++        )
++        self.activation = nn.ReLU(inplace=True)
++
++    def forward(self, x: torch.Tensor) -> torch.Tensor:
++        return self.activation(x + self.block(x))
++
++
++class ResidualSpectrogramCNN(nn.Module):
++    """Deeper residual log-mel classifier for stronger internal baselines."""
++
++    def __init__(self, base_channels: int = 32, dropout: float = 0.35) -> None:
++        super().__init__()
++        self.stem = nn.Sequential(
++            nn.Conv2d(1, base_channels, kernel_size=5, padding=2, bias=False),
++            nn.BatchNorm2d(base_channels),
++            nn.ReLU(inplace=True),
++            nn.MaxPool2d(2),
++        )
++        self.stage1 = nn.Sequential(ResidualBlock(base_channels), ResidualBlock(base_channels))
++        self.down1 = nn.Sequential(
++            nn.Conv2d(base_channels, base_channels * 2, kernel_size=3, stride=2, padding=1, bias=False),
++            nn.BatchNorm2d(base_channels * 2),
++            nn.ReLU(inplace=True),
++        )
++        self.stage2 = nn.Sequential(ResidualBlock(base_channels * 2), ResidualBlock(base_channels * 2))
++        self.down2 = nn.Sequential(
++            nn.Conv2d(base_channels * 2, base_channels * 4, kernel_size=3, stride=2, padding=1, bias=False),
++            nn.BatchNorm2d(base_channels * 4),
++            nn.ReLU(inplace=True),
++        )
++        self.stage3 = nn.Sequential(ResidualBlock(base_channels * 4), ResidualBlock(base_channels * 4))
++        self.pool = nn.AdaptiveAvgPool2d((1, 1))
++        self.classifier = nn.Sequential(
++            nn.Flatten(),
++            nn.Dropout(dropout),
++            nn.Linear(base_channels * 4, 128),
++            nn.ReLU(inplace=True),
++            nn.Dropout(dropout),
++            nn.Linear(128, 1),
++        )
++
++    def forward(self, x: torch.Tensor) -> torch.Tensor:
++        x = self.stem(x)
++        x = self.stage1(x)
++        x = self.down1(x)
++        x = self.stage2(x)
++        x = self.down2(x)
++        x = self.stage3(x)
++        x = self.pool(x)
++        return self.classifier(x).squeeze(1)
++
++
++class CNNBiGRUSpectrogram(nn.Module):
++    """CNN front-end plus bidirectional GRU over time frames."""
++
++    def __init__(self, channels: int = 32, hidden_size: int = 96, dropout: float = 0.35) -> None:
++        super().__init__()
++        self.frontend = nn.Sequential(
++            nn.Conv2d(1, channels, kernel_size=3, padding=1, bias=False),
++            nn.BatchNorm2d(channels),
++            nn.ReLU(inplace=True),
++            nn.MaxPool2d((2, 1)),
++            nn.Conv2d(channels, channels * 2, kernel_size=3, padding=1, bias=False),
++            nn.BatchNorm2d(channels * 2),
++            nn.ReLU(inplace=True),
++            nn.MaxPool2d((2, 1)),
++            nn.Conv2d(channels * 2, channels * 2, kernel_size=3, padding=1, bias=False),
++            nn.BatchNorm2d(channels * 2),
++            nn.ReLU(inplace=True),
++        )
++        self.gru = nn.GRU(
++            input_size=channels * 2,
++            hidden_size=hidden_size,
++            num_layers=1,
++            batch_first=True,
++            bidirectional=True,
++        )
++        self.classifier = nn.Sequential(
++            nn.Dropout(dropout),
++            nn.Linear(hidden_size * 2, 128),
++            nn.ReLU(inplace=True),
++            nn.Dropout(dropout),
++            nn.Linear(128, 1),
++        )
++
++    def forward(self, x: torch.Tensor) -> torch.Tensor:
++        x = self.frontend(x)
++        x = x.mean(dim=2).transpose(1, 2)
++        seq, _ = self.gru(x)
++        pooled = seq.mean(dim=1)
++        return self.classifier(pooled).squeeze(1)
++
++
++def make_spectrogram_model(architecture: str = "compact_cnn") -> nn.Module:
++    if architecture == "compact_cnn":
++        return CompactSpectrogramCNN()
++    if architecture == "residual_cnn":
++        return ResidualSpectrogramCNN()
++    if architecture == "cnn_bigru":
++        return CNNBiGRUSpectrogram()
++    raise ValueError(f"Unknown spectrogram architecture: {architecture}")
+diff --git a/covid_audio_btp/src/covid_audio_btp/strong_baseline.py b/covid_audio_btp/src/covid_audio_btp/strong_baseline.py
+new file mode 100644
+index 0000000..216953a
+--- /dev/null
++++ b/covid_audio_btp/src/covid_audio_btp/strong_baseline.py
+@@ -0,0 +1,833 @@
++from __future__ import annotations
++
++from dataclasses import dataclass
++from itertools import combinations
++from pathlib import Path
++from typing import Iterable
++
++import numpy as np
++import pandas as pd
++from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier
++from sklearn.feature_selection import SelectPercentile, f_classif
++from sklearn.linear_model import LogisticRegression
++from sklearn.metrics import roc_auc_score
++from sklearn.pipeline import Pipeline
++from sklearn.preprocessing import StandardScaler
++from sklearn.svm import SVC
++
++from covid_audio_btp.features import feature_columns
++from covid_audio_btp.metrics import (
++    best_threshold_by_balanced_accuracy,
++    binary_metric_bundle,
++    labels_to_binary,
++)
++from covid_audio_btp.strong_baseline_protocol import (
++    DEFAULT_MODALITIES,
++    ProtocolResult,
++    build_clean_internal_protocol,
++)
++
++
++DEFAULT_MODEL_NAMES = (
++    "logistic_l2_f80",
++    "logistic_smote_f80",
++    "extra_trees_f100",
++    "extra_trees_smote_f100",
++    "random_forest_f80",
++    "random_forest_smote_f80",
++    "svc_rbf_f60",
++    "xgboost_smote_f80",
++    "lightgbm_smote_f80",
++    "catboost_smote_f80",
++    "optuna_validation_search",
++)
++
++
++@dataclass(frozen=True)
++class StrongBaselineResult:
++    metrics: pd.DataFrame
++    predictions: pd.DataFrame
++    selection: pd.DataFrame
++    protocol_audit: pd.DataFrame
++    participant_audit: pd.DataFrame
++
++
++def _make_model(model_name: str, random_state: int = 42) -> Pipeline:
++    def smote_pipeline(preprocess_steps: list[tuple[str, object]], estimator: object) -> object:
++        try:
++            from imblearn.over_sampling import SMOTE
++            from imblearn.pipeline import Pipeline as ImbPipeline
++        except Exception as exc:  # pragma: no cover - depends on optional dependency
++            raise RuntimeError("imbalanced-learn is required for SMOTE strong-baseline models") from exc
++        return ImbPipeline(
++            [
++                *preprocess_steps,
++                ("smote", SMOTE(k_neighbors=3, random_state=random_state)),
++                ("model", estimator),
++            ]
++        )
++
++    def optional_classifier(name: str):
++        if name == "xgboost":
++            try:
++                from xgboost import XGBClassifier
++            except Exception as exc:  # pragma: no cover - depends on optional dependency
++                raise RuntimeError("xgboost is required for xgboost_smote_f80") from exc
++            return XGBClassifier(
++                n_estimators=800,
++                max_depth=3,
++                learning_rate=0.025,
++                subsample=0.85,
++                colsample_bytree=0.85,
++                min_child_weight=2.0,
++                reg_lambda=2.0,
++                objective="binary:logistic",
++                eval_metric="logloss",
++                n_jobs=-1,
++                random_state=random_state,
++            )
++        if name == "lightgbm":
++            try:
++                from lightgbm import LGBMClassifier
++            except Exception as exc:  # pragma: no cover - depends on optional dependency
++                raise RuntimeError("lightgbm is required for lightgbm_smote_f80") from exc
++            return LGBMClassifier(
++                n_estimators=900,
++                learning_rate=0.025,
++                num_leaves=31,
++                min_child_samples=20,
++                subsample=0.85,
++                colsample_bytree=0.85,
++                reg_lambda=2.0,
++                objective="binary",
++                n_jobs=-1,
++                random_state=random_state,
++                verbosity=-1,
++            )
++        if name == "catboost":
++            try:
++                from catboost import CatBoostClassifier
++            except Exception as exc:  # pragma: no cover - depends on optional dependency
++                raise RuntimeError("catboost is required for catboost_smote_f80") from exc
++            return CatBoostClassifier(
++                iterations=900,
++                depth=5,
++                learning_rate=0.025,
++                loss_function="Logloss",
++                eval_metric="AUC",
++                random_seed=random_state,
++                verbose=False,
++                allow_writing_files=False,
++            )
++        raise ValueError(f"Unknown optional classifier: {name}")
++
++    if model_name == "logistic_l2_f80":
++        return Pipeline(
++            [
++                ("scaler", StandardScaler()),
++                ("select", SelectPercentile(score_func=f_classif, percentile=80)),
++                (
++                    "model",
++                    LogisticRegression(
++                        C=1.0,
++                        class_weight="balanced",
++                        max_iter=4000,
++                        random_state=random_state,
++                    ),
++                ),
++            ]
++        )
++    if model_name == "logistic_smote_f80":
++        return smote_pipeline(
++            [
++                ("scaler", StandardScaler()),
++                ("select", SelectPercentile(score_func=f_classif, percentile=80)),
++            ],
++            LogisticRegression(
++                C=1.0,
++                max_iter=4000,
++                random_state=random_state,
++            ),
++        )
++    if model_name == "extra_trees_f100":
++        return Pipeline(
++            [
++                ("select", SelectPercentile(score_func=f_classif, percentile=100)),
++                (
++                    "model",
++                    ExtraTreesClassifier(
++                        n_estimators=700,
++                        min_samples_leaf=2,
++                        class_weight="balanced",
++                        n_jobs=-1,
++                        random_state=random_state,
++                    ),
++                ),
++            ]
++        )
++    if model_name == "extra_trees_smote_f100":
++        return smote_pipeline(
++            [
++                ("select", SelectPercentile(score_func=f_classif, percentile=100)),
++            ],
++            ExtraTreesClassifier(
++                n_estimators=800,
++                min_samples_leaf=2,
++                n_jobs=-1,
++                random_state=random_state,
++            ),
++        )
++    if model_name == "random_forest_f80":
++        return Pipeline(
++            [
++                ("select", SelectPercentile(score_func=f_classif, percentile=80)),
++                (
++                    "model",
++                    RandomForestClassifier(
++                        n_estimators=700,
++                        min_samples_leaf=2,
++                        class_weight="balanced_subsample",
++                        n_jobs=-1,
++                        random_state=random_state,
++                    ),
++                ),
++            ]
++        )
++    if model_name == "random_forest_smote_f80":
++        return smote_pipeline(
++            [
++                ("select", SelectPercentile(score_func=f_classif, percentile=80)),
++            ],
++            RandomForestClassifier(
++                n_estimators=800,
++                min_samples_leaf=2,
++                n_jobs=-1,
++                random_state=random_state,
++            ),
++        )
++    if model_name == "svc_rbf_f60":
++        return Pipeline(
++            [
++                ("scaler", StandardScaler()),
++                ("select", SelectPercentile(score_func=f_classif, percentile=60)),
++                (
++                    "model",
++                    SVC(
++                        C=2.0,
++                        gamma="scale",
++                        kernel="rbf",
++                        probability=True,
++                        class_weight="balanced",
++                        random_state=random_state,
++                    ),
++                ),
++            ]
++        )
++    if model_name == "xgboost_smote_f80":
++        return smote_pipeline(
++            [
++                ("select", SelectPercentile(score_func=f_classif, percentile=80)),
++            ],
++            optional_classifier("xgboost"),
++        )
++    if model_name == "lightgbm_smote_f80":
++        return smote_pipeline(
++            [
++                ("select", SelectPercentile(score_func=f_classif, percentile=80)),
++            ],
++            optional_classifier("lightgbm"),
++        )
++    if model_name == "catboost_smote_f80":
++        return smote_pipeline(
++            [
++                ("select", SelectPercentile(score_func=f_classif, percentile=80)),
++            ],
++            optional_classifier("catboost"),
++        )
++    raise ValueError(f"Unknown strong-baseline model: {model_name}")
++
++
++def _predict_probability(model: object, x: pd.DataFrame) -> np.ndarray:
++    if hasattr(model, "predict_proba"):
++        return np.asarray(model.predict_proba(x)[:, 1], dtype=float)
++    if hasattr(model, "decision_function"):
++        scores = np.asarray(model.decision_function(x), dtype=float)
++        return 1.0 / (1.0 + np.exp(-scores))
++    raise ValueError("Model does not expose predict_proba or decision_function")
++
++
++def _model_from_optuna_params(params: dict[str, object], random_state: int) -> Pipeline:
++    family = str(params["family"])
++    percentile = int(params["percentile"])
++    if family == "logistic":
++        return Pipeline(
++            [
++                ("scaler", StandardScaler()),
++                ("select", SelectPercentile(score_func=f_classif, percentile=percentile)),
++                (
++                    "model",
++                    LogisticRegression(
++                        C=float(params["logistic_c"]),
++                        class_weight="balanced",
++                        max_iter=4000,
++                        random_state=random_state,
++                    ),
++                ),
++            ]
++        )
++    if family == "extra_trees":
++        return Pipeline(
++            [
++                ("select", SelectPercentile(score_func=f_classif, percentile=percentile)),
++                (
++                    "model",
++                    ExtraTreesClassifier(
++                        n_estimators=int(params["n_estimators"]),
++                        min_samples_leaf=int(params["min_samples_leaf"]),
++                        max_depth=None if params["max_depth"] == "none" else int(params["max_depth"]),
++                        class_weight="balanced",
++                        n_jobs=-1,
++                        random_state=random_state,
++                    ),
++                ),
++            ]
++        )
++    if family == "random_forest":
++        return Pipeline(
++            [
++                ("select", SelectPercentile(score_func=f_classif, percentile=percentile)),
++                (
++                    "model",
++                    RandomForestClassifier(
++                        n_estimators=int(params["n_estimators"]),
++                        min_samples_leaf=int(params["min_samples_leaf"]),
++                        max_depth=None if params["max_depth"] == "none" else int(params["max_depth"]),
++                        class_weight="balanced_subsample",
++                        n_jobs=-1,
++                        random_state=random_state,
++                    ),
++                ),
++            ]
++        )
++    raise ValueError(f"Unknown Optuna model family: {family}")
++
++
++def _fit_optuna_model(
++    x_train: pd.DataFrame,
++    y_train: np.ndarray,
++    x_validation: pd.DataFrame,
++    y_validation: np.ndarray,
++    random_state: int,
++    n_trials: int,
++) -> Pipeline:
++    try:
++        import optuna
++    except Exception as exc:  # pragma: no cover - depends on optional dependency
++        raise RuntimeError("optuna is required for optuna_validation_search") from exc
++
++    if n_trials <= 0:
++        raise RuntimeError("optuna_validation_search requires --optuna-trials > 0")
++
++    def objective(trial) -> float:
++        family = trial.suggest_categorical("family", ["logistic", "extra_trees", "random_forest"])
++        params: dict[str, object] = {
++            "family": family,
++            "percentile": trial.suggest_int("percentile", 40, 100, step=10),
++        }
++        if family == "logistic":
++            params["logistic_c"] = trial.suggest_float("logistic_c", 1e-3, 30.0, log=True)
++        else:
++            params["n_estimators"] = trial.suggest_int("n_estimators", 300, 1000, step=100)
++            params["min_samples_leaf"] = trial.suggest_int("min_samples_leaf", 1, 5)
++            params["max_depth"] = trial.suggest_categorical("max_depth", ["none", "4", "8", "12", "16"])
++        model = _model_from_optuna_params(params, random_state=random_state)
++        model.fit(x_train, y_train)
++        probabilities = _predict_probability(model, x_validation)
++        if len(np.unique(y_validation)) < 2:
++            return 0.5
++        return float(roc_auc_score(y_validation, probabilities))
++
++    sampler = optuna.samplers.TPESampler(seed=random_state)
++    study = optuna.create_study(direction="maximize", sampler=sampler)
++    study.optimize(objective, n_trials=int(n_trials), show_progress_bar=False)
++    best = _model_from_optuna_params(study.best_trial.params, random_state=random_state)
++    best.fit(x_train, y_train)
++    return best
++
++
++def _participant_average(predictions: pd.DataFrame) -> pd.DataFrame:
++    group_cols = [
++        "participant_id",
++        "label_binary",
++        "split",
++        "model_name",
++        "modality",
++        "evaluation_protocol",
++        "analysis_family",
++    ]
++    optional_cols = ["modality_combination", "fusion_method"]
++    group_cols.extend([col for col in optional_cols if col in predictions.columns])
++    return (
++        predictions.groupby(group_cols, dropna=False)
++        .agg(probability=("probability", "mean"), n_recordings=("recording_id", "nunique"))
++        .reset_index()
++    )
++
++
++def _metric_row(
++    participant_predictions: pd.DataFrame,
++    threshold: float,
++    extra: dict[str, object],
++) -> dict[str, object]:
++    y_true = labels_to_binary(participant_predictions["label_binary"])
++    y_prob = participant_predictions["probability"].astype(float).to_numpy()
++    row: dict[str, object] = binary_metric_bundle(y_true, y_prob, threshold=threshold)
++    row.update(extra)
++    row["n_participants"] = float(participant_predictions["participant_id"].nunique())
++    return row
++
++
++def _prediction_frame(
++    source: pd.DataFrame,
++    probabilities: np.ndarray,
++    model_name: str,
++    modality: str,
++    split: str,
++    evaluation_protocol: str,
++) -> pd.DataFrame:
++    return pd.DataFrame(
++        {
++            "recording_id": source["recording_id"].astype(str).to_numpy(),
++            "participant_id": source["participant_id"].astype(str).to_numpy(),
++            "dataset": source.get("dataset", pd.Series(["coswara"] * len(source))).to_numpy(),
++            "modality": modality,
++            "submodality": source.get("submodality", pd.Series(["unknown"] * len(source))).to_numpy(),
++            "label_binary": source["label_binary"].to_numpy(),
++            "split": split,
++            "model_name": model_name,
++            "analysis_family": "strong_audio_modality",
++            "evaluation_protocol": evaluation_protocol,
++            "probability": probabilities,
++        }
++    )
++
++
++def _has_two_classes(df: pd.DataFrame) -> bool:
++    return df["label_binary"].isin(["positive", "negative"]).all() and df["label_binary"].nunique() == 2
++
++
++def _prepare_features_for_protocol(
++    features: pd.DataFrame,
++    metadata: pd.DataFrame | None,
++    modalities: Iterable[str],
++    require_quality_ok: bool,
++) -> tuple[pd.DataFrame, ProtocolResult]:
++    if metadata is None:
++        metadata = features[[c for c in features.columns if c in {
++            "recording_id",
++            "participant_id",
++            "dataset",
++            "modality",
++            "submodality",
++            "label_binary",
++            "split",
++            "label_raw",
++            "label_group",
++            "quality_flag",
++        }]].drop_duplicates("recording_id")
++
++    protocol = build_clean_internal_protocol(
++        metadata,
++        modalities=modalities,
++        require_quality_ok=require_quality_ok,
++    )
++    if protocol.metadata.empty:
++        return features.iloc[0:0].copy(), protocol
++
++    protocol_cols = [
++        "recording_id",
++        "label_binary",
++        "split",
++        "evaluation_protocol",
++        "label_protocol",
++    ]
++    protocol_map = protocol.metadata[protocol_cols].drop_duplicates("recording_id")
++    prepared = features.drop(columns=[c for c in ["label_binary", "split"] if c in features.columns]).merge(
++        protocol_map,
++        on="recording_id",
++        how="inner",
++    )
++    return prepared, protocol
++
++
++def train_strong_modality_models(
++    features: pd.DataFrame,
++    modalities: Iterable[str] = DEFAULT_MODALITIES,
++    model_names: Iterable[str] = DEFAULT_MODEL_NAMES,
++    random_state: int = 42,
++    optuna_trials: int = 25,
++) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[tuple[str, str], object]]:
++    cols = feature_columns(features)
++    if not cols:
++        raise ValueError("No numeric feature columns are available for strong-baseline training")
++
++    metric_rows: list[dict[str, object]] = []
++    prediction_frames: list[pd.DataFrame] = []
++    fitted: dict[tuple[str, str], object] = {}
++
++    for modality in modalities:
++        modality_df = features[
++            (features["modality"].astype(str) == str(modality))
++            & (features["label_binary"].isin(["positive", "negative"]))
++            & (features["split"].isin(["train", "validation", "test"]))
++        ].copy()
++        if modality_df.empty:
++            continue
++        train = modality_df[modality_df["split"].eq("train")]
++        validation = modality_df[modality_df["split"].eq("validation")]
++        test = modality_df[modality_df["split"].eq("test")]
++        if train.empty or validation.empty or test.empty or not _has_two_classes(train):
++            continue
++
++        for model_name in model_names:
++            x_train = train[cols].fillna(0.0)
++            y_train = labels_to_binary(train["label_binary"])
++            x_validation = validation[cols].fillna(0.0)
++            y_validation = labels_to_binary(validation["label_binary"])
++            try:
++                if str(model_name) == "optuna_validation_search":
++                    model = _fit_optuna_model(
++                        x_train,
++                        y_train,
++                        x_validation,
++                        y_validation,
++                        random_state=random_state,
++                        n_trials=optuna_trials,
++                    )
++                else:
++                    model = _make_model(str(model_name), random_state=random_state)
++            except Exception as exc:
++                metric_rows.append(
++                    {
++                        "evaluation_protocol": "clean_internal_protocol",
++                        "analysis_family": "strong_audio_modality",
++                        "model_name": model_name,
++                        "modality": modality,
++                        "metric_split": "skipped",
++                        "skipped": True,
++                        "skip_reason": str(exc),
++                    }
++                )
++                continue
++            try:
++                model.fit(x_train, y_train)
++            except Exception as exc:
++                metric_rows.append(
++                    {
++                        "evaluation_protocol": "clean_internal_protocol",
++                        "analysis_family": "strong_audio_modality",
++                        "model_name": model_name,
++                        "modality": modality,
++                        "metric_split": "skipped",
++                        "skipped": True,
++                        "skip_reason": str(exc),
++                    }
++                )
++                continue
++
++            fitted[(str(modality), str(model_name))] = model
++            split_predictions: list[pd.DataFrame] = []
++            for split_name, split_df in (("validation", validation), ("test", test)):
++                prob = _predict_probability(model, split_df[cols].fillna(0.0))
++                split_predictions.append(
++                    _prediction_frame(
++                        split_df,
++                        prob,
++                        model_name=str(model_name),
++                        modality=str(modality),
++                        split=split_name,
++                        evaluation_protocol="clean_internal_protocol",
++                    )
++                )
++            all_pred = pd.concat(split_predictions, ignore_index=True)
++            prediction_frames.append(all_pred)
++
++            participant_pred = _participant_average(all_pred)
++            validation_participant = participant_pred[participant_pred["split"].eq("validation")]
++            test_participant = participant_pred[participant_pred["split"].eq("test")]
++            if validation_participant.empty or test_participant.empty:
++                continue
++            threshold = best_threshold_by_balanced_accuracy(
++                labels_to_binary(validation_participant["label_binary"]),
++                validation_participant["probability"].astype(float).to_numpy(),
++            )
++            for split_name, group in (("validation", validation_participant), ("test", test_participant)):
++                metric_rows.append(
++                    _metric_row(
++                        group,
++                        threshold=threshold,
++                        extra={
++                            "evaluation_protocol": "clean_internal_protocol",
++                            "analysis_family": "strong_audio_modality",
++                            "model_name": model_name,
++                            "modality": modality,
++                            "metric_split": split_name,
++                            "threshold_source": "validation_balanced_accuracy",
++                            "skipped": False,
++                            "n_features": float(len(cols)),
++                        },
++                    )
++                )
++
++    metrics = pd.DataFrame(metric_rows)
++    predictions = pd.concat(prediction_frames, ignore_index=True) if prediction_frames else pd.DataFrame()
++    selection = select_best_modality_models(metrics)
++    return metrics, predictions, selection, fitted
++
++
++def select_best_modality_models(metrics: pd.DataFrame, selection_metric: str = "auroc") -> pd.DataFrame:
++    if metrics.empty:
++        return pd.DataFrame(
++            columns=[
++                "evaluation_protocol",
++                "modality",
++                "selected_model_name",
++                "selection_metric",
++                "validation_auroc",
++                "validation_auprc",
++            ]
++        )
++    skipped = metrics["skipped"].fillna(False).astype(bool) if "skipped" in metrics.columns else False
++    candidates = metrics[
++        metrics["metric_split"].eq("validation")
++        & metrics["analysis_family"].eq("strong_audio_modality")
++        & ~skipped
++    ].copy()
++    if candidates.empty:
++        return pd.DataFrame()
++    candidates[selection_metric] = pd.to_numeric(candidates[selection_metric], errors="coerce")
++    candidates["auprc"] = pd.to_numeric(candidates.get("auprc"), errors="coerce")
++    candidates = candidates.sort_values(
++        ["modality", selection_metric, "auprc", "model_name"],
++        ascending=[True, False, False, True],
++    )
++    selected = candidates.groupby("modality", dropna=False).head(1).copy()
++    return pd.DataFrame(
++        {
++            "evaluation_protocol": selected["evaluation_protocol"].to_numpy(),
++            "modality": selected["modality"].to_numpy(),
++            "selected_model_name": selected["model_name"].to_numpy(),
++            "selection_metric": selection_metric,
++            "validation_auroc": selected["auroc"].to_numpy(),
++            "validation_auprc": selected["auprc"].to_numpy(),
++            "validation_balanced_accuracy": selected["balanced_accuracy"].to_numpy(),
++            "threshold": selected["threshold"].to_numpy(),
++        }
++    )
++
++
++def _selected_predictions(predictions: pd.DataFrame, selection: pd.DataFrame) -> pd.DataFrame:
++    if predictions.empty or selection.empty:
++        return predictions.iloc[0:0].copy()
++    selected_keys = set(zip(selection["modality"].astype(str), selection["selected_model_name"].astype(str)))
++    mask = [
++        (str(row.modality), str(row.model_name)) in selected_keys
++        for row in predictions[["modality", "model_name"]].itertuples(index=False)
++    ]
++    out = predictions.loc[mask].copy()
++    out["selected_for_fusion"] = True
++    return out
++
++
++def _participant_modality_matrix(predictions: pd.DataFrame, split: str) -> pd.DataFrame:
++    selected = predictions[predictions["split"].eq(split)].copy()
++    if selected.empty:
++        return pd.DataFrame()
++    participant = (
++        selected.groupby(["participant_id", "label_binary", "modality"], dropna=False)
++        .agg(probability=("probability", "mean"))
++        .reset_index()
++    )
++    matrix = participant.pivot_table(
++        index=["participant_id", "label_binary"],
++        columns="modality",
++        values="probability",
++        aggfunc="mean",
++    ).reset_index()
++    matrix.columns.name = None
++    matrix["split"] = split
++    return matrix
++
++
++def run_strong_fusion(
++    selected_predictions: pd.DataFrame,
++    selection: pd.DataFrame,
++    modalities: Iterable[str] = DEFAULT_MODALITIES,
++) -> tuple[pd.DataFrame, pd.DataFrame]:
++    if selected_predictions.empty:
++        return pd.DataFrame(), pd.DataFrame()
++
++    validation_matrix = _participant_modality_matrix(selected_predictions, "validation")
++    test_matrix = _participant_modality_matrix(selected_predictions, "test")
++    if validation_matrix.empty or test_matrix.empty:
++        return pd.DataFrame(), pd.DataFrame()
++
++    modality_list = [str(m) for m in modalities]
++    metric_rows: list[dict[str, object]] = []
++    prediction_rows: list[pd.DataFrame] = []
++    validation_weight_map = selection.set_index("modality")["validation_auprc"].to_dict() if not selection.empty else {}
++
++    for size in range(2, len(modality_list) + 1):
++        for combo in combinations(modality_list, size):
++            combo_cols = list(combo)
++            if not set(combo_cols).issubset(validation_matrix.columns) or not set(combo_cols).issubset(test_matrix.columns):
++                continue
++            val = validation_matrix.dropna(subset=combo_cols).copy()
++            test = test_matrix.dropna(subset=combo_cols).copy()
++            if val.empty or test.empty or val["label_binary"].nunique() < 2:
++                continue
++
++            combo_name = "+".join(combo_cols)
++            fusion_specs: list[tuple[str, np.ndarray, np.ndarray]] = []
++            fusion_specs.append(
++                (
++                    "uniform_mean",
++                    val[combo_cols].mean(axis=1).to_numpy(dtype=float),
++                    test[combo_cols].mean(axis=1).to_numpy(dtype=float),
++                )
++            )
++            raw_weights = np.asarray(
++                [max(float(validation_weight_map.get(col, 0.5)) - 0.5, 0.01) for col in combo_cols],
++                dtype=float,
++            )
++            weights = raw_weights / raw_weights.sum()
++            fusion_specs.append(
++                (
++                    "validation_weighted_auprc",
++                    np.average(val[combo_cols].to_numpy(dtype=float), axis=1, weights=weights),
++                    np.average(test[combo_cols].to_numpy(dtype=float), axis=1, weights=weights),
++                )
++            )
++
++            if val.shape[0] >= 8 and val["label_binary"].nunique() == 2:
++                stacker = LogisticRegression(class_weight="balanced", max_iter=2000, random_state=42)
++                stacker.fit(val[combo_cols].to_numpy(dtype=float), labels_to_binary(val["label_binary"]))
++                fusion_specs.append(
++                    (
++                        "stacked_logistic_validation",
++                        stacker.predict_proba(val[combo_cols].to_numpy(dtype=float))[:, 1],
++                        stacker.predict_proba(test[combo_cols].to_numpy(dtype=float))[:, 1],
++                    )
++                )
++
++            for method, val_prob, test_prob in fusion_specs:
++                threshold = best_threshold_by_balanced_accuracy(labels_to_binary(val["label_binary"]), val_prob)
++                for split_name, frame, probs in (("validation", val, val_prob), ("test", test, test_prob)):
++                    pred = pd.DataFrame(
++                        {
++                            "recording_id": frame["participant_id"].astype(str) + f"::{combo_name}",
++                            "participant_id": frame["participant_id"].astype(str),
++                            "dataset": "coswara",
++                            "modality": "multimodal",
++                            "submodality": combo_name,
++                            "label_binary": frame["label_binary"].to_numpy(),
++                            "split": split_name,
++                            "model_name": "strong_baseline_selected_fusion",
++                            "analysis_family": "strong_multimodal_fusion",
++                            "evaluation_protocol": "clean_internal_protocol",
++                            "modality_combination": combo_name,
++                            "fusion_method": method,
++                            "probability": probs,
++                        }
++                    )
++                    prediction_rows.append(pred)
++                    metric_rows.append(
++                        _metric_row(
++                            pred,
++                            threshold=threshold,
++                            extra={
++                                "evaluation_protocol": "clean_internal_protocol",
++                                "analysis_family": "strong_multimodal_fusion",
++                                "model_name": "strong_baseline_selected_fusion",
++                                "modality": "multimodal",
++                                "modality_combination": combo_name,
++                                "fusion_method": method,
++                                "metric_split": split_name,
++                                "threshold_source": "validation_balanced_accuracy",
++                                "skipped": False,
++                            },
++                        )
++                    )
++
++    predictions = pd.concat(prediction_rows, ignore_index=True) if prediction_rows else pd.DataFrame()
++    metrics = pd.DataFrame(metric_rows)
++    return metrics, predictions
++
++
++def run_strong_baseline(
++    features: pd.DataFrame,
++    metadata: pd.DataFrame | None = None,
++    modalities: Iterable[str] = DEFAULT_MODALITIES,
++    model_names: Iterable[str] = DEFAULT_MODEL_NAMES,
++    require_quality_ok: bool = False,
++    random_state: int = 42,
++    optuna_trials: int = 25,
++) -> StrongBaselineResult:
++    prepared, protocol = _prepare_features_for_protocol(
++        features,
++        metadata=metadata,
++        modalities=modalities,
++        require_quality_ok=require_quality_ok,
++    )
++    if prepared.empty:
++        return StrongBaselineResult(
++            metrics=pd.DataFrame(),
++            predictions=pd.DataFrame(),
++            selection=pd.DataFrame(),
++            protocol_audit=protocol.audit,
++            participant_audit=protocol.participant_audit,
++        )
++
++    modality_metrics, modality_predictions, selection, fitted = train_strong_modality_models(
++        prepared,
++        modalities=modalities,
++        model_names=model_names,
++        random_state=random_state,
++        optuna_trials=optuna_trials,
++    )
++    selected = _selected_predictions(modality_predictions, selection)
++    fusion_metrics, fusion_predictions = run_strong_fusion(selected, selection, modalities=modalities)
++    metrics = pd.concat([modality_metrics, fusion_metrics], ignore_index=True, sort=False)
++    predictions = pd.concat([modality_predictions, fusion_predictions], ignore_index=True, sort=False)
++
++    return StrongBaselineResult(
++        metrics=metrics,
++        predictions=predictions,
++        selection=selection,
++        protocol_audit=protocol.audit,
++        participant_audit=protocol.participant_audit,
++    )
++
++
++def save_strong_baseline_result(
++    result: StrongBaselineResult,
++    metrics_output: Path,
++    predictions_output: Path,
++    selection_output: Path,
++    protocol_audit_output: Path,
++    participant_audit_output: Path,
++) -> None:
++    outputs = [
++        metrics_output,
++        predictions_output,
++        selection_output,
++        protocol_audit_output,
++        participant_audit_output,
++    ]
++    for path in outputs:
++        path.parent.mkdir(parents=True, exist_ok=True)
++    result.metrics.to_csv(metrics_output, index=False)
++    result.predictions.to_csv(predictions_output, index=False)
++    result.selection.to_csv(selection_output, index=False)
++    result.protocol_audit.to_csv(protocol_audit_output, index=False)
++    result.participant_audit.to_csv(participant_audit_output, index=False)
+diff --git a/covid_audio_btp/src/covid_audio_btp/strong_baseline_protocol.py b/covid_audio_btp/src/covid_audio_btp/strong_baseline_protocol.py
+new file mode 100644
+index 0000000..a806a5a
+--- /dev/null
++++ b/covid_audio_btp/src/covid_audio_btp/strong_baseline_protocol.py
+@@ -0,0 +1,217 @@
++from __future__ import annotations
++
++from dataclasses import dataclass
++from typing import Iterable
++
++import pandas as pd
++
++
++CLEAN_POSITIVE_HINTS = {
++    "positive",
++    "positive mild",
++    "positive moderate",
++    "positive asymp",
++    "positive asymptomatic",
++    "covid positive",
++    "covid 19 positive",
++    "sars cov 2 positive",
++}
++
++CLEAN_NEGATIVE_HINTS = {
++    "healthy",
++    "negative",
++    "covid negative",
++    "covid 19 negative",
++    "sars cov 2 negative",
++    "normal",
++}
++
++AMBIGUOUS_HINTS = {
++    "recovered",
++    "resp illness",
++    "respiratory illness",
++    "no resp illness exposed",
++    "not identified",
++    "unknown",
++}
++
++DEFAULT_MODALITIES = ("cough", "breath", "speech")
++DEFAULT_SPLITS = ("train", "validation", "test")
++
++
++@dataclass(frozen=True)
++class ProtocolResult:
++    metadata: pd.DataFrame
++    audit: pd.DataFrame
++    participant_audit: pd.DataFrame
++
++
++def _clean_text(value: object) -> str:
++    if value is None or pd.isna(value):
++        return ""
++    text = str(value).strip().lower().replace("_", " ").replace("-", " ")
++    return " ".join(text.split())
++
++
++def _contains_any(text: str, hints: Iterable[str]) -> bool:
++    return any(hint in text for hint in hints)
++
++
++def infer_clean_label_from_raw(row: pd.Series) -> tuple[str, str]:
++    """Infer a paper-comparable active-positive/healthy-negative label.
++
++    If raw label text is informative, ambiguous recovered/exposed/respiratory
++    illness groups are excluded. If raw text is unavailable, the existing
++    normalized binary label is used as a conservative fallback so older feature
++    tables remain runnable.
++    """
++    label_binary = _clean_text(row.get("label_binary", ""))
++    raw = _clean_text(row.get("label_raw", ""))
++    label_group = _clean_text(row.get("label_group", ""))
++    combined = " ".join(part for part in (raw, label_group) if part)
++
++    if combined:
++        if _contains_any(combined, AMBIGUOUS_HINTS):
++            return "exclude", "ambiguous_raw_label"
++        if _contains_any(combined, CLEAN_POSITIVE_HINTS):
++            return "positive", "raw_clean_positive"
++        if _contains_any(combined, CLEAN_NEGATIVE_HINTS):
++            return "negative", "raw_clean_negative"
++        return "exclude", "raw_label_not_clean_protocol"
++
++    if label_binary in {"positive", "negative"}:
++        return label_binary, "fallback_binary_label"
++    return "exclude", "unknown_binary_label"
++
++
++def build_clean_internal_protocol(
++    metadata: pd.DataFrame,
++    modalities: Iterable[str] = DEFAULT_MODALITIES,
++    splits: Iterable[str] = DEFAULT_SPLITS,
++    require_quality_ok: bool = False,
++) -> ProtocolResult:
++    """Filter metadata to a paper-comparable clean internal protocol.
++
++    The filter is intentionally explicit: active COVID-positive versus healthy
++    or clearly negative controls, known supervised labels, supported modalities,
++    participant-level label consistency, and train/validation/test rows.
++    """
++    if metadata.empty:
++        empty = metadata.copy()
++        return ProtocolResult(empty, _audit_table(empty), _participant_audit(empty))
++
++    required = {"participant_id", "recording_id", "label_binary", "modality"}
++    missing = required - set(metadata.columns)
++    if missing:
++        raise ValueError(f"Metadata is missing required protocol columns: {sorted(missing)}")
++
++    allowed_modalities = {str(m) for m in modalities}
++    allowed_splits = {str(s) for s in splits}
++    df = metadata.copy()
++    if "split" not in df.columns:
++        df["split"] = "unused"
++
++    inferred = df.apply(infer_clean_label_from_raw, axis=1, result_type="expand")
++    inferred.columns = ["clean_label_binary", "clean_label_source"]
++    df = pd.concat([df, inferred], axis=1)
++    df["protocol_exclusion_reason"] = ""
++
++    modality_mask = df["modality"].astype(str).isin(allowed_modalities)
++    split_mask = df["split"].astype(str).isin(allowed_splits)
++    label_mask = df["clean_label_binary"].isin(["positive", "negative"])
++    quality_mask = pd.Series(True, index=df.index)
++    if require_quality_ok and "quality_flag" in df.columns:
++        quality_mask = df["quality_flag"].astype(str).str.lower().eq("ok")
++
++    df.loc[~modality_mask, "protocol_exclusion_reason"] = "unsupported_modality"
++    df.loc[modality_mask & ~split_mask, "protocol_exclusion_reason"] = "unused_split"
++    df.loc[modality_mask & split_mask & ~label_mask, "protocol_exclusion_reason"] = df.loc[
++        modality_mask & split_mask & ~label_mask,
++        "clean_label_source",
++    ]
++    df.loc[modality_mask & split_mask & label_mask & ~quality_mask, "protocol_exclusion_reason"] = "quality_not_ok"
++
++    included = df[
++        modality_mask
++        & split_mask
++        & label_mask
++        & quality_mask
++    ].copy()
++    df.loc[modality_mask & split_mask & label_mask & quality_mask, "protocol_exclusion_reason"] = "included"
++
++    label_counts = included.groupby("participant_id")["clean_label_binary"].nunique()
++    inconsistent = set(label_counts[label_counts > 1].index.astype(str))
++    if inconsistent:
++        included = included[~included["participant_id"].astype(str).isin(inconsistent)].copy()
++        df.loc[df["participant_id"].astype(str).isin(inconsistent), "protocol_exclusion_reason"] = (
++            "participant_label_conflict"
++        )
++
++    included["label_binary"] = included["clean_label_binary"]
++    included["evaluation_protocol"] = "clean_internal_protocol"
++    included["label_protocol"] = "active_positive_vs_clean_negative"
++    included["protocol_exclusion_reason"] = "included"
++    return ProtocolResult(
++        metadata=included.reset_index(drop=True),
++        audit=_audit_table(df),
++        participant_audit=_participant_audit(included),
++    )
++
++
++def _audit_table(df: pd.DataFrame) -> pd.DataFrame:
++    if df.empty:
++        return pd.DataFrame(
++            columns=[
++                "evaluation_protocol",
++                "protocol_exclusion_reason",
++                "split",
++                "modality",
++                "label_binary",
++                "n_rows",
++                "n_participants",
++            ]
++        )
++    audit = (
++        df.assign(
++            protocol_exclusion_reason=df.get("protocol_exclusion_reason", "included"),
++            split=df.get("split", "unused"),
++            modality=df.get("modality", "unknown"),
++            label_binary=df.get("clean_label_binary", df.get("label_binary", "unknown")),
++        )
++        .groupby(["protocol_exclusion_reason", "split", "modality", "label_binary"], dropna=False)
++        .agg(n_rows=("recording_id", "nunique"), n_participants=("participant_id", "nunique"))
++        .reset_index()
++        .sort_values(["protocol_exclusion_reason", "split", "modality", "label_binary"])
++    )
++    audit.insert(0, "evaluation_protocol", "clean_internal_protocol")
++    return audit
++
++
++def _participant_audit(metadata: pd.DataFrame) -> pd.DataFrame:
++    if metadata.empty:
++        return pd.DataFrame(
++            columns=[
++                "evaluation_protocol",
++                "split",
++                "label_binary",
++                "n_participants",
++                "modalities_available",
++            ]
++        )
++
++    def join_modalities(values: pd.Series) -> str:
++        return ",".join(sorted(set(values.dropna().astype(str))))
++
++    table = (
++        metadata.groupby(["participant_id", "split", "label_binary"], dropna=False)
++        .agg(modalities_available=("modality", join_modalities))
++        .reset_index()
++    )
++    out = (
++        table.groupby(["split", "label_binary", "modalities_available"], dropna=False)
++        .agg(n_participants=("participant_id", "nunique"))
++        .reset_index()
++        .sort_values(["split", "label_binary", "modalities_available"])
++    )
++    out.insert(0, "evaluation_protocol", "clean_internal_protocol")
++    return out
+diff --git a/covid_audio_btp/src/covid_audio_btp/strong_features.py b/covid_audio_btp/src/covid_audio_btp/strong_features.py
+new file mode 100644
+index 0000000..afecc93
+--- /dev/null
++++ b/covid_audio_btp/src/covid_audio_btp/strong_features.py
+@@ -0,0 +1,152 @@
++from __future__ import annotations
++
++from pathlib import Path
++
++import librosa
++import numpy as np
++import pandas as pd
++from scipy.stats import kurtosis, skew
++
++from covid_audio_btp.audio_io import load_audio
++from covid_audio_btp.preprocess import preprocess_for_features
++
++
++def _safe_values(values: np.ndarray) -> np.ndarray:
++    arr = np.asarray(values, dtype=float).ravel()
++    arr = arr[np.isfinite(arr)]
++    return arr if arr.size else np.asarray([0.0], dtype=float)
++
++
++def _stats(prefix: str, values: np.ndarray) -> dict[str, float]:
++    arr = _safe_values(values)
++    q25, q75 = np.percentile(arr, [25, 75])
++    std = float(np.std(arr))
++    if std <= 1e-12:
++        skewness = 0.0
++        excess_kurtosis = 0.0
++    else:
++        skewness = float(skew(arr, bias=False, nan_policy="omit"))
++        excess_kurtosis = float(kurtosis(arr, fisher=True, bias=False, nan_policy="omit"))
++    out = {
++        f"{prefix}_mean": float(np.mean(arr)),
++        f"{prefix}_std": std,
++        f"{prefix}_min": float(np.min(arr)),
++        f"{prefix}_max": float(np.max(arr)),
++        f"{prefix}_median": float(np.median(arr)),
++        f"{prefix}_q25": float(q25),
++        f"{prefix}_q75": float(q75),
++        f"{prefix}_iqr": float(q75 - q25),
++        f"{prefix}_skew": skewness,
++        f"{prefix}_kurtosis": excess_kurtosis,
++    }
++    return {key: (value if np.isfinite(value) else 0.0) for key, value in out.items()}
++
++
++def _matrix_row_stats(prefix: str, matrix: np.ndarray) -> dict[str, float]:
++    features: dict[str, float] = {}
++    arr = np.asarray(matrix, dtype=float)
++    if arr.ndim == 1:
++        arr = arr[np.newaxis, :]
++    for idx in range(arr.shape[0]):
++        features.update(_stats(f"{prefix}_{idx + 1:02d}", arr[idx]))
++    return features
++
++
++def extract_extended_acoustic_features(
++    y: np.ndarray,
++    sample_rate: int,
++    n_mfcc: int = 40,
++    n_mels: int = 64,
++) -> dict[str, float]:
++    """Extract a paper-style acoustic feature bank.
++
++    The bank intentionally combines families used across COVID-audio papers:
++    MFCC/delta trajectories, mel-band summaries, chroma, spectral contrast,
++    tonnetz, and low-level spectral/energy descriptors.
++    """
++    y = np.asarray(y, dtype=np.float32)
++    if y.size == 0:
++        y = np.zeros(sample_rate, dtype=np.float32)
++    if not np.any(np.isfinite(y)):
++        y = np.zeros_like(y, dtype=np.float32)
++    y = np.nan_to_num(y, nan=0.0, posinf=0.0, neginf=0.0).astype(np.float32, copy=False)
++
++    features: dict[str, float] = {
++        "duration_sec": float(y.size / max(1, sample_rate)),
++        "waveform_abs_mean": float(np.mean(np.abs(y))),
++        "waveform_abs_max": float(np.max(np.abs(y))) if y.size else 0.0,
++    }
++
++    mfcc = librosa.feature.mfcc(y=y, sr=sample_rate, n_mfcc=n_mfcc)
++    features.update(_matrix_row_stats("mfcc", mfcc))
++    features.update(_matrix_row_stats("delta_mfcc", librosa.feature.delta(mfcc)))
++    features.update(_matrix_row_stats("delta2_mfcc", librosa.feature.delta(mfcc, order=2)))
++
++    mel = librosa.feature.melspectrogram(y=y, sr=sample_rate, n_mels=n_mels, power=2.0)
++    log_mel = librosa.power_to_db(mel, ref=np.max)
++    features.update(_matrix_row_stats("mel_band", log_mel))
++    features.update(_stats("mel_global", log_mel))
++
++    chroma = librosa.feature.chroma_stft(y=y, sr=sample_rate)
++    features.update(_matrix_row_stats("chroma", chroma))
++
++    contrast = librosa.feature.spectral_contrast(y=y, sr=sample_rate)
++    features.update(_matrix_row_stats("spectral_contrast", contrast))
++
++    try:
++        harmonic = librosa.effects.harmonic(y)
++        tonnetz = librosa.feature.tonnetz(y=harmonic, sr=sample_rate)
++        features.update(_matrix_row_stats("tonnetz", tonnetz))
++    except Exception:
++        for idx in range(6):
++            features.update(_stats(f"tonnetz_{idx + 1:02d}", np.asarray([0.0])))
++
++    low_level = {
++        "rms": librosa.feature.rms(y=y)[0],
++        "zcr": librosa.feature.zero_crossing_rate(y=y)[0],
++        "spectral_centroid": librosa.feature.spectral_centroid(y=y, sr=sample_rate)[0],
++        "spectral_bandwidth": librosa.feature.spectral_bandwidth(y=y, sr=sample_rate)[0],
++        "spectral_rolloff": librosa.feature.spectral_rolloff(y=y, sr=sample_rate)[0],
++        "spectral_flatness": librosa.feature.spectral_flatness(y=y)[0],
++    }
++    for name, values in low_level.items():
++        features.update(_stats(name, values))
++
++    tempo_values = librosa.feature.tempogram(y=y, sr=sample_rate)
++    features.update(_stats("tempogram_global", tempo_values))
++    return {key: float(value) if np.isfinite(value) else 0.0 for key, value in features.items()}
++
++
++def extract_strong_features_for_row(row: pd.Series) -> dict[str, object]:
++    y, sample_rate, _ = load_audio(Path(row["audio_path"]))
++    processed, event_info = preprocess_for_features(y, sample_rate, str(row.get("modality", "unknown")))
++    features = extract_extended_acoustic_features(processed, sample_rate=sample_rate)
++    return {
++        "recording_id": row["recording_id"],
++        "participant_id": row["participant_id"],
++        "dataset": row.get("dataset", "coswara"),
++        "modality": row.get("modality", "unknown"),
++        "submodality": row.get("submodality", "unknown"),
++        "label_binary": row.get("label_binary", "unknown"),
++        "split": row.get("split", "unused"),
++        **event_info,
++        **features,
++    }
++
++
++def build_strong_feature_table(metadata: pd.DataFrame, quality_mode: str = "all_samples") -> pd.DataFrame:
++    df = metadata.copy()
++    df = df[df["label_binary"].isin(["positive", "negative"])]
++    if quality_mode == "quality_ok_only" and "quality_flag" in df.columns:
++        df = df[df["quality_flag"].astype(str).str.lower().eq("ok")]
++    elif quality_mode not in {"all_samples", "quality_ok_only"}:
++        raise ValueError(f"Unknown quality_mode: {quality_mode}")
++
++    rows: list[dict[str, object]] = []
++    for _, row in df.iterrows():
++        try:
++            rows.append(extract_strong_features_for_row(row))
++        except Exception as exc:
++            print(f"WARNING: skipping {row.get('audio_path', '?')} — {exc}")
++    return pd.DataFrame(rows)
++
+diff --git a/covid_audio_btp/src/covid_audio_btp/train_cnn.py b/covid_audio_btp/src/covid_audio_btp/train_cnn.py
+index 261a4f2..8c07285 100644
+--- a/covid_audio_btp/src/covid_audio_btp/train_cnn.py
++++ b/covid_audio_btp/src/covid_audio_btp/train_cnn.py
+@@ -7,10 +7,11 @@ import pandas as pd
+ import torch
+ from torch import nn
+ from torch.utils.data import DataLoader, Dataset
++from sklearn.metrics import roc_auc_score
+ 
+ from covid_audio_btp.datasets import SpectrogramTableDataset
+-from covid_audio_btp.metrics import binary_metric_bundle
+-from covid_audio_btp.models_cnn import CompactSpectrogramCNN
++from covid_audio_btp.metrics import best_threshold_by_balanced_accuracy, binary_metric_bundle
++from covid_audio_btp.models_cnn import make_spectrogram_model
+ 
+ 
+ class TorchSpectrogramDataset(Dataset):
+@@ -32,7 +33,7 @@ class TorchSpectrogramDataset(Dataset):
+ 
+ @dataclass
+ class CNNTrainArtifacts:
+-    model: CompactSpectrogramCNN
++    model: nn.Module
+     metrics: dict[str, float | str]
+     validation_predictions: pd.DataFrame
+     test_predictions: pd.DataFrame
+@@ -56,13 +57,37 @@ def _collect_logits(model: nn.Module, loader: DataLoader, device: str) -> tuple[
+     return recording_ids, participant_ids, np.asarray(logits_list), np.asarray(labels_list)
+ 
+ 
++def _augment_batch(x: torch.Tensor, noise_std: float = 0.015, freq_mask: int = 6, time_mask: int = 12) -> torch.Tensor:
++    augmented = x.clone()
++    if noise_std > 0:
++        augmented = augmented + torch.randn_like(augmented) * noise_std
++    _, _, n_freq, n_time = augmented.shape
++    if freq_mask > 0 and n_freq > 1:
++        width = min(freq_mask, max(1, n_freq // 4))
++        start = torch.randint(0, max(1, n_freq - width + 1), (1,), device=augmented.device).item()
++        augmented[:, :, start : start + width, :] = 0.0
++    if time_mask > 0 and n_time > 1:
++        width = min(time_mask, max(1, n_time // 5))
++        start = torch.randint(0, max(1, n_time - width + 1), (1,), device=augmented.device).item()
++        augmented[:, :, :, start : start + width] = 0.0
++    return augmented
++
++
++def _safe_auroc(y_true: np.ndarray, probabilities: np.ndarray) -> float:
++    if len(np.unique(y_true.astype(int))) < 2:
++        return float("nan")
++    return float(roc_auc_score(y_true.astype(int), probabilities))
++
++
+ def train_cnn_for_modality(
+     spectrogram_index: pd.DataFrame,
+     modality: str,
++    architecture: str = "compact_cnn",
+     max_epochs: int = 50,
+     patience: int = 8,
+     batch_size: int = 32,
+     learning_rate: float = 1e-3,
++    augment: bool = True,
+     device: str | None = None,
+ ) -> CNNTrainArtifacts:
+     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+@@ -81,11 +106,12 @@ def train_cnn_for_modality(
+     negatives = max(1, int(len(labels) - labels.sum()))
+     pos_weight = torch.tensor([negatives / positives], dtype=torch.float32, device=device)
+ 
+-    model = CompactSpectrogramCNN().to(device)
++    model = make_spectrogram_model(architecture).to(device)
+     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=1e-4)
+ 
+     best_state = None
++    best_val_auroc = -np.inf
+     best_val_loss = float("inf")
+     bad_epochs = 0
+     history_rows = []
+@@ -96,6 +122,8 @@ def train_cnn_for_modality(
+         for x, y, _, _ in train_loader:
+             x = x.to(device)
+             y = y.to(device)
++            if augment:
++                x = _augment_batch(x)
+             optimizer.zero_grad()
+             logits = model(x)
+             loss = criterion(logits, y)
+@@ -105,10 +133,22 @@ def train_cnn_for_modality(
+ 
+         _, _, val_logits, val_y = _collect_logits(model, val_loader, device)
+         val_loss = float(criterion(torch.tensor(val_logits, dtype=torch.float32, device=device), torch.tensor(val_y, dtype=torch.float32, device=device)).detach().cpu())
++        val_prob = 1.0 / (1.0 + np.exp(-val_logits))
++        val_auroc = _safe_auroc(val_y, val_prob)
+         history_rows.append(
+-            {"epoch": epoch, "train_loss": float(np.mean(train_losses)), "validation_loss": val_loss}
++            {
++                "epoch": epoch,
++                "train_loss": float(np.mean(train_losses)),
++                "validation_loss": val_loss,
++                "validation_auroc": val_auroc,
++            }
++        )
++        improved = (
++            np.isfinite(val_auroc)
++            and (val_auroc > best_val_auroc or (val_auroc == best_val_auroc and val_loss < best_val_loss))
+         )
+-        if val_loss < best_val_loss:
++        if improved or (not np.isfinite(val_auroc) and val_loss < best_val_loss):
++            best_val_auroc = val_auroc if np.isfinite(val_auroc) else best_val_auroc
+             best_val_loss = val_loss
+             best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+             bad_epochs = 0
+@@ -124,8 +164,20 @@ def train_cnn_for_modality(
+     test_rec, test_part, test_logits, test_y = _collect_logits(model, test_loader, device)
+     val_prob = 1.0 / (1.0 + np.exp(-val_logits))
+     test_prob = 1.0 / (1.0 + np.exp(-test_logits))
+-    metrics = binary_metric_bundle(test_y.astype(int), test_prob)
+-    metrics.update({"model_name": "compact_cnn", "modality": modality})
++    threshold = best_threshold_by_balanced_accuracy(val_y.astype(int), val_prob)
++    validation_metrics = binary_metric_bundle(val_y.astype(int), val_prob, threshold=threshold)
++    metrics = binary_metric_bundle(test_y.astype(int), test_prob, threshold=threshold)
++    metrics.update(
++        {
++            "model_name": architecture,
++            "architecture": architecture,
++            "modality": modality,
++            "validation_auroc": validation_metrics.get("auroc"),
++            "validation_auprc": validation_metrics.get("auprc"),
++            "validation_balanced_accuracy": validation_metrics.get("balanced_accuracy"),
++            "threshold_source": "validation_balanced_accuracy",
++        }
++    )
+ 
+     def pred_frame(rec_ids, part_ids, logits, probs, y, split):
+         return pd.DataFrame(
+@@ -135,7 +187,8 @@ def train_cnn_for_modality(
+                 "modality": modality,
+                 "label_binary": np.where(y.astype(int) == 1, "positive", "negative"),
+                 "split": split,
+-                "model_name": "compact_cnn",
++                "model_name": architecture,
++                "architecture": architecture,
+                 "logit": logits,
+                 "probability": probs,
+             }
+@@ -148,4 +201,3 @@ def train_cnn_for_modality(
+         test_predictions=pred_frame(test_rec, test_part, test_logits, test_prob, test_y, "test"),
+         history=pd.DataFrame(history_rows),
+     )
+-
+diff --git a/covid_audio_btp/tests/test_deep_spectrogram_models.py b/covid_audio_btp/tests/test_deep_spectrogram_models.py
+new file mode 100644
+index 0000000..03e0059
+--- /dev/null
++++ b/covid_audio_btp/tests/test_deep_spectrogram_models.py
+@@ -0,0 +1,68 @@
++from __future__ import annotations
++
++from pathlib import Path
++
++import numpy as np
++import pandas as pd
++
++
++def test_spectrogram_model_factory_supports_strong_architectures() -> None:
++    import torch
++
++    from covid_audio_btp.models_cnn import make_spectrogram_model
++
++    x = torch.randn(2, 1, 64, 120)
++    for architecture in ("compact_cnn", "residual_cnn", "cnn_bigru"):
++        model = make_spectrogram_model(architecture)
++        logits = model(x)
++        assert logits.shape == (2,)
++
++
++def _spectrogram_index(tmp_path: Path) -> pd.DataFrame:
++    rows: list[dict[str, object]] = []
++    for idx in range(24):
++        label = "positive" if idx % 4 in {1, 2} else "negative"
++        split = "train" if idx % 6 < 4 else "validation" if idx % 6 == 4 else "test"
++        base = 1.0 if label == "positive" else -1.0
++        spec = np.full((1, 64, 48), base, dtype=np.float32)
++        spec += np.random.default_rng(idx).normal(0.0, 0.03, size=spec.shape).astype(np.float32)
++        path = tmp_path / f"spec_{idx}.npy"
++        np.save(path, spec)
++        rows.append(
++            {
++                "recording_id": f"rec_{idx}",
++                "participant_id": f"p_{idx}",
++                "dataset": "coswara",
++                "modality": "cough",
++                "submodality": "cough",
++                "label_binary": label,
++                "split": split,
++                "spectrogram_path": path.as_posix(),
++            }
++        )
++    return pd.DataFrame(rows)
++
++
++def test_deep_spectrogram_trainer_reports_architecture_and_validation_threshold(tmp_path: Path) -> None:
++    from covid_audio_btp.train_cnn import train_cnn_for_modality
++
++    index = _spectrogram_index(tmp_path)
++    artifacts = train_cnn_for_modality(
++        index,
++        modality="cough",
++        architecture="residual_cnn",
++        max_epochs=2,
++        patience=1,
++        batch_size=8,
++        learning_rate=1e-3,
++        augment=False,
++        device="cpu",
++    )
++
++    assert artifacts.metrics["model_name"] == "residual_cnn"
++    assert artifacts.metrics["threshold_source"] == "validation_balanced_accuracy"
++    assert "validation_auroc" in artifacts.metrics
++    assert not artifacts.validation_predictions.empty
++    assert not artifacts.test_predictions.empty
++    assert {"validation_auroc", "validation_loss"}.issubset(artifacts.history.columns)
++
+diff --git a/covid_audio_btp/tests/test_strong_baseline.py b/covid_audio_btp/tests/test_strong_baseline.py
+new file mode 100644
+index 0000000..06249a6
+--- /dev/null
++++ b/covid_audio_btp/tests/test_strong_baseline.py
+@@ -0,0 +1,213 @@
++from __future__ import annotations
++
++import importlib.util
++import sys
++from pathlib import Path
++
++import numpy as np
++import pandas as pd
++
++
++def _metadata_frame(n_participants: int = 36) -> pd.DataFrame:
++    rows: list[dict[str, object]] = []
++    for idx in range(n_participants):
++        label = "positive" if idx % 4 in {1, 2} else "negative"
++        split = "train" if idx % 6 < 4 else "validation" if idx % 6 == 4 else "test"
++        for modality in ("cough", "breath", "speech"):
++            rows.append(
++                {
++                    "recording_id": f"rec_{idx:03d}_{modality}",
++                    "participant_id": f"p_{idx:03d}",
++                    "dataset": "coswara",
++                    "modality": modality,
++                    "submodality": modality,
++                    "label_raw": "positive_mild" if label == "positive" else "healthy",
++                    "label_binary": label,
++                    "label_group": "positive_mild" if label == "positive" else "healthy",
++                    "split": split,
++                    "quality_flag": "ok",
++                }
++            )
++    return pd.DataFrame(rows)
++
++
++def _feature_frame(metadata: pd.DataFrame) -> pd.DataFrame:
++    rows: list[dict[str, object]] = []
++    offsets = {"cough": 0.0, "breath": 0.2, "speech": -0.2}
++    for _, row in metadata.iterrows():
++        idx = int(str(row["participant_id"]).split("_")[-1])
++        signal = 1.0 if row["label_binary"] == "positive" else -1.0
++        offset = offsets[str(row["modality"])]
++        rows.append(
++            {
++                "recording_id": row["recording_id"],
++                "participant_id": row["participant_id"],
++                "dataset": row["dataset"],
++                "modality": row["modality"],
++                "submodality": row["submodality"],
++                "label_binary": row["label_binary"],
++                "split": row["split"],
++                "feat_signal": signal + offset + idx * 0.001,
++                "feat_signal_2": signal * 0.5 + offset,
++                "feat_noise": (idx % 4) * 0.01,
++            }
++        )
++    return pd.DataFrame(rows)
++
++
++def test_clean_internal_protocol_excludes_ambiguous_and_reports_audits() -> None:
++    from covid_audio_btp.strong_baseline_protocol import build_clean_internal_protocol
++
++    metadata = _metadata_frame(12)
++    ambiguous = metadata.iloc[[0]].copy()
++    ambiguous["recording_id"] = "ambiguous_rec"
++    ambiguous["participant_id"] = "ambiguous_p"
++    ambiguous["label_raw"] = "recovered_full"
++    ambiguous["label_binary"] = "negative"
++    metadata = pd.concat([metadata, ambiguous], ignore_index=True)
++
++    result = build_clean_internal_protocol(metadata)
++
++    assert "ambiguous_rec" not in set(result.metadata["recording_id"])
++    assert result.metadata["label_binary"].isin(["positive", "negative"]).all()
++    assert {"included", "ambiguous_raw_label"}.issubset(
++        set(result.audit["protocol_exclusion_reason"].astype(str))
++    )
++    assert not result.participant_audit.empty
++    assert result.metadata["evaluation_protocol"].eq("clean_internal_protocol").all()
++
++
++def test_strong_baseline_selects_models_and_runs_all_fusion_combinations() -> None:
++    from covid_audio_btp.strong_baseline import run_strong_baseline
++
++    metadata = _metadata_frame(48)
++    features = _feature_frame(metadata)
++    result = run_strong_baseline(
++        features,
++        metadata=metadata,
++        model_names=["logistic_l2_f80"],
++        random_state=0,
++    )
++
++    assert not result.metrics.empty
++    assert not result.predictions.empty
++    assert set(result.selection["modality"]) == {"cough", "breath", "speech"}
++    modality_metrics = result.metrics[result.metrics["analysis_family"].eq("strong_audio_modality")]
++    assert {"validation", "test"}.issubset(set(modality_metrics["metric_split"]))
++    fusion = result.metrics[result.metrics["analysis_family"].eq("strong_multimodal_fusion")]
++    assert {
++        "cough+breath",
++        "cough+speech",
++        "breath+speech",
++        "cough+breath+speech",
++    }.issubset(set(fusion["modality_combination"]))
++    assert fusion["threshold_source"].eq("validation_balanced_accuracy").all()
++    test_rows = result.metrics[result.metrics["metric_split"].eq("test")]
++    assert test_rows["auroc"].notna().any()
++    assert test_rows["n_participants"].notna().all()
++
++
++def test_strong_baseline_cli_writes_expected_outputs(tmp_path: Path, monkeypatch) -> None:
++    metadata = _metadata_frame(36)
++    features = _feature_frame(metadata)
++    metadata_path = tmp_path / "metadata.csv"
++    features_path = tmp_path / "features.csv"
++    metadata.to_csv(metadata_path, index=False)
++    features.to_csv(features_path, index=False)
++
++    outputs = {
++        "--metrics-output": tmp_path / "metrics.csv",
++        "--predictions-output": tmp_path / "predictions.csv",
++        "--selection-output": tmp_path / "selection.csv",
++        "--protocol-audit-output": tmp_path / "protocol.csv",
++        "--participant-audit-output": tmp_path / "participants.csv",
++    }
++    script = Path(__file__).parents[1] / "scripts" / "47_run_strong_baseline.py"
++    spec = importlib.util.spec_from_file_location("strong_baseline_cli", script)
++    assert spec is not None and spec.loader is not None
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++
++    argv = [
++        "47_run_strong_baseline.py",
++        "--features",
++        str(features_path),
++        "--metadata",
++        str(metadata_path),
++        "--model-names",
++        "logistic_l2_f80",
++    ]
++    for flag, path in outputs.items():
++        argv.extend([flag, str(path)])
++    monkeypatch.setattr(sys, "argv", argv)
++    module.main()
++
++    for path in outputs.values():
++        assert path.exists()
++        assert path.stat().st_size > 0
++    metrics = pd.read_csv(outputs["--metrics-output"])
++    assert {"strong_audio_modality", "strong_multimodal_fusion"}.issubset(set(metrics["analysis_family"]))
++
++
++def test_strong_baseline_e2e_runner_uses_existing_inputs(tmp_path: Path, monkeypatch) -> None:
++    script = Path(__file__).parents[1] / "scripts" / "48_run_strong_baseline_e2e.py"
++    spec = importlib.util.spec_from_file_location("strong_baseline_e2e", script)
++    assert spec is not None and spec.loader is not None
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++
++    features = tmp_path / "data" / "processed" / "features_mfcc.csv"
++    metadata = tmp_path / "data" / "processed" / "metadata_with_quality.csv"
++    features.parent.mkdir(parents=True)
++    pd.DataFrame({"recording_id": ["r1"]}).to_csv(features, index=False)
++    pd.DataFrame({"recording_id": ["r1"]}).to_csv(metadata, index=False)
++
++    commands: list[list[str]] = []
++    monkeypatch.setattr(module, "PROJECT_ROOT", tmp_path)
++    monkeypatch.setattr(module, "_run", lambda args: commands.append(list(args)))
++    monkeypatch.setattr(
++        sys,
++        "argv",
++        [
++            "48_run_strong_baseline_e2e.py",
++            "--features",
++            "data/processed/features_mfcc.csv",
++            "--metadata",
++            "data/processed/metadata_with_quality.csv",
++            "--skip-validation",
++        ],
++    )
++
++    module.main()
++
++    command_text = [" ".join(cmd) for cmd in commands]
++    assert any("47_run_strong_baseline.py" in cmd for cmd in command_text)
++    assert any("20_make_paper_tables.py" in cmd for cmd in command_text)
++    assert any("24_make_experiment_manifest.py" in cmd for cmd in command_text)
++    assert not any("12_validate_artifacts.py" in cmd for cmd in command_text)
++
++
++def test_extended_acoustic_feature_bank_contains_paper_style_features() -> None:
++    from covid_audio_btp.strong_features import extract_extended_acoustic_features
++
++    sample_rate = 16_000
++    t = np.linspace(0.0, 2.0, sample_rate * 2, endpoint=False)
++    y = (0.2 * np.sin(2 * np.pi * 220 * t) + 0.05 * np.sin(2 * np.pi * 880 * t)).astype(np.float32)
++
++    features = extract_extended_acoustic_features(y, sample_rate=sample_rate, n_mfcc=20, n_mels=32)
++
++    assert len(features) > 250
++    assert {"mfcc_01_mean", "delta_mfcc_01_std", "mel_band_01_mean", "chroma_01_mean"}.issubset(features)
++    assert {"spectral_contrast_01_mean", "rms_mean", "zcr_mean", "duration_sec"}.issubset(features)
++    assert all(np.isfinite(value) for value in features.values())
++
++
++def test_optional_smote_model_is_registered_or_skips_cleanly() -> None:
++    from covid_audio_btp.strong_baseline import _make_model
++
++    try:
++        model = _make_model("extra_trees_smote_f100", random_state=0)
++    except RuntimeError as exc:
++        assert "imbalanced-learn" in str(exc)
++    else:
++        assert hasattr(model, "fit")
