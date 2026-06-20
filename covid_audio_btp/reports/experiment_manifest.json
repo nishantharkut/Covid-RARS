@@ -1,5 +1,5 @@
 {
-  "created_at_utc": "2026-06-20T13:40:34.368701+00:00",
+  "created_at_utc": "2026-06-20T14:21:01.105906+00:00",
   "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
   "python_executable": "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python",
   "config": {
@@ -563,6 +563,60 @@
       "sha256": "85dd3efc7359b2aef127e52f501e44c50c6407765e3df56b75560317405a1599"
     },
     {
+      "path": "data/outputs/metrics/compare_is10_final_validation_metrics.csv",
+      "exists": true,
+      "size_bytes": 105026,
+      "sha256": "49db875246753e723381e6ef6307c9bedd820f2ac84ebe1023d37ea042d7aa1e"
+    },
+    {
+      "path": "data/outputs/metrics/compare_is10_final_validation_predictions.csv",
+      "exists": true,
+      "size_bytes": 43401680,
+      "sha256": "5178fee206ca4481fbd007cf2904e98449b5ca5664df713d6fe89fbea0d2632d"
+    },
+    {
+      "path": "data/outputs/metrics/compare_is10_external_transfer_metrics.csv",
+      "exists": true,
+      "size_bytes": 302,
+      "sha256": "c0b5c2d34727bc5545b89ca0cedf78441edb00f61035832277c862f75e5bc852"
+    },
+    {
+      "path": "data/outputs/metrics/compare_is10_external_transfer_predictions.csv",
+      "exists": true,
+      "size_bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "reports/tables/compare_is10_final_validation_summary.csv",
+      "exists": true,
+      "size_bytes": 1683,
+      "sha256": "ba2559d71355e42a9517535f1a2fc3b2664f1af0526ab0f32fe99c17df086cc4"
+    },
+    {
+      "path": "reports/tables/compare_is10_final_validation_split_summary.csv",
+      "exists": true,
+      "size_bytes": 1084,
+      "sha256": "9a624d056400cb5e71163980b8fc44e746258680996e76d40dd285e69c11bee3"
+    },
+    {
+      "path": "reports/tables/compare_is10_final_validation_modality_coverage.csv",
+      "exists": true,
+      "size_bytes": 2037,
+      "sha256": "325e040db2872da82836cf96acecc2487f34ab16acc9b6f3dea35b0180aef13c"
+    },
+    {
+      "path": "reports/figures/compare_is10_temporal_degradation.svg",
+      "exists": true,
+      "size_bytes": 1542,
+      "sha256": "a9ece7568f0ba67cd72fdcd0f6990ae9339e30e23781f3c7db98ea4b215d9182"
+    },
+    {
+      "path": "reports/figures/compare_is10_final_validation_summary.svg",
+      "exists": true,
+      "size_bytes": 1511,
+      "sha256": "336635330bf9d64523bc04df4c1f81bb4b9d45afccc1b351a0d9769a69e0cd5e"
+    },
+    {
       "path": "reports/tables/feature_shift_report.csv",
       "exists": true,
       "size_bytes": 42022,
@@ -577,8 +631,8 @@
     {
       "path": "reports/tables/paper_metric_table.csv",
       "exists": true,
-      "size_bytes": 292037,
-      "sha256": "fb885b5a8571a589b44b21b5b9167e228c264ad3560938880fddf1e834f6bc6e"
+      "size_bytes": 356311,
+      "sha256": "e31d31659568c51f89cb5f6b5bbabc44471b0b5aa0e7d0835ba2b434b5cba073"
     },
     {
       "path": "data/outputs/metrics/external_model_grid_beats_metrics.csv",

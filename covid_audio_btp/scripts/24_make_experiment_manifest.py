@@ -99,6 +99,15 @@ DEFAULT_ARTIFACTS = [
     Path("data/outputs/metrics/sota_gated_stack_metrics.csv"),
     Path("data/outputs/metrics/sota_gated_stack_predictions.csv"),
     Path("reports/tables/sota_gated_stack_candidates.csv"),
+    Path("data/outputs/metrics/compare_is10_final_validation_metrics.csv"),
+    Path("data/outputs/metrics/compare_is10_final_validation_predictions.csv"),
+    Path("data/outputs/metrics/compare_is10_external_transfer_metrics.csv"),
+    Path("data/outputs/metrics/compare_is10_external_transfer_predictions.csv"),
+    Path("reports/tables/compare_is10_final_validation_summary.csv"),
+    Path("reports/tables/compare_is10_final_validation_split_summary.csv"),
+    Path("reports/tables/compare_is10_final_validation_modality_coverage.csv"),
+    Path("reports/figures/compare_is10_temporal_degradation.svg"),
+    Path("reports/figures/compare_is10_final_validation_summary.svg"),
     Path("reports/tables/feature_shift_report.csv"),
     Path("reports/tables/feature_shift_summary.csv"),
     Path("reports/tables/paper_metric_table.csv"),
@@ -121,6 +130,7 @@ def default_artifact_paths(project_root: Path | None = None) -> list[Path]:
     base = [root / path for path in DEFAULT_ARTIFACTS]
     metrics_dir = root / "data" / "outputs" / "metrics"
     tables_dir = root / "reports" / "tables"
+    figures_dir = root / "reports" / "figures"
     patterns = [
         (metrics_dir, "external_model_grid_*_metrics.csv"),
         (metrics_dir, "external_model_grid_*_bootstrap_ci.csv"),
@@ -143,6 +153,10 @@ def default_artifact_paths(project_root: Path | None = None) -> list[Path]:
         (metrics_dir, "sota_compare_is10*_predictions.csv"),
         (metrics_dir, "paper_comparable_cv*_metrics.csv"),
         (metrics_dir, "paper_comparable_cv*_predictions.csv"),
+        (metrics_dir, "compare_is10_final_validation*_metrics.csv"),
+        (metrics_dir, "compare_is10_final_validation*_predictions.csv"),
+        (metrics_dir, "compare_is10_external_transfer*_metrics.csv"),
+        (metrics_dir, "compare_is10_external_transfer*_predictions.csv"),
         (metrics_dir, "sota_compare_is10*_metrics.csv"),
         (metrics_dir, "sota_compare_is10*_predictions.csv"),
         (metrics_dir, "paper_comparable_cv*_metrics.csv"),
@@ -153,8 +167,10 @@ def default_artifact_paths(project_root: Path | None = None) -> list[Path]:
         (metrics_dir, "sota_fusion_predictions*.csv"),
         (tables_dir, "sota_swarm_feature_selection*.csv"),
         (tables_dir, "sota_gated_stack_candidates*.csv"),
+        (tables_dir, "compare_is10_final_validation*.csv"),
         (tables_dir, "feature_shift_*_cough.csv"),
         (tables_dir, "feature_shift_*_summary.csv"),
+        (figures_dir, "compare_is10_*.svg"),
     ]
     discovered: list[Path] = []
     for directory, pattern in patterns:
