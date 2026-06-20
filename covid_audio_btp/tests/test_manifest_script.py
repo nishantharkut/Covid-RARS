@@ -21,6 +21,15 @@ def test_default_artifact_paths_discovers_representation_outputs(tmp_path) -> No
     tables_dir.mkdir(parents=True)
     (metrics_dir / "external_model_grid_beats_metrics.csv").write_text("auroc\\n0.5\\n")
     (metrics_dir / "coughvid_internal_panns_cnn14_bootstrap_ci.csv").write_text("metric\\nauroc\\n")
+    (metrics_dir / "sota_ssl_metrics_hf_ssl_microsoft_wavlm-base-plus_cough.csv").write_text("auroc\\n0.9\\n")
+    (metrics_dir / "sota_ssl_predictions_hf_ssl_microsoft_wavlm-base-plus_cough.csv").write_text("probability\\n0.8\\n")
+    (metrics_dir / "sota_fusion_metrics.csv").write_text("auroc\\n0.93\\n")
+    (metrics_dir / "sota_swarm_feature_metrics.csv").write_text("auroc\\n0.91\\n")
+    (metrics_dir / "sota_swarm_feature_predictions.csv").write_text("probability\\n0.8\\n")
+    (metrics_dir / "sota_gated_stack_metrics.csv").write_text("auroc\\n0.92\\n")
+    (metrics_dir / "sota_gated_stack_predictions.csv").write_text("probability\\n0.8\\n")
+    (tables_dir / "sota_swarm_feature_selection.csv").write_text("selected_features\\nsignal\\n")
+    (tables_dir / "sota_gated_stack_candidates.csv").write_text("selected\\ntrue\\n")
     (tables_dir / "feature_shift_beats_cough.csv").write_text("feature\\nsome_dim\\n")
 
     artifacts = module.default_artifact_paths(project_root=tmp_path)
@@ -79,4 +88,13 @@ def test_default_artifact_paths_discovers_representation_outputs(tmp_path) -> No
     assert tmp_path / "reports" / "final" / "TEMPORAL_SHORTCUT_THEORY.md" in artifacts
     assert metrics_dir / "external_model_grid_beats_metrics.csv" in artifacts
     assert metrics_dir / "coughvid_internal_panns_cnn14_bootstrap_ci.csv" in artifacts
+    assert metrics_dir / "sota_ssl_metrics_hf_ssl_microsoft_wavlm-base-plus_cough.csv" in artifacts
+    assert metrics_dir / "sota_ssl_predictions_hf_ssl_microsoft_wavlm-base-plus_cough.csv" in artifacts
+    assert metrics_dir / "sota_fusion_metrics.csv" in artifacts
+    assert metrics_dir / "sota_swarm_feature_metrics.csv" in artifacts
+    assert metrics_dir / "sota_swarm_feature_predictions.csv" in artifacts
+    assert metrics_dir / "sota_gated_stack_metrics.csv" in artifacts
+    assert metrics_dir / "sota_gated_stack_predictions.csv" in artifacts
+    assert tables_dir / "sota_swarm_feature_selection.csv" in artifacts
+    assert tables_dir / "sota_gated_stack_candidates.csv" in artifacts
     assert tables_dir / "feature_shift_beats_cough.csv" in artifacts

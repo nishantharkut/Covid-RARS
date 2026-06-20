@@ -1,5 +1,5 @@
 {
-  "created_at_utc": "2026-06-19T13:40:06.202718+00:00",
+  "created_at_utc": "2026-06-20T13:35:26.228981+00:00",
   "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
   "python_executable": "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python",
   "config": {
@@ -503,6 +503,66 @@
       "sha256": "5259771824886c9be7fd1efe27380d5e58b31ea69907978f199a038d96b53d34"
     },
     {
+      "path": "data/processed/sota_segment_index.csv",
+      "exists": true,
+      "size_bytes": 67136083,
+      "sha256": "56e626e6435f4340e02c18db36924a64bf54bff49bc3e001f7dcd72606e74a6f"
+    },
+    {
+      "path": "reports/tables/sota_segment_index_audit.csv",
+      "exists": true,
+      "size_bytes": 60,
+      "sha256": "442405ac866efad9fb35b7f5582a63f3b0f37042e2c9d7b7fb3526060c7c57b2"
+    },
+    {
+      "path": "data/outputs/metrics/sota_fusion_metrics.csv",
+      "exists": false,
+      "size_bytes": 0,
+      "sha256": ""
+    },
+    {
+      "path": "data/outputs/metrics/sota_fusion_predictions.csv",
+      "exists": false,
+      "size_bytes": 0,
+      "sha256": ""
+    },
+    {
+      "path": "data/outputs/metrics/sota_swarm_feature_metrics.csv",
+      "exists": true,
+      "size_bytes": 8945,
+      "sha256": "cafcbb3fd6942da4de07f32783cadebcb227109aef52ae6dba74bac1d8b691b8"
+    },
+    {
+      "path": "data/outputs/metrics/sota_swarm_feature_predictions.csv",
+      "exists": true,
+      "size_bytes": 1229718,
+      "sha256": "b199957b0bd672ec72a86ad14ee6a28336d701e515ce79918447431122775fd4"
+    },
+    {
+      "path": "reports/tables/sota_swarm_feature_selection.csv",
+      "exists": true,
+      "size_bytes": 3916,
+      "sha256": "22034f97545c1a1ca2ca26566a17765eba8f26cc7b073c9940a4abec2560decc"
+    },
+    {
+      "path": "data/outputs/metrics/sota_gated_stack_metrics.csv",
+      "exists": true,
+      "size_bytes": 15541,
+      "sha256": "31e24de47398a6747457b6d4b76916e1591161c7ff03162a00d5aeb01d0bd081"
+    },
+    {
+      "path": "data/outputs/metrics/sota_gated_stack_predictions.csv",
+      "exists": true,
+      "size_bytes": 4538023,
+      "sha256": "e8d1377a15da4cd221eb1c4235c46f0d69e21d2218e845db766f2e579ab4a8aa"
+    },
+    {
+      "path": "reports/tables/sota_gated_stack_candidates.csv",
+      "exists": true,
+      "size_bytes": 59613,
+      "sha256": "85dd3efc7359b2aef127e52f501e44c50c6407765e3df56b75560317405a1599"
+    },
+    {
       "path": "reports/tables/feature_shift_report.csv",
       "exists": true,
       "size_bytes": 42022,
@@ -517,8 +577,8 @@
     {
       "path": "reports/tables/paper_metric_table.csv",
       "exists": true,
-      "size_bytes": 130859,
-      "sha256": "0e9f2b16253e7b829e1cb1f191fb3e9a6399c3a97621dadb13c9d3434b20e8f9"
+      "size_bytes": 134959,
+      "sha256": "5ffeb20ea053adcc476ec4862020388bf3fe7148a1ff43b1115ec8b528cd6a8f"
     },
     {
       "path": "data/outputs/metrics/external_model_grid_beats_metrics.csv",
@@ -783,6 +843,42 @@
       "exists": true,
       "size_bytes": 73,
       "sha256": "1ed0473524e987c3bead43dab963a23cfeee1ed8d06d03c54c49b275f0ba92f3"
+    },
+    {
+      "path": "data/outputs/metrics/sota_ssl_metrics_practical_wavlm_breath.csv",
+      "exists": true,
+      "size_bytes": 1538,
+      "sha256": "cd842570825288d8b320a5aa7999896ea11dd53ac5b904590dbbcee94164735d"
+    },
+    {
+      "path": "data/outputs/metrics/sota_ssl_metrics_practical_wavlm_cough.csv",
+      "exists": true,
+      "size_bytes": 1512,
+      "sha256": "a966d80181f37ac44dca54eb81905734af410b29db40b43d566c64d49a3c3a25"
+    },
+    {
+      "path": "data/outputs/metrics/sota_ssl_predictions_practical_wavlm_breath.csv",
+      "exists": true,
+      "size_bytes": 258653,
+      "sha256": "5147a1a0d272826e07acbf17c8e1918f888a58d637099469369994a154715f77"
+    },
+    {
+      "path": "data/outputs/metrics/sota_ssl_predictions_practical_wavlm_cough.csv",
+      "exists": true,
+      "size_bytes": 265730,
+      "sha256": "a88172748373509ec050cd094c286432696b015a2ab53968d90706458931accc"
+    },
+    {
+      "path": "data/outputs/metrics/sota_ssl_history_practical_wavlm_breath.csv",
+      "exists": true,
+      "size_bytes": 460,
+      "sha256": "df22ac162eafadcfd36a2e2d696fc38307c7bb2744f5581c51a686a7d217517c"
+    },
+    {
+      "path": "data/outputs/metrics/sota_ssl_history_practical_wavlm_cough.csv",
+      "exists": true,
+      "size_bytes": 694,
+      "sha256": "7f679dc2005f0b84215a232c733aa0343ff64c52a07adb3172adeb6629ce1279"
     },
     {
       "path": "reports/tables/feature_shift_beats_cough.csv",

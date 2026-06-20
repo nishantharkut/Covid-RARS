@@ -20,6 +20,10 @@ def test_default_metric_paths_discovers_representation_outputs(tmp_path) -> None
     (metrics_dir / "external_model_grid_opensmile_egemaps_metrics.csv").write_text("auroc\\n0.5\\n")
     (metrics_dir / "coughvid_internal_beats_bootstrap_ci.csv").write_text("metric\\nauroc\\n")
     (metrics_dir / "coughvid_internal_beats_metrics.csv").write_text("auroc\\n0.7\\n")
+    (metrics_dir / "sota_ssl_metrics_hf_ssl_microsoft_wavlm-base-plus_cough.csv").write_text("auroc\\n0.9\\n")
+    (metrics_dir / "sota_fusion_metrics.csv").write_text("auroc\\n0.93\\n")
+    (metrics_dir / "sota_swarm_feature_metrics.csv").write_text("auroc\\n0.91\\n")
+    (metrics_dir / "sota_gated_stack_metrics.csv").write_text("auroc\\n0.92\\n")
 
     metric_paths = module.default_metric_paths(metrics_dir=metrics_dir)
     ci_paths = module.default_ci_paths(metrics_dir=metrics_dir)
@@ -34,8 +38,29 @@ def test_default_metric_paths_discovers_representation_outputs(tmp_path) -> None
     assert Path("reports/tables/temporal_matched_cohort_metrics.csv") in metric_paths
     assert metrics_dir / "external_model_grid_opensmile_egemaps_metrics.csv" in metric_paths
     assert metrics_dir / "coughvid_internal_beats_metrics.csv" in metric_paths
+    assert metrics_dir / "sota_ssl_metrics_hf_ssl_microsoft_wavlm-base-plus_cough.csv" in metric_paths
+    assert metrics_dir / "sota_fusion_metrics.csv" in metric_paths
+    assert metrics_dir / "sota_swarm_feature_metrics.csv" in metric_paths
+    assert metrics_dir / "sota_gated_stack_metrics.csv" in metric_paths
     assert Path("data/outputs/metrics/temporal_holdout_bootstrap_ci.csv") in ci_paths
     assert metrics_dir / "coughvid_internal_beats_bootstrap_ci.csv" in ci_paths
+
+
+def test_read_existing_csvs_skips_headerless_empty_files(tmp_path) -> None:
+    import pandas as pd
+
+    from covid_audio_btp.reporting import read_existing_csvs
+
+    empty_path = tmp_path / "empty_metrics.csv"
+    good_path = tmp_path / "good_metrics.csv"
+    empty_path.write_text("\n")
+    good_path.write_text("auroc\n0.75\n")
+
+    combined = read_existing_csvs([empty_path, good_path])
+
+    assert len(combined) == 1
+    assert pd.to_numeric(combined["auroc"]).iloc[0] == 0.75
+    assert combined["table_source"].iloc[0] == "good_metrics"
 
 
 def test_group_columns_preserve_temporal_ablation_identity() -> None:
@@ -53,6 +78,7 @@ def test_group_columns_preserve_temporal_ablation_identity() -> None:
             "base_feature_set",
             "ablation_name",
             "removed_features",
+            "feature_strategy",
             "auroc",
         ]
     )
@@ -65,3 +91,4 @@ def test_group_columns_preserve_temporal_ablation_identity() -> None:
     assert "base_feature_set" in group_columns
     assert "ablation_name" in group_columns
     assert "removed_features" in group_columns
+    assert "feature_strategy" in group_columns

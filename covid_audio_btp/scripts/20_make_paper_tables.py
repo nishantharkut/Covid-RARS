@@ -30,6 +30,7 @@ DEFAULT_METRIC_PATHS = [
     Path("reports/tables/temporal_metadata_ablation.csv"),
     Path("reports/tables/temporal_matched_cohort_metrics.csv"),
     Path("data/outputs/metrics/strong_baseline_metrics.csv"),
+    Path("data/outputs/metrics/sota_fusion_metrics.csv"),
 ]
 
 DEFAULT_CI_PATHS = [
@@ -58,6 +59,12 @@ def default_metric_paths(metrics_dir: Path = Path("data/outputs/metrics")) -> li
         "external_model_grid_*_metrics.csv",
         "coughvid_internal_*_metrics.csv",
         "cnn_metrics_*.csv",
+        "sota_ssl_metrics_*.csv",
+        "sota_spectrogram_metrics_*.csv",
+        "sota_foundation_metrics_*.csv",
+        "sota_swarm_feature_metrics*.csv",
+        "sota_gated_stack_metrics*.csv",
+        "sota_fusion_metrics*.csv",
     ]
     discovered: list[Path] = []
     for pattern in representation_patterns:
@@ -69,6 +76,7 @@ def default_ci_paths(metrics_dir: Path = Path("data/outputs/metrics")) -> list[P
     representation_patterns = [
         "external_model_grid_*_bootstrap_ci.csv",
         "coughvid_internal_*_bootstrap_ci.csv",
+        "sota_*_bootstrap_ci.csv",
     ]
     discovered: list[Path] = []
     for pattern in representation_patterns:
@@ -105,6 +113,7 @@ def _group_columns(metrics: pd.DataFrame) -> list[str]:
         "control_method",
         "prediction_source",
         "calibration_method",
+        "feature_strategy",
     ]
     return [col for col in candidates if col in metrics.columns]
 

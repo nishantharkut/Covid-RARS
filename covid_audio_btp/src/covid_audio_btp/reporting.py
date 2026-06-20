@@ -183,10 +183,12 @@ def read_existing_csvs(paths: list[str | Path], source_column: str = "table_sour
         p = Path(path)
         if not p.exists() or p.stat().st_size == 0:
             continue
-        df = pd.read_csv(p)
+        try:
+            df = pd.read_csv(p)
+        except pd.errors.EmptyDataError:
+            continue
         if df.empty:
             continue
         df[source_column] = p.stem
         frames.append(df)
     return pd.concat(frames, ignore_index=True, sort=False) if frames else pd.DataFrame()
-
