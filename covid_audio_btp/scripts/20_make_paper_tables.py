@@ -65,6 +65,10 @@ def default_metric_paths(metrics_dir: Path = Path("data/outputs/metrics")) -> li
         "sota_swarm_feature_metrics*.csv",
         "sota_gated_stack_metrics*.csv",
         "sota_fusion_metrics*.csv",
+        "sota_compare_is10*_metrics.csv",
+        "paper_comparable_cv*_metrics.csv",
+        "sota_compare_is10*_metrics.csv",
+        "paper_comparable_cv*_metrics.csv",
     ]
     discovered: list[Path] = []
     for pattern in representation_patterns:

@@ -1,5 +1,5 @@
 {
-  "created_at_utc": "2026-06-20T13:35:26.228981+00:00",
+  "created_at_utc": "2026-06-20T13:40:34.368701+00:00",
   "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
   "python_executable": "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python",
   "config": {
@@ -577,8 +577,8 @@
     {
       "path": "reports/tables/paper_metric_table.csv",
       "exists": true,
-      "size_bytes": 134959,
-      "sha256": "5ffeb20ea053adcc476ec4862020388bf3fe7148a1ff43b1115ec8b528cd6a8f"
+      "size_bytes": 292037,
+      "sha256": "fb885b5a8571a589b44b21b5b9167e228c264ad3560938880fddf1e834f6bc6e"
     },
     {
       "path": "data/outputs/metrics/external_model_grid_beats_metrics.csv",
@@ -879,6 +879,42 @@
       "exists": true,
       "size_bytes": 694,
       "sha256": "7f679dc2005f0b84215a232c733aa0343ff64c52a07adb3172adeb6629ce1279"
+    },
+    {
+      "path": "data/outputs/metrics/sota_compare_is10_metrics.csv",
+      "exists": true,
+      "size_bytes": 238467,
+      "sha256": "3b60bb57134f7936c65113fe3dd06afe5d43de0725c5333c0edeed13c2bc2130"
+    },
+    {
+      "path": "data/outputs/metrics/sota_compare_is10_predictions.csv",
+      "exists": true,
+      "size_bytes": 79682965,
+      "sha256": "89a26cb8fa56fc5a75423de8009e31b9b917b3cdd2b9da585fc7189aedffe0d0"
+    },
+    {
+      "path": "data/outputs/metrics/paper_comparable_cv_metrics.csv",
+      "exists": true,
+      "size_bytes": 32769,
+      "sha256": "1302f50e5fd6c30a25d15f852a39e50e4ad63b41dab8cda63825fbae0750d4a8"
+    },
+    {
+      "path": "data/outputs/metrics/paper_comparable_cv_speech_metrics.csv",
+      "exists": true,
+      "size_bytes": 33046,
+      "sha256": "b8a6a4e414c3d23161f3253e71c0d681cb950129be65301fb493bda50e24e700"
+    },
+    {
+      "path": "data/outputs/metrics/paper_comparable_cv_predictions.csv",
+      "exists": true,
+      "size_bytes": 10159572,
+      "sha256": "8de9a4159cea9263b94536c12ae50db57f2568a97130181b62096559ff5761d0"
+    },
+    {
+      "path": "data/outputs/metrics/paper_comparable_cv_speech_predictions.csv",
+      "exists": true,
+      "size_bytes": 24634895,
+      "sha256": "c9c1b95affcbd906ac2bfa9f7c95d73a7bc263fe39430fda028107aff62c2d35"
     },
     {
       "path": "reports/tables/feature_shift_beats_cough.csv",
