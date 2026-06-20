@@ -1,5 +1,5 @@
 {
-  "created_at_utc": "2026-06-20T14:21:01.105906+00:00",
+  "created_at_utc": "2026-06-20T16:18:28.387139+00:00",
   "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
   "python_executable": "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python",
   "config": {
@@ -577,14 +577,14 @@
     {
       "path": "data/outputs/metrics/compare_is10_external_transfer_metrics.csv",
       "exists": true,
-      "size_bytes": 302,
-      "sha256": "c0b5c2d34727bc5545b89ca0cedf78441edb00f61035832277c862f75e5bc852"
+      "size_bytes": 1855,
+      "sha256": "24648c20f65e7cbc2fc2398cc5e933269a37c8aa5ee60bf3dedc038dc31add46"
     },
     {
       "path": "data/outputs/metrics/compare_is10_external_transfer_predictions.csv",
       "exists": true,
-      "size_bytes": 1,
-      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+      "size_bytes": 8090927,
+      "sha256": "36f74d07b3ce0e336a4770b7dfe37b787d129ee33fe3680f8546f5445fb72aea"
     },
     {
       "path": "reports/tables/compare_is10_final_validation_summary.csv",
@@ -613,8 +613,8 @@
     {
       "path": "reports/figures/compare_is10_final_validation_summary.svg",
       "exists": true,
-      "size_bytes": 1511,
-      "sha256": "336635330bf9d64523bc04df4c1f81bb4b9d45afccc1b351a0d9769a69e0cd5e"
+      "size_bytes": 1875,
+      "sha256": "0d4dfc73db08d529f6385ffc220f3a6e8dc05dda87cc13ca1e1de17bceec1f77"
     },
     {
       "path": "reports/tables/feature_shift_report.csv",
@@ -631,8 +631,8 @@
     {
       "path": "reports/tables/paper_metric_table.csv",
       "exists": true,
-      "size_bytes": 356311,
-      "sha256": "e31d31659568c51f89cb5f6b5bbabc44471b0b5aa0e7d0835ba2b434b5cba073"
+      "size_bytes": 357071,
+      "sha256": "85d9213918916b15a690112e21a5235d146323efeb2819361f02bfab7546357b"
     },
     {
       "path": "data/outputs/metrics/external_model_grid_beats_metrics.csv",
