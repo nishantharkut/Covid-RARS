@@ -1,5 +1,5 @@
 {
-  "created_at_utc": "2026-07-01T13:19:19.611989+00:00",
+  "created_at_utc": "2026-07-01T13:51:26.274406+00:00",
   "platform": "Linux-6.17.0-35-generic-x86_64-with-glibc2.39",
   "python_executable": "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python",
   "config": {
@@ -315,6 +315,30 @@
       "exists": true,
       "size_bytes": 1,
       "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "data/outputs/metrics/reviewer_incremental_audio_metadata_metrics.csv",
+      "exists": true,
+      "size_bytes": 28580,
+      "sha256": "286a46ec3667c5c384781d3b71ede5a70f1686d87a6c86e52e0b9e2f1c4d18ec"
+    },
+    {
+      "path": "data/outputs/metrics/reviewer_incremental_audio_metadata_predictions.csv",
+      "exists": true,
+      "size_bytes": 1096725,
+      "sha256": "18dbad67a2800600ede9115bc39f45c20590960bdd8fcd7c7f341a29d3448c26"
+    },
+    {
+      "path": "reports/tables/reviewer_incremental_audio_metadata_candidates.csv",
+      "exists": true,
+      "size_bytes": 5729,
+      "sha256": "40999ea99eb4c2f087a78997d0a66eeb176490f6be858674afd48e2342e3438e"
+    },
+    {
+      "path": "reports/tables/reviewer_external_model_family_transfer_summary.csv",
+      "exists": true,
+      "size_bytes": 1860,
+      "sha256": "9df8c153318650681eba552578d52b3e508a8e5fb1e08ee31ea9656a6bdb5bc5"
     },
     {
       "path": "reports/tables/reviewer_support_overlap_positivity.csv",
@@ -955,8 +979,8 @@
     {
       "path": "reports/tables/paper_metric_table.csv",
       "exists": true,
-      "size_bytes": 873387,
-      "sha256": "e74a61e0d557e1c19873514d5140632f783ce0e8b01e8dc23d5398ba5d523a18"
+      "size_bytes": 886335,
+      "sha256": "faa8dc3eb1f35b6a2cf4182e9e149cac39235f164811cf48e54ec15eb622db9f"
     },
     {
       "path": "data/outputs/metrics/external_model_grid_beats_metrics.csv",
