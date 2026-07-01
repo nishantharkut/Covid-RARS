@@ -1,0 +1,10 @@
+evaluation_protocol,split,modality,n_rows,n_participants,n_positive,n_negative
+compare_is10_temporal_late_to_early,test,breath,817,413,2,815
+compare_is10_temporal_late_to_early,test,cough,814,415,1,813
+compare_is10_temporal_late_to_early,test,speech,2013,416,5,2008
+compare_is10_temporal_late_to_early,train,breath,2386,1240,1265,1121
+compare_is10_temporal_late_to_early,train,cough,2463,1254,1332,1131
+compare_is10_temporal_late_to_early,train,speech,5934,1244,3170,2764
+compare_is10_temporal_late_to_early,validation,breath,826,416,0,826
+compare_is10_temporal_late_to_early,validation,cough,817,415,0,817
+compare_is10_temporal_late_to_early,validation,speech,2036,416,0,2036

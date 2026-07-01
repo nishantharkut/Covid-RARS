@@ -1,0 +1,4 @@
+sanity_check,audit_model,observed_auroc,shuffled_auroc_mean,shuffled_auroc_ci_low,shuffled_auroc_ci_high,n_permutations,random_state
+metadata_retrain_with_shuffled_labels,full_safe_metadata,0.9638209444486256,0.5032528980046332,0.4645840632304837,0.5589627453313455,20,42
+metadata_retrain_with_shuffled_labels,symptoms_only,0.93172273650937,0.5027427356524347,0.46307516687728956,0.5440100785899837,20,42
+metadata_retrain_with_shuffled_labels,demographic_protocol_only,0.9137823380692351,0.5027900581613154,0.4503454323285931,0.5574594714735978,20,42

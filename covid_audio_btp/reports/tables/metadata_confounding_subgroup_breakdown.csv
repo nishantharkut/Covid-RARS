@@ -1,0 +1,60 @@
+subgroup,source_column,level,n_recordings,n_participants,n_positive,n_negative,positive_prevalence,splits
+country,country,Argentina,9,1,0,9,0.0,train
+country,country,Australia,27,3,0,27,0.0,train
+country,country,Bahrain,36,4,27,9,0.75,"train,validation"
+country,country,Bangladesh,18,2,0,18,0.0,train
+country,country,Brazil,9,1,0,9,0.0,validation
+country,country,Canada,108,12,0,108,0.0,"test,train,validation"
+country,country,China,45,5,0,45,0.0,"test,train"
+country,country,Ecuador,9,1,0,9,0.0,validation
+country,country,Egypt,9,1,0,9,0.0,train
+country,country,Finland,27,3,0,27,0.0,"test,train,validation"
+country,country,France,135,15,45,90,0.3333333333333333,"test,train,validation"
+country,country,Germany,63,7,0,63,0.0,"train,validation"
+country,country,Greece,18,2,0,18,0.0,train
+country,country,Hungary,9,1,0,9,0.0,test
+country,country,India,17395,1933,6003,11392,0.34509916642713423,"test,train,validation"
+country,country,Indonesia,9,1,0,9,0.0,test
+country,country,Iran,9,1,0,9,0.0,train
+country,country,Iraq,9,1,0,9,0.0,train
+country,country,Ireland,9,1,0,9,0.0,test
+country,country,Israel,18,2,0,18,0.0,train
+country,country,Italy,9,1,0,9,0.0,test
+country,country,Japan,36,4,0,36,0.0,"train,validation"
+country,country,Malaysia,27,3,0,27,0.0,"test,train"
+country,country,Mexico,9,1,0,9,0.0,test
+country,country,Netherlands The,45,5,0,45,0.0,"test,train,validation"
+country,country,Norway,9,1,0,9,0.0,test
+country,country,Oman,18,2,0,18,0.0,"test,train"
+country,country,Pakistan,9,1,0,9,0.0,test
+country,country,Philippines,9,1,0,9,0.0,test
+country,country,Portugal,18,2,0,18,0.0,train
+country,country,Qatar,9,1,0,9,0.0,train
+country,country,Romania,18,2,0,18,0.0,"train,validation"
+country,country,Saudi Arabia,27,3,0,27,0.0,"test,train"
+country,country,Singapore,27,3,0,27,0.0,train
+country,country,South Africa,9,1,0,9,0.0,train
+country,country,Spain,9,1,0,9,0.0,train
+country,country,Switzerland,18,2,0,18,0.0,train
+country,country,Syria,9,1,0,9,0.0,train
+country,country,Thailand,9,1,0,9,0.0,train
+country,country,Turkey,9,1,0,9,0.0,train
+country,country,United Arab Emirates,9,1,0,9,0.0,validation
+country,country,United Kingdom,63,7,0,63,0.0,train
+country,country,United States,621,69,54,567,0.08695652173913043,"test,train,validation"
+country,country,Vietnam,27,3,0,27,0.0,train
+recording_year,recording_year,2020,11662,1296,972,10690,0.08334762476419139,"test,train,validation"
+recording_year,recording_year,2021,4779,531,2916,1863,0.6101694915254238,"test,train,validation"
+recording_year,recording_year,2022,2583,287,2241,342,0.867595818815331,"test,train,validation"
+recording_month,recording_month,1,1782,198,1557,225,0.8737373737373737,"test,train,validation"
+recording_month,recording_month,10,405,45,108,297,0.26666666666666666,"test,train,validation"
+recording_month,recording_month,11,153,17,18,135,0.11764705882352941,"test,train,validation"
+recording_month,recording_month,12,333,37,81,252,0.24324324324324326,"test,train,validation"
+recording_month,recording_month,2,1017,113,711,306,0.6991150442477876,"test,train,validation"
+recording_month,recording_month,3,135,15,36,99,0.26666666666666666,"test,train,validation"
+recording_month,recording_month,4,6622,736,261,6361,0.039414074297795226,"test,train,validation"
+recording_month,recording_month,5,3033,337,342,2691,0.11275964391691394,"test,train,validation"
+recording_month,recording_month,6,1296,144,657,639,0.5069444444444444,"test,train,validation"
+recording_month,recording_month,7,1359,151,828,531,0.609271523178808,"test,train,validation"
+recording_month,recording_month,8,1413,157,369,1044,0.2611464968152866,"test,train,validation"
+recording_month,recording_month,9,1476,164,1161,315,0.7865853658536586,"test,train,validation"
