@@ -71,15 +71,9 @@ def _bootstrap_delta(
     random_state: int,
     paired_on: tuple[str, ...],
 ) -> dict[str, object]:
-    left_y = labels_to_binary(left["label_binary"])
-    right_y = labels_to_binary(right["label_binary"])
-    left_prob = left["probability"].astype(float).to_numpy()
-    right_prob = right["probability"].astype(float).to_numpy()
-    left_point = _metric_value(left_y, left_prob, metric)
-    right_point = _metric_value(right_y, right_prob, metric)
-
     pair_cols = [col for col in paired_on if col in left.columns and col in right.columns]
     paired = False
+    point_estimate_level = "row_level"
     paired_left = paired_right = pd.DataFrame()
     if pair_cols:
         left_pair = left.groupby(pair_cols, dropna=False).agg(label_binary=("label_binary", "first"), probability=("probability", "mean")).reset_index()
@@ -94,6 +88,16 @@ def _bootstrap_delta(
             paired_right = merged[["label_binary_right", "probability_right"]].rename(
                 columns={"label_binary_right": "label_binary", "probability_right": "probability"}
             )
+            point_estimate_level = "paired_participant"
+
+    analysis_left = paired_left if paired else left
+    analysis_right = paired_right if paired else right
+    left_y = labels_to_binary(analysis_left["label_binary"])
+    right_y = labels_to_binary(analysis_right["label_binary"])
+    left_prob = analysis_left["probability"].astype(float).to_numpy()
+    right_prob = analysis_right["probability"].astype(float).to_numpy()
+    left_point = _metric_value(left_y, left_prob, metric)
+    right_point = _metric_value(right_y, right_prob, metric)
 
     rng = np.random.default_rng(random_state)
     values: list[float] = []
@@ -132,6 +136,7 @@ def _bootstrap_delta(
         "ci_high": float(ci_high),
         "paired": bool(paired),
         "paired_n": int(len(paired_left)) if paired else 0,
+        "point_estimate_level": point_estimate_level,
     }
 
 

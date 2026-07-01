@@ -53,6 +53,69 @@ def test_delta_bootstrap_reports_metric_drops_with_ci() -> None:
     assert (table["right_n"] == 40).all()
 
 
+def test_delta_bootstrap_uses_paired_participant_points_when_paired() -> None:
+    from covid_audio_btp.delta_bootstrap import DeltaComparison, build_delta_bootstrap_table
+
+    rows = []
+    labels = {
+        "p1": "positive",
+        "p2": "positive",
+        "p3": "negative",
+        "p4": "negative",
+    }
+    left_probs = {
+        "p1": [0.95, 0.05],
+        "p2": [0.90, 0.90],
+        "p3": [0.20, 0.20],
+        "p4": [0.85, 0.15],
+    }
+    right_probs = {
+        "p1": [0.70, 0.70],
+        "p2": [0.65, 0.65],
+        "p3": [0.35, 0.35],
+        "p4": [0.30, 0.30],
+    }
+    for source, probs_by_participant in [("left", left_probs), ("right", right_probs)]:
+        for participant_id, probs in probs_by_participant.items():
+            for recording_idx, prob in enumerate(probs):
+                rows.append(
+                    {
+                        "recording_id": f"{source}_{participant_id}_{recording_idx}",
+                        "participant_id": participant_id,
+                        "label_binary": labels[participant_id],
+                        "probability": prob,
+                        "evaluation_protocol": source,
+                    }
+                )
+    predictions = pd.DataFrame(rows)
+
+    table = build_delta_bootstrap_table(
+        predictions,
+        comparisons=[
+            DeltaComparison(
+                comparison_id="left_minus_right",
+                left_name="left",
+                right_name="right",
+                left_selector={"evaluation_protocol": "left"},
+                right_selector={"evaluation_protocol": "right"},
+            )
+        ],
+        metrics=["brier"],
+        n_bootstraps=25,
+        random_state=0,
+    )
+
+    row = table.iloc[0]
+    left_participant_brier = ((1 - 0.50) ** 2 + (1 - 0.90) ** 2 + 0.20**2 + 0.50**2) / 4
+    right_participant_brier = ((1 - 0.70) ** 2 + (1 - 0.65) ** 2 + 0.35**2 + 0.30**2) / 4
+
+    assert row["paired"]
+    assert row["paired_n"] == 4
+    assert row["left_point"] == left_participant_brier
+    assert row["right_point"] == right_participant_brier
+    assert row["delta"] == left_participant_brier - right_participant_brier
+
+
 def test_auto_ladder_comparisons_include_matched_cough_models() -> None:
     from covid_audio_btp.delta_bootstrap import build_auto_reviewer_comparisons
 
