@@ -72,3 +72,46 @@ def test_fuse_sota_prediction_sources_reports_validation_and_test_metrics() -> N
     assert fused_predictions["fusion_method"].isin(
         ["top_source_uniform_mean", "top_source_validation_weighted_auroc", "top_source_stacked_logistic_validation"]
     ).all()
+
+
+def test_debug_sota_ssl_branch_keeps_external_test_predictions(tmp_path) -> None:
+    import soundfile as sf
+
+    from covid_audio_btp.sota_ssl import train_sota_ssl_branch
+
+    sample_rate = 16000
+    rows: list[dict[str, object]] = []
+    for split in ("train", "validation", "test", "external_test"):
+        for idx, label in enumerate(("negative", "positive")):
+            y = np.sin(np.linspace(0, np.pi * (idx + 1), sample_rate, endpoint=False)).astype(np.float32) * 0.2
+            path = tmp_path / f"{split}_{idx}.wav"
+            sf.write(path, y, sample_rate)
+            rows.append(
+                {
+                    "segment_id": f"{split}_{idx}_seg",
+                    "recording_id": f"{split}_{idx}",
+                    "participant_id": f"{split}_{idx}",
+                    "dataset": "coughvid" if split == "external_test" else "coswara",
+                    "modality": "cough",
+                    "submodality": "cough",
+                    "label_binary": label,
+                    "split": split,
+                    "audio_path": str(path),
+                    "segment_start_sample": 0,
+                    "segment_end_sample": sample_rate,
+                    "is_augmented": False,
+                    "augmentation_id": "original",
+                    "augmentation_seed": 42,
+                }
+            )
+
+    result = train_sota_ssl_branch(
+        pd.DataFrame(rows),
+        modality="cough",
+        backend="debug_acoustic",
+        target_samples=sample_rate,
+    )
+
+    assert "external_test" in set(result.predictions["split"])
+    assert result.predictions[result.predictions["split"].eq("external_test")]["dataset"].eq("coughvid").all()
+    assert "external_test" in set(result.metrics["metric_split"])

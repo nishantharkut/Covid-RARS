@@ -26,7 +26,7 @@ def _filter_branch_segments(segment_index: pd.DataFrame, modality: str) -> pd.Da
     df = segment_index.copy()
     df = df[df["modality"].astype(str).eq(str(modality))]
     df = df[df["label_binary"].isin(["positive", "negative"])]
-    df = df[df["split"].isin(["train", "validation", "test"])]
+    df = df[df["split"].astype(str).isin(["train", "validation", "test", "external_test"])]
     if df.empty:
         raise ValueError(f"No SOTA segments available for modality={modality}")
     return df.reset_index(drop=True)
@@ -61,10 +61,10 @@ def train_debug_acoustic_branch(
         feature_rows.append({**row.to_dict(), **_waveform_stats(row, target_samples=target_samples)})
     features = pd.DataFrame(feature_rows)
     train = features[features["split"].eq("train")].copy()
-    eval_df = features[features["split"].isin(["validation", "test"])].copy()
+    eval_df = features[~features["split"].eq("train")].copy()
     feature_cols = ["mean", "std", "abs_mean", "abs_max", "rms", "zcr", "q25", "q75"]
     if train.empty or eval_df.empty:
-        raise ValueError(f"Need train and validation/test segments for modality={modality}")
+        raise ValueError(f"Need train and evaluation segments for modality={modality}")
 
     model = None
     if train["label_binary"].nunique() >= 2:
@@ -243,6 +243,7 @@ def train_hf_ssl_branch(
     train = df[df["split"].eq("train")].copy()
     validation = df[df["split"].eq("validation")].copy()
     test = df[df["split"].eq("test")].copy()
+    external = df[df["split"].eq("external_test")].copy()
     if train.empty or validation.empty or test.empty:
         raise ValueError(f"Need train/validation/test segments for modality={modality}")
     if train["label_binary"].nunique() < 2:
@@ -253,6 +254,11 @@ def train_hf_ssl_branch(
     train_loader = DataLoader(SegmentDataset(train), batch_size=batch_size, shuffle=True, collate_fn=collate)
     val_loader = DataLoader(SegmentDataset(validation), batch_size=batch_size, shuffle=False, collate_fn=collate)
     test_loader = DataLoader(SegmentDataset(test), batch_size=batch_size, shuffle=False, collate_fn=collate)
+    external_loader = (
+        DataLoader(SegmentDataset(external), batch_size=batch_size, shuffle=False, collate_fn=collate)
+        if not external.empty
+        else None
+    )
 
     backbone_params = [p for n, p in model.named_parameters() if p.requires_grad and not n.startswith("classifier.")]
     head_params = [p for n, p in model.named_parameters() if p.requires_grad and n.startswith("classifier.")]
@@ -325,11 +331,10 @@ def train_hf_ssl_branch(
         model_output.parent.mkdir(parents=True, exist_ok=True)
         torch.save({"model_state_dict": model.state_dict(), "model_name": model_name, "modality": modality}, model_output)
 
-    segment_predictions = pd.concat(
-        [collect(model, val_loader, device_name), collect(model, test_loader, device_name)],
-        ignore_index=True,
-        sort=False,
-    )
+    prediction_frames = [collect(model, val_loader, device_name), collect(model, test_loader, device_name)]
+    if external_loader is not None:
+        prediction_frames.append(collect(model, external_loader, device_name))
+    segment_predictions = pd.concat(prediction_frames, ignore_index=True, sort=False)
     participant_predictions = aggregate_sota_predictions(segment_predictions, level="participant")
     metrics = evaluate_sota_prediction_table(participant_predictions)
     history = pd.DataFrame(history_rows)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -38,6 +39,8 @@ class CNNTrainArtifacts:
     validation_predictions: pd.DataFrame
     test_predictions: pd.DataFrame
     history: pd.DataFrame
+    external_predictions: pd.DataFrame | None = None
+    external_metrics: dict[str, Any] | None = None
 
 
 def _collect_logits(model: nn.Module, loader: DataLoader, device: str) -> tuple[list[str], list[str], np.ndarray, np.ndarray]:
@@ -94,12 +97,14 @@ def train_cnn_for_modality(
     train_ds = TorchSpectrogramDataset(SpectrogramTableDataset(spectrogram_index, "train", modality))
     val_ds = TorchSpectrogramDataset(SpectrogramTableDataset(spectrogram_index, "validation", modality))
     test_ds = TorchSpectrogramDataset(SpectrogramTableDataset(spectrogram_index, "test", modality))
+    external_ds = TorchSpectrogramDataset(SpectrogramTableDataset(spectrogram_index, "external_test", modality))
     if len(train_ds) == 0 or len(val_ds) == 0 or len(test_ds) == 0:
         raise ValueError(f"Need train/validation/test spectrograms for modality={modality}")
 
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
+    external_loader = DataLoader(external_ds, batch_size=batch_size, shuffle=False) if len(external_ds) > 0 else None
 
     labels = np.array([train_ds[i][1].item() for i in range(len(train_ds))])
     positives = max(1, int(labels.sum()))
@@ -194,10 +199,39 @@ def train_cnn_for_modality(
             }
         )
 
+    external_predictions = None
+    external_metrics = None
+    if external_loader is not None:
+        external_rec, external_part, external_logits, external_y = _collect_logits(model, external_loader, device)
+        external_prob = 1.0 / (1.0 + np.exp(-external_logits))
+        external_predictions = pred_frame(
+            external_rec,
+            external_part,
+            external_logits,
+            external_prob,
+            external_y,
+            "external_test",
+        )
+        external_metrics = binary_metric_bundle(external_y.astype(int), external_prob, threshold=threshold)
+        external_metrics.update(
+            {
+                "model_name": architecture,
+                "architecture": architecture,
+                "modality": modality,
+                "metric_split": "external_test",
+                "validation_auroc": validation_metrics.get("auroc"),
+                "validation_auprc": validation_metrics.get("auprc"),
+                "validation_balanced_accuracy": validation_metrics.get("balanced_accuracy"),
+                "threshold_source": "validation_balanced_accuracy",
+            }
+        )
+
     return CNNTrainArtifacts(
         model=model,
         metrics=metrics,
         validation_predictions=pred_frame(val_rec, val_part, val_logits, val_prob, val_y, "validation"),
         test_predictions=pred_frame(test_rec, test_part, test_logits, test_prob, test_y, "test"),
         history=pd.DataFrame(history_rows),
+        external_predictions=external_predictions,
+        external_metrics=external_metrics,
     )

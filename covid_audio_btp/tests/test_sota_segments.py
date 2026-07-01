@@ -70,6 +70,49 @@ def test_build_sota_segment_index_is_split_safe_and_train_augmented_only(tmp_pat
     assert audit["severity"].eq("error").sum() == 0
 
 
+def test_build_sota_segment_index_preserves_external_test_without_augmentation(tmp_path: Path) -> None:
+    from covid_audio_btp.sota_segments import build_sota_segment_index
+
+    metadata = _metadata(tmp_path)
+    external_audio = tmp_path / "external_cough.wav"
+    _write_tone(external_audio, amp=0.22)
+    metadata = pd.concat(
+        [
+            metadata,
+            pd.DataFrame(
+                [
+                    {
+                        "recording_id": "external_rec",
+                        "participant_id": "external_p",
+                        "dataset": "coughvid",
+                        "modality": "cough",
+                        "submodality": "cough",
+                        "label_binary": "positive",
+                        "split": "external_test",
+                        "quality_flag": "ok",
+                        "audio_path": str(external_audio),
+                    }
+                ]
+            ),
+        ],
+        ignore_index=True,
+    )
+
+    index = build_sota_segment_index(
+        metadata,
+        modalities=["cough"],
+        window_sec=1.0,
+        overlap=0.5,
+        max_segments_per_recording=2,
+        augment_train_copies=1,
+    )
+
+    external = index[index["split"].eq("external_test")]
+    assert not external.empty
+    assert external["dataset"].eq("coughvid").all()
+    assert not external["is_augmented"].any()
+
+
 def test_load_sota_segment_waveform_returns_fixed_length_normalized_audio(tmp_path: Path) -> None:
     from covid_audio_btp.sota_segments import build_sota_segment_index, load_sota_segment_waveform
 

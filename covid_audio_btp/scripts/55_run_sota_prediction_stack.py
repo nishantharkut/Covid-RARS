@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from covid_audio_btp.sota_prediction_stack import run_gated_prediction_stack
 
@@ -31,12 +34,25 @@ def _read_source(spec: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     if "=" not in spec or ":" not in spec:
         raise ValueError(f"Invalid source spec {spec!r}; expected name=metrics.csv:predictions.csv")
     name, rest = spec.split("=", 1)
-    metrics_path, predictions_path = rest.split(":", 1)
+    metrics_path, predictions_path = _split_existing_path_pair(rest)
     metrics = pd.read_csv(metrics_path)
     predictions = pd.read_csv(predictions_path)
     metrics["source_run"] = name
     predictions["source_run"] = name
     return metrics, predictions
+
+
+def _split_existing_path_pair(spec: str) -> tuple[Path, Path]:
+    """Split metrics:predictions while allowing Windows drive-letter colons."""
+    for idx, char in enumerate(spec):
+        if char != ":":
+            continue
+        left = Path(spec[:idx])
+        right = Path(spec[idx + 1 :])
+        if left.exists() and right.exists():
+            return left, right
+    left_text, right_text = spec.split(":", 1)
+    return Path(left_text), Path(right_text)
 
 
 def main() -> None:

@@ -91,7 +91,12 @@ def evaluate_sota_prediction_table(
     validation_split: str = "validation",
     test_split: str = "test",
 ) -> pd.DataFrame:
-    """Evaluate prediction sources using validation-selected thresholds."""
+    """Evaluate prediction sources using validation-selected thresholds.
+
+    The validation split is used only for threshold selection. Metrics are then
+    reported for validation plus every available non-train evaluation split,
+    including external_test when a cross-dataset prediction table is supplied.
+    """
     if predictions.empty:
         return pd.DataFrame()
     df = _ensure_optional_columns(
@@ -115,14 +120,20 @@ def evaluate_sota_prediction_table(
             group_key = (group_key,)
         group_meta = dict(zip(group_cols, group_key))
         val = group[group["split"].astype(str).eq(validation_split)].copy()
-        test = group[group["split"].astype(str).eq(test_split)].copy()
-        if val.empty or test.empty or val["label_binary"].nunique() < 2:
+        available_splits = [str(split) for split in group["split"].dropna().astype(str).unique()]
+        evaluation_splits: list[str] = []
+        for split_name in [validation_split, test_split, *sorted(available_splits)]:
+            if split_name == "train" or split_name in evaluation_splits:
+                continue
+            if split_name in available_splits:
+                evaluation_splits.append(split_name)
+        if val.empty or val["label_binary"].nunique() < 2 or not evaluation_splits:
             rows.append(
                 {
                     **group_meta,
                     "metric_split": "skipped",
                     "skipped": True,
-                    "skip_reason": "missing validation/test split or one-class validation labels",
+                    "skip_reason": "missing validation/evaluation split or one-class validation labels",
                 }
             )
             continue
@@ -130,7 +141,10 @@ def evaluate_sota_prediction_table(
             labels_to_binary(val["label_binary"]),
             val["probability"].astype(float).to_numpy(),
         )
-        for split_name, split_frame in ((validation_split, val), (test_split, test)):
+        for split_name in evaluation_splits:
+            split_frame = group[group["split"].astype(str).eq(split_name)].copy()
+            if split_frame.empty:
+                continue
             rows.append(
                 _metric_row(
                     split_frame,

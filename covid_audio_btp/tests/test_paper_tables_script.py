@@ -29,6 +29,11 @@ def test_default_metric_paths_discovers_representation_outputs(tmp_path) -> None
     ci_paths = module.default_ci_paths(metrics_dir=metrics_dir)
 
     assert Path("reports/tables/calibration_under_shift_summary.csv") in metric_paths
+    assert Path("reports/tables/final_validation_fixed_sensitivity_operating_points.csv") in metric_paths
+    assert Path("reports/tables/coughvid_partial_recalibration_metrics.csv") in metric_paths
+    assert Path("reports/tables/reviewer_nested_metadata_audio_comparison.csv") in metric_paths
+    assert Path("reports/tables/reviewer_context_control_exposure.csv") in metric_paths
+    assert Path("data/outputs/metrics/metadata_permutation_importance_metrics.csv") in metric_paths
     assert Path("data/outputs/metrics/domain_shift_audit_metrics.csv") in metric_paths
     assert Path("data/outputs/metrics/domain_adaptation_baseline_metrics.csv") in metric_paths
     assert Path("data/outputs/metrics/ipw_sensitivity_metrics.csv") in metric_paths
@@ -42,6 +47,9 @@ def test_default_metric_paths_discovers_representation_outputs(tmp_path) -> None
     assert metrics_dir / "sota_fusion_metrics.csv" in metric_paths
     assert metrics_dir / "sota_swarm_feature_metrics.csv" in metric_paths
     assert metrics_dir / "sota_gated_stack_metrics.csv" in metric_paths
+    (metrics_dir / "compare_is10_shuffle_retrain_metrics.csv").write_text("auroc\n0.51\n")
+    metric_paths = module.default_metric_paths(metrics_dir=metrics_dir)
+    assert metrics_dir / "compare_is10_shuffle_retrain_metrics.csv" in metric_paths
     assert Path("data/outputs/metrics/temporal_holdout_bootstrap_ci.csv") in ci_paths
     assert metrics_dir / "coughvid_internal_beats_bootstrap_ci.csv" in ci_paths
 
@@ -79,6 +87,7 @@ def test_group_columns_preserve_temporal_ablation_identity() -> None:
             "ablation_name",
             "removed_features",
             "feature_strategy",
+            "nested_model",
             "auroc",
         ]
     )
@@ -92,3 +101,4 @@ def test_group_columns_preserve_temporal_ablation_identity() -> None:
     assert "ablation_name" in group_columns
     assert "removed_features" in group_columns
     assert "feature_strategy" in group_columns
+    assert "nested_model" in group_columns

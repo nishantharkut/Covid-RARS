@@ -22,6 +22,12 @@ DEFAULT_METRIC_PATHS = [
     Path("data/outputs/metrics/metadata_confounding_metrics.csv"),
     Path("data/outputs/metrics/confounding_controlled_audio_metrics.csv"),
     Path("reports/tables/calibration_under_shift_summary.csv"),
+    Path("reports/tables/final_validation_calibration_summary.csv"),
+    Path("reports/tables/final_validation_fixed_sensitivity_operating_points.csv"),
+    Path("reports/tables/coughvid_partial_recalibration_metrics.csv"),
+    Path("reports/tables/reviewer_nested_metadata_audio_comparison.csv"),
+    Path("reports/tables/reviewer_context_control_exposure.csv"),
+    Path("data/outputs/metrics/metadata_permutation_importance_metrics.csv"),
     Path("data/outputs/metrics/domain_shift_audit_metrics.csv"),
     Path("data/outputs/metrics/domain_adaptation_baseline_metrics.csv"),
     Path("data/outputs/metrics/ipw_sensitivity_metrics.csv"),
@@ -31,6 +37,11 @@ DEFAULT_METRIC_PATHS = [
     Path("reports/tables/temporal_matched_cohort_metrics.csv"),
     Path("data/outputs/metrics/strong_baseline_metrics.csv"),
     Path("data/outputs/metrics/sota_fusion_metrics.csv"),
+    Path("data/outputs/metrics/compare_is10_reverse_temporal_metrics.csv"),
+    Path("data/outputs/metrics/compare_is10_multiseed_metrics.csv"),
+    Path("data/outputs/metrics/compare_is10_shuffle_retrain_metrics.csv"),
+    Path("data/outputs/metrics/deep_external_wavlm_cough_metrics.csv"),
+    Path("data/outputs/metrics/deep_external_cnn_bigru_cough_metrics.csv"),
 ]
 
 DEFAULT_CI_PATHS = [
@@ -40,6 +51,7 @@ DEFAULT_CI_PATHS = [
     Path("data/outputs/metrics/coughvid_internal_bootstrap_ci.csv"),
     Path("data/outputs/metrics/confounding_controlled_audio_bootstrap_ci.csv"),
     Path("data/outputs/metrics/temporal_holdout_bootstrap_ci.csv"),
+    Path("reports/tables/final_validation_bootstrap_ci.csv"),
 ]
 
 
@@ -69,6 +81,12 @@ def default_metric_paths(metrics_dir: Path = Path("data/outputs/metrics")) -> li
         "paper_comparable_cv*_metrics.csv",
         "compare_is10_final_validation*_metrics.csv",
         "compare_is10_external_transfer*_metrics.csv",
+        "compare_is10_reverse_temporal*_metrics.csv",
+        "compare_is10_multiseed*_metrics.csv",
+        "compare_is10_shuffle_retrain*_metrics.csv",
+        "metadata_permutation_importance*_metrics.csv",
+        "reviewer_*_metrics.csv",
+        "deep_external_*_metrics.csv",
         "sota_compare_is10*_metrics.csv",
         "paper_comparable_cv*_metrics.csv",
         "compare_is10_final_validation*_metrics.csv",
@@ -109,6 +127,7 @@ def _group_columns(metrics: pd.DataFrame) -> list[str]:
         "model_name",
         "model",
         "modality",
+        "metric_split",
         "modality_combination",
         "feature_strategy",
         "base_feature_set",
@@ -121,6 +140,11 @@ def _group_columns(metrics: pd.DataFrame) -> list[str]:
         "control_method",
         "prediction_source",
         "calibration_method",
+        "analysis",
+        "nested_model",
+        "context_column",
+        "subgroup_column",
+        "subgroup_value",
         "feature_strategy",
     ]
     return [col for col in candidates if col in metrics.columns]

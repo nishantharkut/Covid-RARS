@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from zipfile import ZIP_DEFLATED, ZipFile
 
 
@@ -62,6 +62,8 @@ BUNDLE_ARTIFACTS = [
     Path("covid_audio_btp/data/outputs/metrics/ipw_sensitivity_metrics.csv"),
     Path("covid_audio_btp/data/outputs/metrics/domain_adaptation_baseline_metrics.csv"),
 ]
+
+BUNDLE_ARTIFACTS = [PurePosixPath(path.as_posix()) for path in BUNDLE_ARTIFACTS]
 
 
 def default_bundle_artifacts() -> list[Path]:

@@ -19,6 +19,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--metrics-output", type=Path, default=Path("data/outputs/metrics/cnn_metrics.csv"))
     parser.add_argument("--validation-output", type=Path, default=Path("data/outputs/metrics/cnn_logits_validation.csv"))
     parser.add_argument("--test-output", type=Path, default=Path("data/outputs/metrics/cnn_logits_test.csv"))
+    parser.add_argument("--external-output", type=Path, default=Path("data/outputs/metrics/cnn_logits_external_test.csv"))
+    parser.add_argument("--external-metrics-output", type=Path, default=Path("data/outputs/metrics/cnn_metrics_external_test.csv"))
     parser.add_argument("--history-output", type=Path, default=Path("data/outputs/metrics/cnn_training_history.csv"))
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--batch-size", type=int, default=32)
@@ -44,6 +46,11 @@ def main() -> None:
     pd.DataFrame([artifacts.metrics]).to_csv(args.metrics_output, index=False)
     artifacts.validation_predictions.to_csv(args.validation_output, index=False)
     artifacts.test_predictions.to_csv(args.test_output, index=False)
+    if artifacts.external_predictions is not None and artifacts.external_metrics is not None:
+        args.external_output.parent.mkdir(parents=True, exist_ok=True)
+        args.external_metrics_output.parent.mkdir(parents=True, exist_ok=True)
+        artifacts.external_predictions.to_csv(args.external_output, index=False)
+        pd.DataFrame([artifacts.external_metrics]).to_csv(args.external_metrics_output, index=False)
     artifacts.history.to_csv(args.history_output, index=False)
     print(f"Wrote CNN model and metrics for modality={args.modality}")
 

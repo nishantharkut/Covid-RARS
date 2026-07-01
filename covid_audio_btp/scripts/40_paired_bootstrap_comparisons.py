@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from covid_audio_btp.tier2_comparisons import build_best_vs_baseline_paired_comparisons
 
@@ -34,7 +37,20 @@ DEFAULT_PAIRS = [
 
 
 def _parse_pair(spec: str) -> tuple[Path, Path, str]:
-    parts = spec.split(":")
+    for first_idx, char in enumerate(spec):
+        if char != ":":
+            continue
+        predictions_path = Path(spec[:first_idx])
+        if not predictions_path.exists():
+            continue
+        for second_idx in range(first_idx + 1, len(spec)):
+            if spec[second_idx] != ":":
+                continue
+            metrics_path = Path(spec[first_idx + 1 : second_idx])
+            source = spec[second_idx + 1 :]
+            if metrics_path.exists() and source:
+                return predictions_path, metrics_path, source
+    parts = spec.split(":", 2)
     if len(parts) != 3:
         raise ValueError("Prediction/metric pair specs must be predictions_csv:metrics_csv:prediction_source")
     return Path(parts[0]), Path(parts[1]), parts[2]

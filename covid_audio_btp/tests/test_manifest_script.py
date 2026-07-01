@@ -37,6 +37,15 @@ def test_default_artifact_paths_discovers_representation_outputs(tmp_path) -> No
     assert tmp_path / "reports" / "tables" / "calibration_under_shift_bins.csv" in artifacts
     assert tmp_path / "reports" / "tables" / "calibration_under_shift_summary.csv" in artifacts
     assert tmp_path / "reports" / "tables" / "clinical_operating_points.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "final_validation_shuffle_label_sanity.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "metadata_confounding_shuffle_retrain_sanity.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "coughvid_partial_recalibration_metrics.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "reviewer_nested_metadata_audio_comparison.csv" in artifacts
+    assert tmp_path / "reports" / "tables" / "reviewer_support_overlap_positivity.csv" in artifacts
+    assert tmp_path / "reports" / "figures" / "reviewer_decision_curve_analysis.svg" in artifacts
+    assert tmp_path / "reports" / "final" / "LABEL_CONSTRUCTION_AUDIT.md" in artifacts
+    assert tmp_path / "reports" / "final" / "MULTIPLICITY_AND_ANALYSIS_SCOPE.md" in artifacts
+    assert tmp_path / "data" / "outputs" / "metrics" / "metadata_permutation_importance_metrics.csv" in artifacts
     assert tmp_path / "data" / "outputs" / "metrics" / "domain_shift_audit_metrics.csv" in artifacts
     assert tmp_path / "data" / "outputs" / "metrics" / "domain_adaptation_baseline_metrics.csv" in artifacts
     assert tmp_path / "data" / "outputs" / "metrics" / "domain_adaptation_baseline_predictions.csv" in artifacts
@@ -98,3 +107,9 @@ def test_default_artifact_paths_discovers_representation_outputs(tmp_path) -> No
     assert tables_dir / "sota_swarm_feature_selection.csv" in artifacts
     assert tables_dir / "sota_gated_stack_candidates.csv" in artifacts
     assert tables_dir / "feature_shift_beats_cough.csv" in artifacts
+
+    (metrics_dir / "compare_is10_reverse_temporal_metrics.csv").write_text("auroc\n0.7\n")
+    (tables_dir / "metadata_confounding_permutation_importance.csv").write_text("feature\nage\n")
+    artifacts = module.default_artifact_paths(project_root=tmp_path)
+    assert metrics_dir / "compare_is10_reverse_temporal_metrics.csv" in artifacts
+    assert tables_dir / "metadata_confounding_permutation_importance.csv" in artifacts

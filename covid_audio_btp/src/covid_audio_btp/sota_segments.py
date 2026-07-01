@@ -13,6 +13,7 @@ from covid_audio_btp.strong_features import augment_waveform
 
 
 SOTA_PREPROCESSING_VERSION = "sota_active_segments_v1"
+SUPPORTED_SOTA_SPLITS = {"train", "validation", "test", "external_test"}
 
 
 @dataclass(frozen=True)
@@ -94,7 +95,7 @@ def _filter_metadata(
         allowed = {str(m) for m in modalities}
         df = df[df["modality"].astype(str).isin(allowed)]
     df = df[df["label_binary"].isin(["positive", "negative"])]
-    df = df[df["split"].isin(["train", "validation", "test"])]
+    df = df[df["split"].astype(str).isin(SUPPORTED_SOTA_SPLITS)]
     if quality_mode == "quality_ok_only" and "quality_flag" in df.columns:
         df = df[df["quality_flag"].astype(str).str.lower().eq("ok")]
     elif quality_mode not in {"all_samples", "quality_ok_only"}:
