@@ -27,6 +27,7 @@ DEFAULT_METRIC_PATHS = [
     Path("reports/tables/coughvid_partial_recalibration_metrics.csv"),
     Path("reports/tables/reviewer_nested_metadata_audio_comparison.csv"),
     Path("reports/tables/reviewer_context_control_exposure.csv"),
+    Path("data/outputs/metrics/reviewer_incremental_audio_metadata_metrics.csv"),
     Path("data/outputs/metrics/metadata_permutation_importance_metrics.csv"),
     Path("data/outputs/metrics/domain_shift_audit_metrics.csv"),
     Path("data/outputs/metrics/domain_adaptation_baseline_metrics.csv"),
