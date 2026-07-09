@@ -208,7 +208,7 @@ WavLM:
 - Max segments per recording: `4`.
 - Epochs: `8`.
 - Batch size: `8`.
-- Gradient accumulation: `4`.
+- gradient accumulation: `4`.
 - Learning rate: `2e-5`.
 - Head learning rate: `1e-4`.
 - Unfrozen top layers: `4`.
@@ -537,4 +537,3 @@ python scripts/24_make_experiment_manifest.py
 ```text
 The implementation is not one model; it is a full evaluation system. It extracts multiple acoustic feature families, selects features only on training data, trains several model families and fusion routes, evaluates them under internal, temporal, and external protocols, and adds reviewer-grade checks for uncertainty, calibration, confounding, shuffle sanity, support overlap, decision curves, and incremental value over metadata.
 ```
-
