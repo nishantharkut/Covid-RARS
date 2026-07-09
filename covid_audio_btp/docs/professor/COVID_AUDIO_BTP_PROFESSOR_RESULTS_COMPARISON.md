@@ -1,4 +1,4 @@
-# COVID Audio BTP Professor Results Comparison
+﻿# COVID Audio BTP Professor Results Comparison
 
 This document explains how to compare our results with published work without making unfair or unsafe claims.
 
@@ -23,7 +23,7 @@ Those numbers are usually reported under internal validation protocols. Our inte
 | Time-stratified participant split | `0.849` AUROC | More conservative internal evidence |
 | Paper-comparable cough 10-fold CV | `0.819` AUROC | Fairer comparison to cough-only CV papers |
 | Temporal early-to-late | `0.698` AUROC | Main drift evidence |
-| COUGHVID handcrafted cough external | `0.523-0.543` AUROC | Main external collapse evidence |
+| COUGHVID measured audio-summary cough external | `0.523-0.543` AUROC | Main external collapse evidence |
 | WavLM transformer COUGHVID external | `0.484` AUROC | Shows transformer does not solve transfer |
 | CNN-BiGRU COUGHVID external | `0.548` AUROC | Shows neural spectrogram model also weak |
 | Metadata-only full safe metadata | `0.964` AUROC | Shortcut/confounding evidence |
@@ -54,7 +54,7 @@ Use this when discussing deployment, real-world screening, or clinical usefulnes
 Our strict rows:
 
 - Temporal early-to-late: `0.698` AUROC.
-- COUGHVID external handcrafted: `0.523-0.543` AUROC.
+- COUGHVID external measured audio-summary: `0.523-0.543` AUROC.
 - COUGHVID external WavLM: `0.484` AUROC.
 - COUGHVID external CNN-BiGRU: `0.548` AUROC.
 
@@ -95,7 +95,7 @@ Safe comparison:
 
 - Their reported internal/cross-dataset setup is not automatically identical to our strict Coswara-to-COUGHVID transfer setup.
 - If they report high internal AUC values on Coswara or COUGHVID, compare those to our internal or 10-fold rows, not directly to our external-transfer row.
-- Our stricter point is that when a model trained on Coswara cough is applied to COUGHVID cough with our frozen pipeline, AUROC falls to `0.523-0.543` for handcrafted models and `0.484-0.548` for deep branches.
+- Our stricter point is that when a model trained on Coswara cough is applied to COUGHVID cough with our frozen pipeline, AUROC falls to `0.523-0.543` for measured audio-summary models and `0.484-0.548` for deep branches.
 
 What to say:
 
@@ -201,5 +201,6 @@ Ma'am, npj Digital Medicine is the high-prestige reach target only if we write t
 
 Use this exact positioning in a presentation:
 
-> Our internal model performance is strong, but the paper's novelty is the reliability evidence: temporal drift, metadata shortcuts, calibration failure, decision-curve weakness, feature non-stationarity, and external collapse across handcrafted, CNN, and transformer branches. This is why our study is stronger as a biomedical AI validation paper than as a SOTA classifier paper.
+> Our internal model performance is strong, but the paper's novelty is the reliability evidence: temporal drift, metadata shortcuts, calibration failure, decision-curve weakness, feature non-stationarity, and external collapse across measured audio-summary, CNN, and transformer branches. This is why our study is stronger as a biomedical AI validation paper than as a SOTA classifier paper.
+
 

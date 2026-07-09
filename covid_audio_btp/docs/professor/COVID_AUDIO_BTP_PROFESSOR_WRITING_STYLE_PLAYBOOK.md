@@ -1,4 +1,4 @@
-# COVID Audio BTP Professor Writing Style and Venue Playbook
+﻿# COVID Audio BTP Professor Writing Style and Venue Playbook
 
 This playbook explains how to write and present the COVID audio BTP work so it sounds like a serious biomedical AI paper, not like an engineering log or a failed SOTA attempt.
 
@@ -71,7 +71,7 @@ Use these contribution bullets:
 
 1. We construct a multimodal COVID respiratory-audio benchmark pipeline combining strong acoustic descriptors, OpenSMILE ComParE 2016, IS10, model selection, and multimodal probability fusion.
 2. We evaluate the pipeline across a validation ladder: existing participant split, time-stratified participant split, early-to-late temporal split, and COUGHVID external cough transfer.
-3. We show that strong internal performance (`0.897` AUROC) degrades under temporal and external validation, with COUGHVID cough transfer collapsing near chance across handcrafted, CNN-BiGRU, and WavLM transformer branches.
+3. We show that strong internal performance (`0.897` AUROC) degrades under temporal and external validation, with COUGHVID cough transfer collapsing near chance across measured audio-summary, CNN-BiGRU, and WavLM transformer branches.
 4. We quantify shortcut-learning mechanisms using metadata-only models, permutation importance, shuffle-label sanity checks, feature-selection stability, support-overlap diagnostics, calibration, and decision-curve analysis.
 5. We test whether audio adds incremental value beyond metadata/symptoms and show that any gain is sample-limited and not yet statistically secure.
 
@@ -158,7 +158,7 @@ Use figures that look like biomedical AI evidence, not decorative AI diagrams.
 |---|---|---|
 | Figure 1 | Dataset and validation ladder pipeline | Shows this is a reliability study |
 | Figure 2 | Internal -> time-stratified -> temporal -> external performance ladder | Main result visually |
-| Figure 3 | External transfer by model family: handcrafted, WavLM, CNN-BiGRU | Shows collapse is architecture-independent |
+| Figure 3 | External transfer by model family: measured audio-summary, WavLM, CNN-BiGRU | Shows collapse is architecture-independent |
 | Figure 4 | Metadata shortcut/permutation importance | Shows mechanism |
 | Figure 5 | Calibration/decision-curve evidence | Shows clinical screening weakness |
 | Supplement | Feature-selection stability, subgroup/equity, support overlap | Reviewer defense |
@@ -280,4 +280,5 @@ Avoid:
 ```text
 Ma'am, the paper is stronger if we do not chase one inflated leaderboard number. We built a strong internal model at 0.897 AUROC, tested classical, deep, and transformer branches, then showed that temporal drift, metadata shortcuts, feature non-stationarity, and external dataset shift make internal COVID-audio performance unreliable. This is exactly the kind of evidence that reputable biomedical AI venues expect now.
 ```
+
 

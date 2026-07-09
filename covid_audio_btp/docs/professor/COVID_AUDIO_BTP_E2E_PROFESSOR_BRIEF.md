@@ -1,6 +1,8 @@
-# COVID Audio BTP End-to-End Professor Brief
+﻿# COVID Audio BTP End-to-End Professor Brief
 
 This document is a discussion guide for explaining the complete COVID respiratory-audio project to a professor who wants reputable venues, strong numbers, and a clear implementation story. All paths are relative to `covid_audio_btp/` unless stated otherwise.
+
+For simple explanations of terms such as audio-summary features, time-stratified validation, early-to-late validation, shuffle-label sanity, temporal robustness, calibration, support overlap, and decision curves, use `COVID_AUDIO_BTP_PLAIN_LANGUAGE_EXPLANATION_GUIDE.md`.
 
 The safest project sentence is:
 
@@ -10,14 +12,14 @@ This is not a pure leaderboard/SOTA paper. The internal result is strong (`0.897
 
 ## One-Minute Thesis
 
-Public COVID-audio studies often report high internal metrics, but the real question is whether those models survive realistic validation. Our work builds a strong multimodal respiratory-audio pipeline on Coswara using cough, breath, and speech; improves the handcrafted feature branch with OpenSMILE ComParE 2016 and IS10 descriptors; evaluates many classical, ensemble, deep, and transformer branches; and then stress-tests the final pipeline under stricter validation.
+Public COVID-audio studies often report high internal metrics, but the real question is whether those models survive realistic validation. Our work builds a strong multimodal respiratory-audio pipeline on Coswara using cough, breath, and speech; improves the measured audio-summary feature branch with OpenSMILE ComParE 2016 and IS10 descriptors; evaluates many classical, ensemble, deep, and transformer branches; and then stress-tests the final pipeline under stricter validation.
 
 The final story is:
 
 - Internal participant-split fusion reaches `0.897` AUROC and `0.863` AUPRC.
 - Time-stratified participant validation remains high but lower at `0.849` AUROC.
 - Early-to-late temporal validation drops to about `0.698` AUROC, with multi-seed temporal mean around `0.691 +/- 0.006`.
-- COUGHVID external transfer collapses to near-random performance: handcrafted cough models `0.523-0.543` AUROC, WavLM transformer `0.484` AUROC, CNN-BiGRU `0.548` AUROC.
+- COUGHVID external transfer collapses to near-random performance: measured audio-summary cough models `0.523-0.543` AUROC, WavLM transformer `0.484` AUROC, CNN-BiGRU `0.548` AUROC.
 - Metadata-only models predict COVID labels extremely well (`0.964` AUROC for full safe metadata, `0.932` for symptoms-only), and shuffle-label sanity checks drop to chance (`~0.50`), confirming the shortcut is real dataset structure rather than a software bug.
 - Feature-selection stability over time is very low: top-800 early vs late acoustic features have Jaccard overlap `0.074`.
 
@@ -29,7 +31,7 @@ The professor-facing framing:
 
 | Area | Main files |
 |---|---|
-| Strong handcrafted/audio baseline | `src/covid_audio_btp/strong_baseline.py`, `src/covid_audio_btp/strong_features.py`, `scripts/49_extract_strong_features.py` |
+| Strong measured audio-summary/audio baseline | `src/covid_audio_btp/strong_baseline.py`, `src/covid_audio_btp/strong_features.py`, `scripts/49_extract_strong_features.py` |
 | OpenSMILE ComParE+IS10 rescue branch | `scripts/56_run_compare_is10_rescue.py`, `src/covid_audio_btp/compare_is10_rescue.py`, `src/covid_audio_btp/opensmile_features.py` |
 | Final validation ladder | `scripts/58_run_compare_is10_final_validation.py`, `src/covid_audio_btp/compare_is10_final_validation.py`, `reports/tables/compare_is10_final_validation_summary.csv` |
 | Paper-comparable 10-fold CV | `scripts/57_run_paper_comparable_cv.py`, `reports/tables/paper_comparable_cv_metric_table.csv` |
@@ -96,7 +98,7 @@ That warning is expected for rows not used in supervised binary evaluation. It i
 
 ### 3. Acoustic feature extraction
 
-We used three handcrafted/acoustic feature groups:
+We used three measured audio-summary/acoustic feature groups:
 
 | Feature group | What it contains | Why used |
 |---|---|---|
@@ -143,7 +145,7 @@ Deep/model-representation branches:
 | Model | What it proves |
 |---|---|
 | WavLM base-plus | Yes, we used a transformer. It is a self-supervised speech transformer, fine-tuned on cough segments. |
-| CNN-BiGRU spectrogram model | Neural spectrogram route independent of handcrafted features |
+| CNN-BiGRU spectrogram model | Neural spectrogram route independent of measured audio-summary features |
 | BEATs/PANNs earlier representation work | Representation-shift/domain evidence from pretrained audio feature families |
 
 Nature-inspired/swarm branch:
@@ -183,7 +185,7 @@ The final paper should emphasize a validation ladder:
 | Existing participant split | Strong internal performance under the repository split | `0.897` AUROC |
 | Time-stratified participant split | Participant separation with time structure considered | `0.849` AUROC |
 | Early-to-late temporal split | Whether the model survives calendar drift | `0.698` AUROC |
-| COUGHVID external cough transfer | Whether cough representations survive another dataset | `0.523-0.543` AUROC for handcrafted, `0.484` WavLM, `0.548` CNN-BiGRU |
+| COUGHVID external cough transfer | Whether cough representations survive another dataset | `0.523-0.543` AUROC for measured audio-summary, `0.484` WavLM, `0.548` CNN-BiGRU |
 
 The key interpretation:
 
@@ -196,7 +198,7 @@ The key interpretation:
 | Existing participant split | `0.897` AUROC, `0.863` AUPRC | Strong internal multimodal performance |
 | Time-stratified split | `0.849` AUROC, `0.783` AUPRC | Still strong, but lower |
 | Early-to-late temporal split | `0.698` AUROC | Temporal drift damages performance |
-| COUGHVID external handcrafted cough | `0.523-0.543` AUROC | Near-random external transfer |
+| COUGHVID external measured audio-summary cough | `0.523-0.543` AUROC | Near-random external transfer |
 | WavLM transformer external cough | `0.484` AUROC | Transformer does not solve dataset shift |
 | CNN-BiGRU external cough | `0.548` AUROC | Deep spectrogram branch also weak externally |
 | Full metadata-only shortcut | `0.964` AUROC | Context/metadata strongly predicts labels |
@@ -210,7 +212,7 @@ The key interpretation:
 Use this if she asks, "What is the achievement if not SOTA?"
 
 ```text
-Ma'am, the strongest internal model reaches 0.897 AUROC, so the pipeline is not weak internally. The main contribution is that we then tested whether this performance survives realistic conditions. Under temporal and external validation, the performance drops sharply, and the same collapse appears for handcrafted models, WavLM transformer, and CNN-BiGRU. This is stronger than simply reporting one high number because it tells reviewers what is actually deployable and what is only an internal benchmark artifact.
+Ma'am, the strongest internal model reaches 0.897 AUROC, so the pipeline is not weak internally. The main contribution is that we then tested whether this performance survives realistic conditions. Under temporal and external validation, the performance drops sharply, and the same collapse appears for measured audio-summary models, WavLM transformer, and CNN-BiGRU. This is stronger than simply reporting one high number because it tells reviewers what is actually deployable and what is only an internal benchmark artifact.
 ```
 
 If she asks, "Why should a good journal accept this?"
@@ -222,7 +224,7 @@ Because reputable biomedical AI journals increasingly care about external valida
 If she asks, "Did we use transformer?"
 
 ```text
-Yes. WavLM base-plus is a self-supervised transformer model. It reached 0.812 AUROC internally on pooled cough, but collapsed to 0.484 AUROC on COUGHVID. That is important because it shows the reliability problem is not only because we used classical handcrafted features.
+Yes. WavLM base-plus is a self-supervised transformer model. It reached 0.812 AUROC internally on pooled cough, but collapsed to 0.484 AUROC on COUGHVID. That is important because it shows the reliability problem is not only because we used classical measured audio-summary features.
 ```
 
 If she asks, "Why not Grad-CAM?"
@@ -249,7 +251,7 @@ We should not say fabricated. We should say their reported numbers are often und
    - Shows the three main Coswara validation ladder rows.
 
 2. `reports/tables/reviewer_external_model_family_transfer_summary.csv`
-   - Shows handcrafted, WavLM transformer, and CNN-BiGRU external transfer.
+   - Shows measured audio-summary, WavLM transformer, and CNN-BiGRU external transfer.
 
 3. `reports/tables/final_validation_delta_bootstrap_ci.csv`
    - Shows confidence intervals for drops, including internal-to-COUGHVID.
@@ -290,4 +292,5 @@ The strongest direction is:
 > A biomedical AI reliability paper showing that strong internal COVID respiratory-audio performance can be driven by temporal, protocol, and dataset shortcuts, and that these shortcuts persist across classical, deep, and transformer representations.
 
 The best realistic venue strategy is documented in `COVID_AUDIO_BTP_PROFESSOR_WRITING_STYLE_PLAYBOOK.md`.
+
 

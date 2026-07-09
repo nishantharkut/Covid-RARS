@@ -1,4 +1,4 @@
-# COVID Audio BTP Results Evidence Ledger
+﻿# COVID Audio BTP Results Evidence Ledger
 
 This file is the evidence ledger for professor discussion and manuscript writing. It records the main result, the source artifact, and the safe interpretation.
 
@@ -8,7 +8,8 @@ The current evidence is generated from the pushed branch:
 
 ```text
 publication-upgrade-confounding-da
-latest local head after sync: a276a20 Add incremental audio metadata reviewer evidence
+result artifacts synced through: a276a20 Add incremental audio metadata reviewer evidence
+professor documentation commits added after that evidence snapshot
 ```
 
 Core generated artifacts:
@@ -73,7 +74,7 @@ Safe interpretation:
 What to say:
 
 ```text
-The external failure is not only a handcrafted-feature issue. WavLM and CNN-BiGRU were also tested, and neither produced reliable external discrimination.
+The external failure is not only a measured-audio-summary issue. WavLM and CNN-BiGRU were also tested, and neither produced reliable external discrimination.
 ```
 
 ## Result 3: Bootstrap Drop Confidence Intervals
@@ -302,4 +303,5 @@ Do not write these:
 - "COUGHVID proves full multimodal fusion failure."
 - "WavLM was not tried."
 - "The audio+metadata result proves audio is clinically useful beyond symptoms."
+
 

@@ -1,6 +1,8 @@
-# COVID Audio BTP Implementation Defense Guide
+﻿# COVID Audio BTP Implementation Defense Guide
 
 This guide is for answering implementation questions in a viva, professor meeting, or code demonstration. It is deliberately high-level but specific enough to memorize.
+
+For non-technical explanations of the difficult terms, use `COVID_AUDIO_BTP_PLAIN_LANGUAGE_EXPLANATION_GUIDE.md` before the detailed sections below.
 
 ## One-Line Implementation Summary
 
@@ -287,7 +289,7 @@ Purpose:
 
 Main result:
 
-- Handcrafted models `0.523-0.543` AUROC.
+- measured audio-summary models `0.523-0.543` AUROC.
 - WavLM `0.484` AUROC.
 - CNN-BiGRU `0.548` AUROC.
 
@@ -537,3 +539,4 @@ python scripts/24_make_experiment_manifest.py
 ```text
 The implementation is not one model; it is a full evaluation system. It extracts multiple acoustic feature families, selects features only on training data, trains several model families and fusion routes, evaluates them under internal, temporal, and external protocols, and adds reviewer-grade checks for uncertainty, calibration, confounding, shuffle sanity, support overlap, decision curves, and incremental value over metadata.
 ```
+
