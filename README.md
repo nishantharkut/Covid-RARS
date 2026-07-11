@@ -27,7 +27,7 @@ The best internal multimodal Coswara setting reaches `0.897` AUROC and `0.863` A
 | Symptoms-only metadata model | `0.932` AUROC | Symptoms alone are a strong shortcut predictor |
 | Early/late acoustic feature-selection overlap | `0.074` Jaccard | Selected acoustic features are non-stationary |
 
-Source ledger: [`covid_audio_btp/docs/professor/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md`](covid_audio_btp/docs/professor/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md)
+Source ledger: [`covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md`](covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md)
 
 ## Contribution
 
@@ -54,7 +54,7 @@ The repository contains a complete research pipeline:
 | Feature extraction | MFCC/mel/spectral/acoustic summaries, OpenSMILE ComParE/IS10 routes, SSL/representation feature routes |
 | Models | Classical tabular models, calibrated branches, fusion models, CNN-BiGRU spectrogram branch, WavLM branch |
 | Reliability checks | Temporal holdout, early-to-late validation, external transfer, metadata confounding, shuffle sanity, bootstrap CI, calibration, decision curves, support overlap, feature stability |
-| Reporting | Paper tables, experiment manifests, professor evidence docs, manuscript drafts, preserved result bundles |
+| Reporting | Paper tables, experiment manifests, research briefing docs, manuscript drafts, preserved result bundles |
 
 ## Repository Map
 
@@ -75,12 +75,12 @@ Detailed map: [`docs/repository/REPOSITORY_MAP.md`](docs/repository/REPOSITORY_M
 
 ## Review Order
 
-For a professor, reviewer, or collaborator, start here:
+For a reviewer, collaborator, or manuscript writer, start here:
 
-1. [`covid_audio_btp/docs/professor/COVID_AUDIO_BTP_E2E_PROFESSOR_BRIEF.md`](covid_audio_btp/docs/professor/COVID_AUDIO_BTP_E2E_PROFESSOR_BRIEF.md)
-2. [`covid_audio_btp/docs/professor/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md`](covid_audio_btp/docs/professor/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md)
-3. [`covid_audio_btp/docs/professor/COVID_AUDIO_BTP_PLAIN_LANGUAGE_EXPLANATION_GUIDE.md`](covid_audio_btp/docs/professor/COVID_AUDIO_BTP_PLAIN_LANGUAGE_EXPLANATION_GUIDE.md)
-4. [`covid_audio_btp/docs/professor/COVID_AUDIO_BTP_PROFESSOR_RESULTS_COMPARISON.md`](covid_audio_btp/docs/professor/COVID_AUDIO_BTP_PROFESSOR_RESULTS_COMPARISON.md)
+1. [`covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_E2E_PROJECT_BRIEF.md`](covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_E2E_PROJECT_BRIEF.md)
+2. [`covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md`](covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md)
+3. [`covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_PLAIN_LANGUAGE_EXPLANATION_GUIDE.md`](covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_PLAIN_LANGUAGE_EXPLANATION_GUIDE.md)
+4. [`covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_RESULTS_COMPARISON.md`](covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_RESULTS_COMPARISON.md)
 5. [`covid_audio_btp/references/verified_source_registry.md`](covid_audio_btp/references/verified_source_registry.md)
 6. [`ARTIFACT.md`](ARTIFACT.md)
 
@@ -88,9 +88,9 @@ For a professor, reviewer, or collaborator, start here:
 
 | Question | File to inspect |
 |---|---|
-| What are the final validation-ladder numbers? | [`covid_audio_btp/docs/professor/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md`](covid_audio_btp/docs/professor/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md) |
-| What should be presented to the professor first? | [`covid_audio_btp/docs/professor/COVID_AUDIO_BTP_E2E_PROFESSOR_BRIEF.md`](covid_audio_btp/docs/professor/COVID_AUDIO_BTP_E2E_PROFESSOR_BRIEF.md) |
-| How should results be explained in simple language? | [`covid_audio_btp/docs/professor/COVID_AUDIO_BTP_PLAIN_LANGUAGE_EXPLANATION_GUIDE.md`](covid_audio_btp/docs/professor/COVID_AUDIO_BTP_PLAIN_LANGUAGE_EXPLANATION_GUIDE.md) |
+| What are the final validation-ladder numbers? | [`covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md`](covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md) |
+| What explains the complete project first? | [`covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_E2E_PROJECT_BRIEF.md`](covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_E2E_PROJECT_BRIEF.md) |
+| How should results be explained in simple language? | [`covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_PLAIN_LANGUAGE_EXPLANATION_GUIDE.md`](covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_PLAIN_LANGUAGE_EXPLANATION_GUIDE.md) |
 | Where are source and claim checks documented? | [`covid_audio_btp/references/verified_source_registry.md`](covid_audio_btp/references/verified_source_registry.md) |
 | Where are frozen result folders? | [`results/frozen/`](results/frozen/) |
 | Where are representation outputs? | [`results/representations/`](results/representations/) |
@@ -109,7 +109,7 @@ flowchart LR
     F --> H["COUGHVID cough-only external transfer"]
     G --> I["Reliability checks<br/>metadata confounding, shuffle sanity,<br/>calibration, DCA, CI, support overlap"]
     H --> I
-    I --> J["Tables, manuscripts, professor evidence docs"]
+    I --> J["Tables, manuscripts, research briefing docs"]
 ```
 
 ## Experiment Families

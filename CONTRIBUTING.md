@@ -27,8 +27,8 @@ If full dependencies are not installed, document which checks were skipped and w
 
 Strong claims should cite one of:
 
-- `covid_audio_btp/docs/professor/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md`
-- `covid_audio_btp/docs/professor/COVID_AUDIO_BTP_E2E_PROFESSOR_BRIEF.md`
+- `covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md`
+- `covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_E2E_PROJECT_BRIEF.md`
 - `covid_audio_btp/references/verified_source_registry.md`
 - Generated CSV/JSON artifacts under result directories or package-level `reports/` and `data/outputs/`.
 

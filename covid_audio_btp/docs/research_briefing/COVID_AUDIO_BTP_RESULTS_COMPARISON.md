@@ -1,4 +1,4 @@
-﻿# COVID Audio BTP Professor Results Comparison
+# COVID Audio BTP Results Comparison
 
 This document explains how to compare our results with published work without making unfair or unsafe claims.
 
@@ -9,7 +9,7 @@ Our work should be compared on two axes:
 1. **Apples-to-apples internal comparison**: When we use internal or 10-fold style evaluation, our numbers are good but not leaderboard SOTA.
 2. **Apples-to-oranges strict validation comparison**: When we use temporal and external validation, our numbers are lower because the test is harder and more deployment-relevant.
 
-The professor may focus on the highest reported AUROC in other papers. The correct response is not to dismiss those papers. The correct response is:
+A reviewer may focus on the highest reported AUROC in other papers. The correct response is not to dismiss those papers. The correct response is:
 
 ```text
 Those numbers are usually reported under internal validation protocols. Our internal number is also high at 0.897 AUROC. The difference is that we additionally tested temporal drift, metadata shortcuts, calibration, decision-curve behavior, and COUGHVID transfer. Under those stricter tests, the model becomes unreliable.
@@ -117,7 +117,7 @@ Their result is not directly comparable unless the split, label construction, pa
 
 ### 3. COVID-19 Detection From Respiratory Sounds With Hierarchical Spectrogram Transformers
 
-This paper is relevant because the professor may ask why we did not use a transformer or spectrogram saliency.
+This paper is relevant because a reviewer may ask why we did not use a transformer or spectrogram saliency.
 
 Safe comparison:
 
@@ -146,7 +146,7 @@ Safe comparison:
 
 Use this table in meetings.
 
-| Professor asks | Best response |
+| Question | Best response |
 |---|---|
 | "This paper has 0.92 AUC. Why are you lower?" | "That is an internal or different-protocol number. Our internal result is also high at 0.897. Our stricter temporal/external rows intentionally test deployment shift." |
 | "Why not just do their model?" | "We tested multiple model families including boosted trees, SVC, CNN-BiGRU, and WavLM transformer. The failure persists across families, so the issue is structural validation, not one missing classifier." |
@@ -189,9 +189,9 @@ Current venue fit, using official/public scope pages checked during doc creation
 | IEEE Journal of Biomedical and Health Informatics | Good if technical/statistical validation is emphasized | Needs strong engineering/statistical rigor and clean figures |
 | Computers in Biology and Medicine | Realistic Elsevier biomedical-computing target | Better if written as computational validation and biomedical signal-processing reliability |
 | Biomedical Signal Processing and Control | Realistic signal-processing fallback | Good if the focus is respiratory audio features and validation |
-| JMIR AI / JMIR Formative Research route | Useful if the paper is framed around digital-health AI evaluation | Less "famous" to the professor, but credible in digital health |
+| JMIR AI / JMIR Formative Research route | Useful if the paper is framed around digital-health AI evaluation | Less famous to some readers, but credible in digital health |
 
-How to present to professor:
+How to present:
 
 ```text
 Ma'am, npj Digital Medicine is the high-prestige reach target only if we write this as a clinical AI reliability audit, not as a classifier paper. The most realistic strong targets are PLOS Digital Health, IEEE JBHI, and Computers in Biology and Medicine. The submission order can start ambitious, then move to the more realistic venue without changing the core manuscript.

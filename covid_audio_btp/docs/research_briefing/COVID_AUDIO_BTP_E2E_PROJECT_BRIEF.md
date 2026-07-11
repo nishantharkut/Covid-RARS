@@ -1,6 +1,6 @@
-﻿# COVID Audio BTP End-to-End Professor Brief
+# COVID Audio BTP End-to-End Project Brief
 
-This document is a discussion guide for explaining the complete COVID respiratory-audio project to a professor who wants reputable venues, strong numbers, and a clear implementation story. All paths are relative to `covid_audio_btp/` unless stated otherwise.
+This document is a discussion guide for explaining the complete COVID respiratory-audio project to a research reviewer who wants reputable venues, strong numbers, and a clear implementation story. All paths are relative to `covid_audio_btp/` unless stated otherwise.
 
 For simple explanations of terms such as audio-summary features, time-stratified validation, early-to-late validation, shuffle-label sanity, temporal robustness, calibration, support overlap, and decision curves, use `COVID_AUDIO_BTP_PLAIN_LANGUAGE_EXPLANATION_GUIDE.md`.
 
@@ -23,7 +23,7 @@ The final story is:
 - Metadata-only models predict COVID labels extremely well (`0.964` AUROC for full safe metadata, `0.932` for symptoms-only), and shuffle-label sanity checks drop to chance (`~0.50`), confirming the shortcut is real dataset structure rather than a software bug.
 - Feature-selection stability over time is very low: top-800 early vs late acoustic features have Jaccard overlap `0.074`.
 
-The professor-facing framing:
+The meeting framing:
 
 > The paper should not say "we failed to beat SOTA." It should say "we built a strong pipeline, then proved that common high internal COVID-audio scores are not sufficient because they depend on collection context, calendar time, and dataset protocol."
 
@@ -54,7 +54,7 @@ flowchart LR
     H --> I["External transfer\nCOUGHVID cough-only"]
     H --> J["Reviewer audits\nCI, calibration, DCA, shuffle, subgroups,\nsupport overlap, feature stability"]
     I --> J
-    J --> K["Manuscripts and professor evidence docs"]
+    J --> K["Manuscripts and research briefing docs"]
 ```
 
 ## What Happens at Each Stage
@@ -207,7 +207,7 @@ The key interpretation:
 | Feature stability early vs late | `0.074` Jaccard | Selected acoustic features are non-stationary |
 | Domain support outside source | `25.2%` external outside support band | COUGHVID partly lies outside Coswara feature support |
 
-## How to Explain This to the Professor
+## How to Explain This in a Meeting
 
 Use this if she asks, "What is the achievement if not SOTA?"
 
@@ -291,6 +291,6 @@ The strongest direction is:
 
 > A biomedical AI reliability paper showing that strong internal COVID respiratory-audio performance can be driven by temporal, protocol, and dataset shortcuts, and that these shortcuts persist across classical, deep, and transformer representations.
 
-The best realistic venue strategy is documented in `COVID_AUDIO_BTP_PROFESSOR_WRITING_STYLE_PLAYBOOK.md`.
+The best realistic venue strategy is documented in `COVID_AUDIO_BTP_WRITING_STYLE_PLAYBOOK.md`.
 
 

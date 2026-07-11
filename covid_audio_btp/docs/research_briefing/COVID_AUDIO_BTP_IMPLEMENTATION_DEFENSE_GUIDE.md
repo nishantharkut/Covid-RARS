@@ -1,6 +1,6 @@
-﻿# COVID Audio BTP Implementation Defense Guide
+# COVID Audio BTP Implementation Defense Guide
 
-This guide is for answering implementation questions in a viva, professor meeting, or code demonstration. It is deliberately high-level but specific enough to memorize.
+This guide is for answering implementation questions in a viva, research meeting, or code demonstration. It is deliberately high-level but specific enough to memorize.
 
 For non-technical explanations of the difficult terms, use `COVID_AUDIO_BTP_PLAIN_LANGUAGE_EXPLANATION_GUIDE.md` before the detailed sections below.
 

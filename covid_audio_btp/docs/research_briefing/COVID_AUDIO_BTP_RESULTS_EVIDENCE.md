@@ -1,6 +1,6 @@
-﻿# COVID Audio BTP Results Evidence Ledger
+# COVID Audio BTP Results Evidence Ledger
 
-This file is the evidence ledger for professor discussion and manuscript writing. It records the main result, the source artifact, and the safe interpretation.
+This file is the evidence ledger for research discussion and manuscript writing. It records the main result, the source artifact, and the safe interpretation.
 
 ## Source Snapshot
 
@@ -9,7 +9,7 @@ The current evidence is generated from the pushed branch:
 ```text
 publication-upgrade-confounding-da
 result artifacts synced through: a276a20 Add incremental audio metadata reviewer evidence
-professor documentation commits added after that evidence snapshot
+briefing documentation commits added after that evidence snapshot
 ```
 
 Core generated artifacts:

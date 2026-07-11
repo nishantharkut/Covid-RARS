@@ -1,6 +1,6 @@
 # Artifact Review Guide
 
-This repository is a research artifact for reliability-aware COVID/respiratory audio evaluation. It contains code, scripts, notebooks, frozen result bundles, professor-facing evidence documents, manuscript drafts if present, and source registries.
+This repository is a research artifact for reliability-aware COVID/respiratory audio evaluation. It contains code, scripts, notebooks, frozen result bundles, research briefing documents, manuscript drafts if present, and source registries.
 
 ## Artifact Scope
 
@@ -21,8 +21,8 @@ Out of scope:
 ## Primary Review Path
 
 1. Read the root [`README.md`](README.md).
-2. Read the professor brief: [`covid_audio_btp/docs/professor/COVID_AUDIO_BTP_E2E_PROFESSOR_BRIEF.md`](covid_audio_btp/docs/professor/COVID_AUDIO_BTP_E2E_PROFESSOR_BRIEF.md).
-3. Read the evidence ledger: [`covid_audio_btp/docs/professor/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md`](covid_audio_btp/docs/professor/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md).
+2. Read the project brief: [`covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_E2E_PROJECT_BRIEF.md`](covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_E2E_PROJECT_BRIEF.md).
+3. Read the evidence ledger: [`covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md`](covid_audio_btp/docs/research_briefing/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md).
 4. Check source/claim guardrails: [`covid_audio_btp/references/verified_source_registry.md`](covid_audio_btp/references/verified_source_registry.md).
 5. Use [`docs/repository/REPOSITORY_MAP.md`](docs/repository/REPOSITORY_MAP.md) to locate code and artifacts.
 

@@ -1,4 +1,4 @@
-﻿# COVID Audio BTP Plain-Language Explanation Guide
+# COVID Audio BTP Plain-Language Explanation Guide
 
 Use this file when you need to explain the project without sounding like you are hiding behind technical words. The goal is to answer "what did you actually do?" in simple language.
 
@@ -447,7 +447,7 @@ Meaning:
 The cough signal learned from Coswara did not transfer reliably to COUGHVID.
 ```
 
-## 16. Simple Final Explanation To Professor
+## 16. Simple Final Explanation For A Meeting
 
 Use this if she asks for the entire logic in simple words:
 

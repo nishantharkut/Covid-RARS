@@ -1,4 +1,4 @@
-﻿# COVID Audio BTP Professor Writing Style and Venue Playbook
+# COVID Audio BTP Writing Style and Venue Playbook
 
 This playbook explains how to write and present the COVID audio BTP work so it sounds like a serious biomedical AI paper, not like an engineering log or a failed SOTA attempt.
 
@@ -30,7 +30,7 @@ Beyond Internal Accuracy: Temporal Drift, Shortcut Learning, and External Valida
 
 Why this works:
 
-- "Beyond Internal Accuracy" tells the professor there is still a strong number.
+- "Beyond Internal Accuracy" signals there is still a strong number.
 - "Temporal Drift, Shortcut Learning, and External Validation" states the novelty.
 - "Multimodal COVID-19 Respiratory-Audio Models" captures cough, breath, and speech.
 
@@ -183,7 +183,7 @@ Avoid:
 
 ## Venue Strategy
 
-Use a two-tier strategy so the professor sees ambition and realism.
+Use a two-tier strategy so the positioning shows ambition and realism.
 
 ### Reach target
 
@@ -232,7 +232,7 @@ This is a digital medicine reliability study showing why internal respiratory-au
 **JMIR AI / JMIR Formative Research**
 
 - Good digital-health fit.
-- May be less persuasive to a professor who only recognizes very famous venues, but methodologically appropriate.
+- May be less persuasive to readers who only recognize very famous venues, but methodologically appropriate.
 
 ## How to Talk About "Fame"
 
@@ -242,7 +242,7 @@ Say this:
 Ma'am, we can aim high first, but the manuscript has to match the venue. For npj Digital Medicine, we should not sell it as just a classifier. We should sell it as a digital-health reliability audit with strong internal performance and strict external validation. For IEEE JBHI or Computers in Biology and Medicine, we can emphasize the technical pipeline, uncertainty, calibration, and model-family robustness.
 ```
 
-## Professor Q&A
+## Meeting Q&A
 
 | Question | Answer |
 |---|---|
