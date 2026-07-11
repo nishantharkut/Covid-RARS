@@ -318,15 +318,15 @@ Only after metrics print successfully:
 
 ```bash
 cd /home/covid/Desktop/Covid-19-BTP
-rm -rf Corrected_Coswara_NoLeakage_Results
-mkdir -p Corrected_Coswara_NoLeakage_Results
-cp covid_audio_btp/data/outputs/metrics/*.csv Corrected_Coswara_NoLeakage_Results/
-cp covid_audio_btp/reports/tables/*.csv Corrected_Coswara_NoLeakage_Results/
-cp covid_audio_btp/reports/experiment_manifest.json Corrected_Coswara_NoLeakage_Results/
-cp covid_audio_btp/reports/report_outline.md Corrected_Coswara_NoLeakage_Results/ 2>/dev/null || true
-cp covid_audio_btp/reports/slides_outline.md Corrected_Coswara_NoLeakage_Results/ 2>/dev/null || true
-zip -r Corrected_Coswara_NoLeakage_Results.zip Corrected_Coswara_NoLeakage_Results
-ls -lh Corrected_Coswara_NoLeakage_Results.zip
+rm -rf results/frozen/Corrected_Coswara_NoLeakage_Results
+mkdir -p results/frozen/Corrected_Coswara_NoLeakage_Results artifacts/bundles
+cp covid_audio_btp/data/outputs/metrics/*.csv results/frozen/Corrected_Coswara_NoLeakage_Results/
+cp covid_audio_btp/reports/tables/*.csv results/frozen/Corrected_Coswara_NoLeakage_Results/
+cp covid_audio_btp/reports/experiment_manifest.json results/frozen/Corrected_Coswara_NoLeakage_Results/
+cp covid_audio_btp/reports/report_outline.md results/frozen/Corrected_Coswara_NoLeakage_Results/ 2>/dev/null || true
+cp covid_audio_btp/reports/slides_outline.md results/frozen/Corrected_Coswara_NoLeakage_Results/ 2>/dev/null || true
+zip -r artifacts/bundles/Corrected_Coswara_NoLeakage_Results.zip results/frozen/Corrected_Coswara_NoLeakage_Results
+ls -lh artifacts/bundles/Corrected_Coswara_NoLeakage_Results.zip
 ```
 
 Do not include raw datasets in the bundle.

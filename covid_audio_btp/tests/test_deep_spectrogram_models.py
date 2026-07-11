@@ -4,11 +4,12 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
+
+torch = pytest.importorskip("torch")
 
 
 def test_spectrogram_model_factory_supports_strong_architectures() -> None:
-    import torch
-
     from covid_audio_btp.models_cnn import make_spectrogram_model
 
     x = torch.randn(2, 1, 64, 120)
