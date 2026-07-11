@@ -1,15 +1,15 @@
 # COVID Respiratory Audio Reliability Study
 
-[![Status](https://img.shields.io/badge/status-research%20artifact-blue)](#scope)
+[![Status](https://img.shields.io/badge/status-research%20artifact-blue)](#scope-and-limits)
 [![Python](https://img.shields.io/badge/python-3.10%2B-informational)](covid_audio_btp/pyproject.toml)
 [![Datasets](https://img.shields.io/badge/datasets-Coswara%20%2B%20COUGHVID-lightgrey)](#datasets)
-[![Clinical Use](https://img.shields.io/badge/clinical%20use-not%20diagnostic-red)](#scope)
+[![Focus](https://img.shields.io/badge/focus-validation%20reliability-green)](#main-result)
 
 This repository studies a direct question:
 
 > Do COVID respiratory-audio models remain reliable when strong internal results are tested under temporal validation, metadata-confounding checks, calibration, and external dataset transfer?
 
-The answer from this artifact is also direct: the internal Coswara result is strong, but deployment-style checks expose large reliability gaps. This is a reliability and benchmark-validity study, not a deployable COVID diagnostic system.
+The internal Coswara result is strong, but deployment-style checks expose large reliability gaps. The repository is organized as a research artifact for validation, domain shift, and benchmark reliability.
 
 ## Main Result
 
@@ -20,10 +20,10 @@ The best internal multimodal Coswara setting reaches `0.897` AUROC and `0.863` A
 | Existing participant split | `0.897` AUROC, `0.863` AUPRC | Strong internal multimodal performance |
 | Time-stratified participant split | `0.849` AUROC, `0.783` AUPRC | Lower under time-aware validation |
 | Early-to-late temporal split | about `0.698` AUROC | Calendar drift damages reliability |
-| COUGHVID external cough transfer, classical acoustic models | `0.523-0.543` AUROC | Near-random external transfer |
+| COUGHVID external cough transfer, classical acoustic models | `0.523-0.543` AUROC | Weak external discrimination |
 | COUGHVID external cough transfer, WavLM transformer | `0.484` AUROC | Transformer representation did not rescue transfer |
-| COUGHVID external cough transfer, CNN-BiGRU | `0.548` AUROC | Deep spectrogram branch also weak externally |
-| Full safe metadata-only model | `0.964` AUROC | Metadata/context can strongly predict labels |
+| COUGHVID external cough transfer, CNN-BiGRU | `0.548` AUROC | Weak external discrimination in the deep spectrogram branch |
+| Full metadata-only model | `0.964` AUROC | Metadata/context can strongly predict labels |
 | Symptoms-only metadata model | `0.932` AUROC | Symptoms alone are a strong shortcut predictor |
 | Early/late acoustic feature-selection overlap | `0.074` Jaccard | Selected acoustic features are non-stationary |
 
@@ -40,7 +40,7 @@ This project contributes an evidence chain, not only a classifier:
 - Metadata-confounding, shuffle-label sanity, support-overlap, calibration, decision-curve, bootstrap, and feature-stability audits.
 - Manuscript-ready result tables and evidence documents.
 
-The safe paper claim is:
+The main research claim is:
 
 > Strong internal COVID respiratory-audio performance is achievable, but temporal validation, metadata-confounding audits, and external transfer show that high internal scores are not enough for deployment claims.
 
@@ -91,7 +91,7 @@ For a professor, reviewer, or collaborator, start here:
 | What are the final validation-ladder numbers? | [`covid_audio_btp/docs/professor/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md`](covid_audio_btp/docs/professor/COVID_AUDIO_BTP_RESULTS_EVIDENCE.md) |
 | What should be presented to the professor first? | [`covid_audio_btp/docs/professor/COVID_AUDIO_BTP_E2E_PROFESSOR_BRIEF.md`](covid_audio_btp/docs/professor/COVID_AUDIO_BTP_E2E_PROFESSOR_BRIEF.md) |
 | How should results be explained in simple language? | [`covid_audio_btp/docs/professor/COVID_AUDIO_BTP_PLAIN_LANGUAGE_EXPLANATION_GUIDE.md`](covid_audio_btp/docs/professor/COVID_AUDIO_BTP_PLAIN_LANGUAGE_EXPLANATION_GUIDE.md) |
-| Which claims are source-verified? | [`covid_audio_btp/references/verified_source_registry.md`](covid_audio_btp/references/verified_source_registry.md) |
+| Where are source and claim checks documented? | [`covid_audio_btp/references/verified_source_registry.md`](covid_audio_btp/references/verified_source_registry.md) |
 | Where are frozen result folders? | [`results/frozen/`](results/frozen/) |
 | Where are representation outputs? | [`results/representations/`](results/representations/) |
 | Where are manuscript source tables and figures? | [`manuscripts/source_artifacts/`](manuscripts/source_artifacts/) |
@@ -128,7 +128,7 @@ The numbered scripts under [`covid_audio_btp/scripts/`](covid_audio_btp/scripts/
 
 ## Datasets
 
-| Dataset | Role | Boundary |
+| Dataset | Role | Use in this artifact |
 |---|---|---|
 | Coswara | Primary respiratory-audio dataset | Supports internal cough, breath, and speech analysis with participant-level controls |
 | COUGHVID | External cough-only dataset | Tests cough-to-cough transfer only; it does not validate full cough+breath+speech fusion |
@@ -190,7 +190,7 @@ Some full experiment scripts require raw Coswara and/or COUGHVID data plus optio
 
 The result folders are retained as evidence. The top-level layout separates active code from frozen outputs so reviewers can find the implementation without losing traceability to completed runs.
 
-## Reproducibility Boundary
+## Reproducibility
 
 This repository supports three levels of review:
 
@@ -202,18 +202,18 @@ This repository supports three levels of review:
 
 The frozen artifacts are included to preserve completed evidence even when raw data cannot be redistributed.
 
-## Scope
+## Scope And Limits
 
-Use this repository to support these claims:
+This repository supports these claims:
 
 - Strong internal Coswara respiratory-audio performance was achieved.
 - Performance drops under stricter temporal validation.
-- COUGHVID cough-only external transfer is weak across classical, transformer, and deep spectrogram branches.
+- COUGHVID cough-only external transfer has weak discrimination across classical, transformer, and deep spectrogram branches.
 - Metadata/context variables are strong shortcut predictors.
 - Calibration, decision-curve, bootstrap, support-overlap, and feature-stability checks are part of the evaluation.
 - The evidence supports a reliability/domain-shift paper.
 
-Do not use this repository to claim:
+This repository does not establish:
 
 - A clinical COVID diagnostic system.
 - Real-world deployment readiness.
