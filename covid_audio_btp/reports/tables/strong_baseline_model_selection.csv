@@ -1,0 +1,4 @@
+evaluation_protocol,modality,selected_model_name,selection_metric,validation_auroc,validation_auprc,validation_balanced_accuracy,threshold
+clean_internal_protocol,breath,top_5_validation_ensemble,auroc,0.7840607027209898,0.7145313085848871,0.7514619883040936,0.41874653622190716
+clean_internal_protocol,cough,top_5_validation_ensemble,auroc,0.8051390853371052,0.7487064418777396,0.7413248467703913,0.5361823331869927
+clean_internal_protocol,speech,lightgbm_smote_f80,auroc,0.8427628477133428,0.7904382079775384,0.7932814710042433,0.3072175336399125

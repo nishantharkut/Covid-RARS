@@ -1,0 +1,5 @@
+subgroup,available,source_column,n_non_missing,n_levels,reason
+country,True,country,24712,52,
+device,False,,0,0,no matching metadata column
+recording_year,True,recording_year,24712,3,
+recording_month,True,recording_month,24712,12,

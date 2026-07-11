@@ -1,0 +1,589 @@
+nohup: ignoring input
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/librosa/core/pitch.py:103: UserWarning: Trying to estimate tuning from empty frequency set.
+  return pitch_tuning(
+Strong feature extraction progress: 250/43476 rows
+Strong feature extraction progress: 500/43476 rows
+Strong feature extraction progress: 750/43476 rows
+Strong feature extraction progress: 1000/43476 rows
+Strong feature extraction progress: 1250/43476 rows
+Strong feature extraction progress: 1500/43476 rows
+Strong feature extraction progress: 1750/43476 rows
+Strong feature extraction progress: 2000/43476 rows
+Strong feature extraction progress: 2250/43476 rows
+Strong feature extraction progress: 2500/43476 rows
+Strong feature extraction progress: 2750/43476 rows
+Strong feature extraction progress: 3000/43476 rows
+Strong feature extraction progress: 3250/43476 rows
+Strong feature extraction progress: 3500/43476 rows
+Strong feature extraction progress: 3750/43476 rows
+Strong feature extraction progress: 4000/43476 rows
+Strong feature extraction progress: 4250/43476 rows
+Strong feature extraction progress: 4500/43476 rows
+Strong feature extraction progress: 4750/43476 rows
+Strong feature extraction progress: 5000/43476 rows
+Strong feature extraction progress: 5250/43476 rows
+Strong feature extraction progress: 5500/43476 rows
+Strong feature extraction progress: 5750/43476 rows
+Strong feature extraction progress: 6000/43476 rows
+Strong feature extraction progress: 6250/43476 rows
+Strong feature extraction progress: 6500/43476 rows
+Strong feature extraction progress: 6750/43476 rows
+Strong feature extraction progress: 7000/43476 rows
+Strong feature extraction progress: 7250/43476 rows
+Strong feature extraction progress: 7500/43476 rows
+Strong feature extraction progress: 7750/43476 rows
+Strong feature extraction progress: 8000/43476 rows
+Strong feature extraction progress: 8250/43476 rows
+Strong feature extraction progress: 8500/43476 rows
+Strong feature extraction progress: 8750/43476 rows
+Strong feature extraction progress: 9000/43476 rows
+Strong feature extraction progress: 9250/43476 rows
+Strong feature extraction progress: 9500/43476 rows
+Strong feature extraction progress: 9750/43476 rows
+Strong feature extraction progress: 10000/43476 rows
+Strong feature extraction progress: 10250/43476 rows
+Strong feature extraction progress: 10500/43476 rows
+Strong feature extraction progress: 10750/43476 rows
+Strong feature extraction progress: 11000/43476 rows
+Strong feature extraction progress: 11250/43476 rows
+Strong feature extraction progress: 11500/43476 rows
+Strong feature extraction progress: 11750/43476 rows
+Strong feature extraction progress: 12000/43476 rows
+Strong feature extraction progress: 12250/43476 rows
+Strong feature extraction progress: 12500/43476 rows
+Strong feature extraction progress: 12750/43476 rows
+Strong feature extraction progress: 13000/43476 rows
+Strong feature extraction progress: 13250/43476 rows
+Strong feature extraction progress: 13500/43476 rows
+Strong feature extraction progress: 13750/43476 rows
+Strong feature extraction progress: 14000/43476 rows
+Strong feature extraction progress: 14250/43476 rows
+Strong feature extraction progress: 14500/43476 rows
+Strong feature extraction progress: 14750/43476 rows
+Strong feature extraction progress: 15000/43476 rows
+Strong feature extraction progress: 15250/43476 rows
+Strong feature extraction progress: 15500/43476 rows
+Strong feature extraction progress: 15750/43476 rows
+Strong feature extraction progress: 16000/43476 rows
+Strong feature extraction progress: 16250/43476 rows
+Strong feature extraction progress: 16500/43476 rows
+Strong feature extraction progress: 16750/43476 rows
+Strong feature extraction progress: 17000/43476 rows
+Strong feature extraction progress: 17250/43476 rows
+Strong feature extraction progress: 17500/43476 rows
+Strong feature extraction progress: 17750/43476 rows
+Strong feature extraction progress: 18000/43476 rows
+Strong feature extraction progress: 18250/43476 rows
+Strong feature extraction progress: 18500/43476 rows
+Strong feature extraction progress: 18750/43476 rows
+Strong feature extraction progress: 19000/43476 rows
+Strong feature extraction progress: 19250/43476 rows
+Strong feature extraction progress: 19500/43476 rows
+Strong feature extraction progress: 19750/43476 rows
+Strong feature extraction progress: 20000/43476 rows
+Strong feature extraction progress: 20250/43476 rows
+Strong feature extraction progress: 20500/43476 rows
+Strong feature extraction progress: 20750/43476 rows
+Strong feature extraction progress: 21000/43476 rows
+Strong feature extraction progress: 21250/43476 rows
+Strong feature extraction progress: 21500/43476 rows
+Strong feature extraction progress: 21750/43476 rows
+Strong feature extraction progress: 22000/43476 rows
+Strong feature extraction progress: 22250/43476 rows
+Strong feature extraction progress: 22500/43476 rows
+Strong feature extraction progress: 22750/43476 rows
+Strong feature extraction progress: 23000/43476 rows
+Strong feature extraction progress: 23250/43476 rows
+Strong feature extraction progress: 23500/43476 rows
+Strong feature extraction progress: 23750/43476 rows
+Strong feature extraction progress: 24000/43476 rows
+Strong feature extraction progress: 24250/43476 rows
+Strong feature extraction progress: 24500/43476 rows
+Strong feature extraction progress: 24750/43476 rows
+Strong feature extraction progress: 25000/43476 rows
+Strong feature extraction progress: 25250/43476 rows
+Strong feature extraction progress: 25500/43476 rows
+Strong feature extraction progress: 25750/43476 rows
+Strong feature extraction progress: 26000/43476 rows
+Strong feature extraction progress: 26250/43476 rows
+Strong feature extraction progress: 26500/43476 rows
+Strong feature extraction progress: 26750/43476 rows
+Strong feature extraction progress: 27000/43476 rows
+Strong feature extraction progress: 27250/43476 rows
+Strong feature extraction progress: 27500/43476 rows
+Strong feature extraction progress: 27750/43476 rows
+Strong feature extraction progress: 28000/43476 rows
+Strong feature extraction progress: 28250/43476 rows
+Strong feature extraction progress: 28500/43476 rows
+Strong feature extraction progress: 28750/43476 rows
+Strong feature extraction progress: 29000/43476 rows
+Strong feature extraction progress: 29250/43476 rows
+Strong feature extraction progress: 29500/43476 rows
+Strong feature extraction progress: 29750/43476 rows
+Strong feature extraction progress: 30000/43476 rows
+Strong feature extraction progress: 30250/43476 rows
+Strong feature extraction progress: 30500/43476 rows
+Strong feature extraction progress: 30750/43476 rows
+Strong feature extraction progress: 31000/43476 rows
+Strong feature extraction progress: 31250/43476 rows
+Strong feature extraction progress: 31500/43476 rows
+Strong feature extraction progress: 31750/43476 rows
+Strong feature extraction progress: 32000/43476 rows
+Strong feature extraction progress: 32250/43476 rows
+Strong feature extraction progress: 32500/43476 rows
+Strong feature extraction progress: 32750/43476 rows
+Strong feature extraction progress: 33000/43476 rows
+Strong feature extraction progress: 33250/43476 rows
+Strong feature extraction progress: 33500/43476 rows
+Strong feature extraction progress: 33750/43476 rows
+Strong feature extraction progress: 34000/43476 rows
+Strong feature extraction progress: 34250/43476 rows
+Strong feature extraction progress: 34500/43476 rows
+Strong feature extraction progress: 34750/43476 rows
+Strong feature extraction progress: 35000/43476 rows
+Strong feature extraction progress: 35250/43476 rows
+Strong feature extraction progress: 35500/43476 rows
+Strong feature extraction progress: 35750/43476 rows
+Strong feature extraction progress: 36000/43476 rows
+Strong feature extraction progress: 36250/43476 rows
+Strong feature extraction progress: 36500/43476 rows
+Strong feature extraction progress: 36750/43476 rows
+Strong feature extraction progress: 37000/43476 rows
+Strong feature extraction progress: 37250/43476 rows
+Strong feature extraction progress: 37500/43476 rows
+Strong feature extraction progress: 37750/43476 rows
+Strong feature extraction progress: 38000/43476 rows
+Strong feature extraction progress: 38250/43476 rows
+Strong feature extraction progress: 38500/43476 rows
+Strong feature extraction progress: 38750/43476 rows
+Strong feature extraction progress: 39000/43476 rows
+Strong feature extraction progress: 39250/43476 rows
+Strong feature extraction progress: 39500/43476 rows
+Strong feature extraction progress: 39750/43476 rows
+Strong feature extraction progress: 40000/43476 rows
+Strong feature extraction progress: 40250/43476 rows
+Strong feature extraction progress: 40500/43476 rows
+Strong feature extraction progress: 40750/43476 rows
+Strong feature extraction progress: 41000/43476 rows
+Strong feature extraction progress: 41250/43476 rows
+Strong feature extraction progress: 41500/43476 rows
+Strong feature extraction progress: 41750/43476 rows
+Strong feature extraction progress: 42000/43476 rows
+Strong feature extraction progress: 42250/43476 rows
+Strong feature extraction progress: 42500/43476 rows
+Strong feature extraction progress: 42750/43476 rows
+Strong feature extraction progress: 43000/43476 rows
+Strong feature extraction progress: 43250/43476 rows
+Strong feature extraction progress: 43476/43476 rows
+Wrote strong acoustic features: data/processed/features_strong_acoustic_aug2_quality.csv (43476 rows, 2188 columns)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+[I 2026-06-19 18:01:18,032] A new study created in memory with name: no-name-1127e253-cdd5-47cf-ac03-131e0efaa2bc
+[I 2026-06-19 18:01:19,056] Trial 0 finished with value: 0.7236407660136475 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 0 with value: 0.7236407660136475.
+[I 2026-06-19 18:01:21,929] Trial 1 finished with value: 0.7319502531366939 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0066240595682091315}. Best is trial 1 with value: 0.7319502531366939.
+[I 2026-06-19 18:01:24,291] Trial 2 finished with value: 0.757361753124465 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 700, 'min_samples_leaf': 1, 'max_depth': '12'}. Best is trial 2 with value: 0.757361753124465.
+[I 2026-06-19 18:01:25,329] Trial 3 finished with value: 0.7236407660136475 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 2 with value: 0.757361753124465.
+[I 2026-06-19 18:01:27,474] Trial 4 finished with value: 0.745194071465258 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0014254814784217286}. Best is trial 2 with value: 0.757361753124465.
+[I 2026-06-19 18:01:36,437] Trial 5 finished with value: 0.7106720962653166 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.21301372721189435}. Best is trial 2 with value: 0.757361753124465.
+[I 2026-06-19 18:01:42,412] Trial 6 finished with value: 0.7542434025484873 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 1000, 'min_samples_leaf': 5, 'max_depth': '4'}. Best is trial 2 with value: 0.757361753124465.
+[I 2026-06-19 18:01:44,822] Trial 7 finished with value: 0.7539865972069362 and parameters: {'family': 'extra_trees', 'percentile': 90, 'n_estimators': 500, 'min_samples_leaf': 2, 'max_depth': '16'}. Best is trial 2 with value: 0.757361753124465.
+[I 2026-06-19 18:02:05,922] Trial 8 finished with value: 0.7183028835571208 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 1.4611205138065535}. Best is trial 2 with value: 0.757361753124465.
+[I 2026-06-19 18:02:07,299] Trial 9 finished with value: 0.7496698217037199 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 300, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 2 with value: 0.757361753124465.
+[I 2026-06-19 18:02:13,780] Trial 10 finished with value: 0.7611098882285323 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 800, 'min_samples_leaf': 3, 'max_depth': '12'}. Best is trial 10 with value: 0.7611098882285323.
+[I 2026-06-19 18:02:20,284] Trial 11 finished with value: 0.7611098882285323 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 800, 'min_samples_leaf': 3, 'max_depth': '12'}. Best is trial 10 with value: 0.7611098882285323.
+[I 2026-06-19 18:02:26,898] Trial 12 finished with value: 0.7611098882285323 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 800, 'min_samples_leaf': 3, 'max_depth': '12'}. Best is trial 10 with value: 0.7611098882285323.
+[I 2026-06-19 18:02:32,418] Trial 13 finished with value: 0.7627485508841441 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 800, 'min_samples_leaf': 3, 'max_depth': '8'}. Best is trial 13 with value: 0.7627485508841441.
+[I 2026-06-19 18:02:39,171] Trial 14 finished with value: 0.7631398733093648 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 1000, 'min_samples_leaf': 3, 'max_depth': '8'}. Best is trial 14 with value: 0.7631398733093648.
+[I 2026-06-19 18:02:46,268] Trial 15 finished with value: 0.7670469831486779 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 1000, 'min_samples_leaf': 4, 'max_depth': '8'}. Best is trial 15 with value: 0.7670469831486779.
+[I 2026-06-19 18:02:53,498] Trial 16 finished with value: 0.7670469831486779 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 1000, 'min_samples_leaf': 4, 'max_depth': '8'}. Best is trial 15 with value: 0.7670469831486779.
+[I 2026-06-19 18:03:00,607] Trial 17 finished with value: 0.7670469831486779 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 1000, 'min_samples_leaf': 4, 'max_depth': '8'}. Best is trial 15 with value: 0.7670469831486779.
+[I 2026-06-19 18:03:07,075] Trial 18 finished with value: 0.7669369237165847 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': '8'}. Best is trial 15 with value: 0.7670469831486779.
+[I 2026-06-19 18:03:14,404] Trial 19 finished with value: 0.765059798958104 and parameters: {'family': 'random_forest', 'percentile': 70, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': '8'}. Best is trial 15 with value: 0.7670469831486779.
+[I 2026-06-19 18:03:22,617] Trial 20 finished with value: 0.7624306014136522 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 900, 'min_samples_leaf': 5, 'max_depth': '16'}. Best is trial 15 with value: 0.7670469831486779.
+[I 2026-06-19 18:03:29,728] Trial 21 finished with value: 0.7670469831486779 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 1000, 'min_samples_leaf': 4, 'max_depth': '8'}. Best is trial 15 with value: 0.7670469831486779.
+[I 2026-06-19 18:03:37,427] Trial 22 finished with value: 0.7665884021816225 and parameters: {'family': 'random_forest', 'percentile': 60, 'n_estimators': 1000, 'min_samples_leaf': 4, 'max_depth': '8'}. Best is trial 15 with value: 0.7670469831486779.
+[I 2026-06-19 18:03:43,898] Trial 23 finished with value: 0.7669369237165847 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': '8'}. Best is trial 15 with value: 0.7670469831486779.
+[I 2026-06-19 18:03:52,017] Trial 24 finished with value: 0.7651392863257269 and parameters: {'family': 'random_forest', 'percentile': 70, 'n_estimators': 1000, 'min_samples_leaf': 4, 'max_depth': '8'}. Best is trial 15 with value: 0.7670469831486779.
+[I 2026-06-19 18:04:00,347] Trial 25 finished with value: 0.7628096950130848 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 900, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 15 with value: 0.7670469831486779.
+[I 2026-06-19 18:04:06,857] Trial 26 finished with value: 0.7623755716976056 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 700, 'min_samples_leaf': 4, 'max_depth': '8'}. Best is trial 15 with value: 0.7670469831486779.
+[I 2026-06-19 18:04:14,564] Trial 27 finished with value: 0.7648519089197056 and parameters: {'family': 'random_forest', 'percentile': 60, 'n_estimators': 1000, 'min_samples_leaf': 2, 'max_depth': '8'}. Best is trial 15 with value: 0.7670469831486779.
+[I 2026-06-19 18:04:20,965] Trial 28 finished with value: 0.767205957883924 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 900, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 28 with value: 0.767205957883924.
+[I 2026-06-19 18:04:52,084] Trial 29 finished with value: 0.7025276982904102 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 24.743303275607825}. Best is trial 28 with value: 0.767205957883924.
+[I 2026-06-19 18:04:54,844] Trial 30 finished with value: 0.75016508914814 and parameters: {'family': 'extra_trees', 'percentile': 70, 'n_estimators': 700, 'min_samples_leaf': 5, 'max_depth': '16'}. Best is trial 28 with value: 0.767205957883924.
+[I 2026-06-19 18:05:01,219] Trial 31 finished with value: 0.767205957883924 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 900, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 28 with value: 0.767205957883924.
+[I 2026-06-19 18:05:07,566] Trial 32 finished with value: 0.767205957883924 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 900, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 28 with value: 0.767205957883924.
+[I 2026-06-19 18:05:13,536] Trial 33 finished with value: 0.7676156235478269 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 900, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 33 with value: 0.7676156235478269.
+[I 2026-06-19 18:05:18,945] Trial 34 finished with value: 0.7674811064641573 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 800, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 33 with value: 0.7676156235478269.
+[I 2026-06-19 18:05:22,510] Trial 35 finished with value: 0.7122006994888351 and parameters: {'family': 'logistic', 'percentile': 40, 'logistic_c': 0.04150000647701572}. Best is trial 33 with value: 0.7676156235478269.
+[I 2026-06-19 18:05:24,514] Trial 36 finished with value: 0.7509293907598992 and parameters: {'family': 'extra_trees', 'percentile': 40, 'n_estimators': 600, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 33 with value: 0.7676156235478269.
+[I 2026-06-19 18:05:28,721] Trial 37 finished with value: 0.7534668721109399 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 800, 'min_samples_leaf': 5, 'max_depth': '4'}. Best is trial 33 with value: 0.7676156235478269.
+[I 2026-06-19 18:05:33,486] Trial 38 finished with value: 0.7676523100251914 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 700, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 38 with value: 0.7676523100251914.
+[I 2026-06-19 18:05:54,384] Trial 39 finished with value: 0.6887580404529557 and parameters: {'family': 'logistic', 'percentile': 40, 'logistic_c': 23.437573147053158}. Best is trial 38 with value: 0.7676523100251914.
+[I 2026-06-19 18:05:55,973] Trial 40 finished with value: 0.7467899332306112 and parameters: {'family': 'extra_trees', 'percentile': 40, 'n_estimators': 600, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 38 with value: 0.7676523100251914.
+[I 2026-06-19 18:06:01,072] Trial 41 finished with value: 0.7666434318976691 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 700, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 38 with value: 0.7676523100251914.
+[I 2026-06-19 18:06:06,414] Trial 42 finished with value: 0.7674811064641573 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 800, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 38 with value: 0.7676523100251914.
+[I 2026-06-19 18:06:09,636] Trial 43 finished with value: 0.7528676596473206 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 600, 'min_samples_leaf': 5, 'max_depth': '4'}. Best is trial 38 with value: 0.7676523100251914.
+[I 2026-06-19 18:06:14,936] Trial 44 finished with value: 0.7674811064641573 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 800, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 38 with value: 0.7676523100251914.
+[I 2026-06-19 18:06:20,820] Trial 45 finished with value: 0.7637757722503484 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 700, 'min_samples_leaf': 5, 'max_depth': '16'}. Best is trial 38 with value: 0.7676523100251914.
+[I 2026-06-19 18:06:26,191] Trial 46 finished with value: 0.7674811064641573 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 800, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 38 with value: 0.7676523100251914.
+[I 2026-06-19 18:06:37,841] Trial 47 finished with value: 0.6961687088805733 and parameters: {'family': 'logistic', 'percentile': 40, 'logistic_c': 1.164716737536578}. Best is trial 38 with value: 0.7676523100251914.
+[I 2026-06-19 18:06:44,151] Trial 48 finished with value: 0.76290752561939 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 800, 'min_samples_leaf': 5, 'max_depth': '12'}. Best is trial 38 with value: 0.7676523100251914.
+[I 2026-06-19 18:06:46,363] Trial 49 finished with value: 0.7509660772372637 and parameters: {'family': 'extra_trees', 'percentile': 40, 'n_estimators': 700, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 38 with value: 0.7676523100251914.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+[I 2026-06-19 18:10:57,663] A new study created in memory with name: no-name-c7f37107-bb55-4d23-a66e-7a5c67fe3ed8
+[I 2026-06-19 18:10:58,683] Trial 0 finished with value: 0.6775478947095166 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 0 with value: 0.6775478947095166.
+[I 2026-06-19 18:11:01,501] Trial 1 finished with value: 0.7209127251959919 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0066240595682091315}. Best is trial 1 with value: 0.7209127251959919.
+[I 2026-06-19 18:11:03,867] Trial 2 finished with value: 0.712229375421837 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 700, 'min_samples_leaf': 1, 'max_depth': '12'}. Best is trial 1 with value: 0.7209127251959919.
+[I 2026-06-19 18:11:04,913] Trial 3 finished with value: 0.6775478947095166 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 1 with value: 0.7209127251959919.
+[I 2026-06-19 18:11:07,264] Trial 4 finished with value: 0.7300633404288458 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0014254814784217286}. Best is trial 4 with value: 0.7300633404288458.
+[I 2026-06-19 18:11:16,150] Trial 5 finished with value: 0.6866725507502207 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.21301372721189435}. Best is trial 4 with value: 0.7300633404288458.
+[I 2026-06-19 18:11:22,190] Trial 6 finished with value: 0.6915918176626343 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 1000, 'min_samples_leaf': 5, 'max_depth': '4'}. Best is trial 4 with value: 0.7300633404288458.
+[I 2026-06-19 18:11:24,558] Trial 7 finished with value: 0.7189528061886714 and parameters: {'family': 'extra_trees', 'percentile': 90, 'n_estimators': 500, 'min_samples_leaf': 2, 'max_depth': '16'}. Best is trial 4 with value: 0.7300633404288458.
+[I 2026-06-19 18:11:42,945] Trial 8 finished with value: 0.6794818545246872 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 1.4611205138065535}. Best is trial 4 with value: 0.7300633404288458.
+[I 2026-06-19 18:11:44,271] Trial 9 finished with value: 0.7127355796687607 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 300, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 4 with value: 0.7300633404288458.
+[I 2026-06-19 18:11:51,001] Trial 10 finished with value: 0.7087119048855199 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 1000, 'min_samples_leaf': 3, 'max_depth': '8'}. Best is trial 4 with value: 0.7300633404288458.
+[I 2026-06-19 18:11:52,459] Trial 11 finished with value: 0.7137739473547584 and parameters: {'family': 'logistic', 'percentile': 40, 'logistic_c': 0.0011234362079909188}. Best is trial 4 with value: 0.7300633404288458.
+[I 2026-06-19 18:11:54,348] Trial 12 finished with value: 0.7236254607756607 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0017164142601062626}. Best is trial 4 with value: 0.7300633404288458.
+[I 2026-06-19 18:11:57,872] Trial 13 finished with value: 0.7257541145319557 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.007014634703314543}. Best is trial 4 with value: 0.7300633404288458.
+[I 2026-06-19 18:12:02,072] Trial 14 finished with value: 0.7128004776491356 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.026077616621488192}. Best is trial 4 with value: 0.7300633404288458.
+[I 2026-06-19 18:12:07,321] Trial 15 finished with value: 0.7093349254971186 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.03681115883687551}. Best is trial 4 with value: 0.7300633404288458.
+[I 2026-06-19 18:13:00,679] Trial 16 finished with value: 0.6646851149992212 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 21.275872228626255}. Best is trial 4 with value: 0.7300633404288458.
+[I 2026-06-19 18:13:09,167] Trial 17 finished with value: 0.7118919059238875 and parameters: {'family': 'random_forest', 'percentile': 70, 'n_estimators': 700, 'min_samples_leaf': 3, 'max_depth': 'none'}. Best is trial 4 with value: 0.7300633404288458.
+[I 2026-06-19 18:13:12,571] Trial 18 finished with value: 0.7324905248948653 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.009089148420062964}. Best is trial 18 with value: 0.7324905248948653.
+[I 2026-06-19 18:13:15,900] Trial 19 finished with value: 0.733061627122164 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.008597373643414891}. Best is trial 19 with value: 0.733061627122164.
+[I 2026-06-19 18:13:26,364] Trial 20 finished with value: 0.7170837443538757 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 800, 'min_samples_leaf': 4, 'max_depth': '16'}. Best is trial 19 with value: 0.733061627122164.
+[I 2026-06-19 18:13:30,188] Trial 21 finished with value: 0.7314910959970926 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.010503968519871572}. Best is trial 19 with value: 0.733061627122164.
+[I 2026-06-19 18:13:35,641] Trial 22 finished with value: 0.7200430922589689 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.02732028051905765}. Best is trial 19 with value: 0.733061627122164.
+[I 2026-06-19 18:13:38,921] Trial 23 finished with value: 0.734787913400135 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.007030926024414986}. Best is trial 23 with value: 0.734787913400135.
+[I 2026-06-19 18:13:49,462] Trial 24 finished with value: 0.6974196563002959 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.1523863642625197}. Best is trial 23 with value: 0.734787913400135.
+[I 2026-06-19 18:13:52,505] Trial 25 finished with value: 0.7365012200820309 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.005734568942720136}. Best is trial 25 with value: 0.7365012200820309.
+[I 2026-06-19 18:13:55,423] Trial 26 finished with value: 0.7395124863714242 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0037298269486411334}. Best is trial 26 with value: 0.7395124863714242.
+[I 2026-06-19 18:13:59,052] Trial 27 finished with value: 0.7373059550386792 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 0.003196735883667481}. Best is trial 26 with value: 0.7395124863714242.
+[I 2026-06-19 18:14:01,694] Trial 28 finished with value: 0.7380198328228024 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 0.0026699880027457094}. Best is trial 26 with value: 0.7395124863714242.
+[I 2026-06-19 18:14:07,474] Trial 29 finished with value: 0.708244639426821 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 600, 'min_samples_leaf': 3, 'max_depth': '8'}. Best is trial 26 with value: 0.7395124863714242.
+[I 2026-06-19 18:14:10,836] Trial 30 finished with value: 0.7134754166450341 and parameters: {'family': 'extra_trees', 'percentile': 100, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': '12'}. Best is trial 26 with value: 0.7395124863714242.
+[I 2026-06-19 18:14:13,444] Trial 31 finished with value: 0.7408364051710711 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0026947098451988033}. Best is trial 31 with value: 0.7408364051710711.
+[I 2026-06-19 18:14:16,077] Trial 32 finished with value: 0.7405508540574218 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.003040491938633981}. Best is trial 31 with value: 0.7408364051710711.
+[I 2026-06-19 18:14:18,701] Trial 33 finished with value: 0.7405897928456466 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0030704562573325837}. Best is trial 31 with value: 0.7408364051710711.
+[I 2026-06-19 18:14:21,649] Trial 34 finished with value: 0.7405378744613468 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.002872843858870913}. Best is trial 31 with value: 0.7408364051710711.
+[I 2026-06-19 18:14:23,797] Trial 35 finished with value: 0.7408104459789211 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0011734651351346995}. Best is trial 31 with value: 0.7408364051710711.
+[I 2026-06-19 18:14:25,404] Trial 36 finished with value: 0.7184855407299725 and parameters: {'family': 'extra_trees', 'percentile': 90, 'n_estimators': 300, 'min_samples_leaf': 2, 'max_depth': '16'}. Best is trial 31 with value: 0.7408364051710711.
+[I 2026-06-19 18:14:27,699] Trial 37 finished with value: 0.7414464461865946 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0015282722258804658}. Best is trial 37 with value: 0.7414464461865946.
+[I 2026-06-19 18:14:29,935] Trial 38 finished with value: 0.7405248948652718 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0010860303382730257}. Best is trial 37 with value: 0.7414464461865946.
+[I 2026-06-19 18:14:32,019] Trial 39 finished with value: 0.7406546908260214 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0011036066875870912}. Best is trial 37 with value: 0.7414464461865946.
+[I 2026-06-19 18:14:35,147] Trial 40 finished with value: 0.7133456206842843 and parameters: {'family': 'extra_trees', 'percentile': 100, 'n_estimators': 800, 'min_samples_leaf': 4, 'max_depth': '12'}. Best is trial 37 with value: 0.7414464461865946.
+[I 2026-06-19 18:14:37,053] Trial 41 finished with value: 0.7405378744613468 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0011160776665918011}. Best is trial 37 with value: 0.7414464461865946.
+[I 2026-06-19 18:14:39,507] Trial 42 finished with value: 0.7411998338611702 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0020851778315275483}. Best is trial 37 with value: 0.7414464461865946.
+[I 2026-06-19 18:14:41,982] Trial 43 finished with value: 0.7415113441669695 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.001893692224105747}. Best is trial 43 with value: 0.7415113441669695.
+[I 2026-06-19 18:14:46,386] Trial 44 finished with value: 0.7253387674575568 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.018220920177529805}. Best is trial 43 with value: 0.7415113441669695.
+[I 2026-06-19 18:14:48,646] Trial 45 finished with value: 0.7414334665905196 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0019175117076311993}. Best is trial 43 with value: 0.7415113441669695.
+[I 2026-06-19 18:14:57,600] Trial 46 finished with value: 0.712605783708011 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 600, 'min_samples_leaf': 2, 'max_depth': 'none'}. Best is trial 43 with value: 0.7415113441669695.
+[I 2026-06-19 18:15:00,059] Trial 47 finished with value: 0.7407195888063963 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0025781557762274104}. Best is trial 43 with value: 0.7415113441669695.
+[I 2026-06-19 18:15:01,612] Trial 48 finished with value: 0.6981724728726443 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 500, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 43 with value: 0.7415113441669695.
+[I 2026-06-19 18:15:04,892] Trial 49 finished with value: 0.7383443227246768 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.004807104800471616}. Best is trial 43 with value: 0.7415113441669695.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+[I 2026-06-19 18:28:49,006] A new study created in memory with name: no-name-14eaecde-58e4-44ae-bca7-fcde95f7d864
+[I 2026-06-19 18:28:50,749] Trial 0 finished with value: 0.6921421535664859 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 0 with value: 0.6921421535664859.
+[I 2026-06-19 18:28:56,179] Trial 1 finished with value: 0.7383418570362191 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0066240595682091315}. Best is trial 1 with value: 0.7383418570362191.
+[I 2026-06-19 18:29:01,489] Trial 2 finished with value: 0.7442128272988807 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 700, 'min_samples_leaf': 1, 'max_depth': '12'}. Best is trial 2 with value: 0.7442128272988807.
+[I 2026-06-19 18:29:03,209] Trial 3 finished with value: 0.6921421535664859 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 2 with value: 0.7442128272988807.
+[I 2026-06-19 18:29:07,792] Trial 4 finished with value: 0.7419096795951396 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0014254814784217286}. Best is trial 2 with value: 0.7442128272988807.
+[I 2026-06-19 18:29:26,879] Trial 5 finished with value: 0.7336512499717247 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.21301372721189435}. Best is trial 2 with value: 0.7442128272988807.
+[I 2026-06-19 18:29:39,915] Trial 6 finished with value: 0.7196359792798962 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 1000, 'min_samples_leaf': 5, 'max_depth': '4'}. Best is trial 2 with value: 0.7442128272988807.
+[I 2026-06-19 18:29:46,305] Trial 7 finished with value: 0.7473755426277682 and parameters: {'family': 'extra_trees', 'percentile': 90, 'n_estimators': 500, 'min_samples_leaf': 2, 'max_depth': '16'}. Best is trial 7 with value: 0.7473755426277682.
+[I 2026-06-19 18:30:40,093] Trial 8 finished with value: 0.7093612672247688 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 1.4611205138065535}. Best is trial 7 with value: 0.7473755426277682.
+[I 2026-06-19 18:30:43,761] Trial 9 finished with value: 0.7455042351184785 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 300, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 7 with value: 0.7473755426277682.
+[I 2026-06-19 18:30:59,747] Trial 10 finished with value: 0.7483975644213032 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 700, 'min_samples_leaf': 3, 'max_depth': '16'}. Best is trial 10 with value: 0.7483975644213032.
+[I 2026-06-19 18:31:15,697] Trial 11 finished with value: 0.7483975644213032 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 700, 'min_samples_leaf': 3, 'max_depth': '16'}. Best is trial 10 with value: 0.7483975644213032.
+[I 2026-06-19 18:31:31,566] Trial 12 finished with value: 0.7483975644213032 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 700, 'min_samples_leaf': 3, 'max_depth': '16'}. Best is trial 10 with value: 0.7483975644213032.
+[I 2026-06-19 18:31:42,578] Trial 13 finished with value: 0.7385207622596346 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 700, 'min_samples_leaf': 3, 'max_depth': '8'}. Best is trial 10 with value: 0.7483975644213032.
+[I 2026-06-19 18:32:02,789] Trial 14 finished with value: 0.7488972652177399 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 900, 'min_samples_leaf': 3, 'max_depth': '16'}. Best is trial 14 with value: 0.7488972652177399.
+[I 2026-06-19 18:32:26,915] Trial 15 finished with value: 0.7516178584427843 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 1000, 'min_samples_leaf': 4, 'max_depth': '16'}. Best is trial 15 with value: 0.7516178584427843.
+[I 2026-06-19 18:32:51,166] Trial 16 finished with value: 0.7516178584427843 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 1000, 'min_samples_leaf': 4, 'max_depth': '16'}. Best is trial 15 with value: 0.7516178584427843.
+[I 2026-06-19 18:33:12,786] Trial 17 finished with value: 0.7506277105683635 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 1000, 'min_samples_leaf': 4, 'max_depth': '12'}. Best is trial 15 with value: 0.7516178584427843.
+[I 2026-06-19 18:33:36,301] Trial 18 finished with value: 0.7556401413968181 and parameters: {'family': 'random_forest', 'percentile': 50, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': 'none'}. Best is trial 18 with value: 0.7556401413968181.
+[I 2026-06-19 18:34:04,880] Trial 19 finished with value: 0.7534521510782639 and parameters: {'family': 'random_forest', 'percentile': 70, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': 'none'}. Best is trial 18 with value: 0.7556401413968181.
+[I 2026-06-19 18:34:34,642] Trial 20 finished with value: 0.7529349710358614 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 800, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 18 with value: 0.7556401413968181.
+[I 2026-06-19 18:35:04,290] Trial 21 finished with value: 0.7529349710358614 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 800, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 18 with value: 0.7556401413968181.
+[I 2026-06-19 18:35:38,413] Trial 22 finished with value: 0.7550571571343085 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': 'none'}. Best is trial 18 with value: 0.7556401413968181.
+[I 2026-06-19 18:36:07,271] Trial 23 finished with value: 0.7534521510782639 and parameters: {'family': 'random_forest', 'percentile': 70, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': 'none'}. Best is trial 18 with value: 0.7556401413968181.
+[I 2026-06-19 18:36:35,983] Trial 24 finished with value: 0.7534521510782639 and parameters: {'family': 'random_forest', 'percentile': 70, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': 'none'}. Best is trial 18 with value: 0.7556401413968181.
+[I 2026-06-19 18:37:02,858] Trial 25 finished with value: 0.752323197427055 and parameters: {'family': 'random_forest', 'percentile': 80, 'n_estimators': 800, 'min_samples_leaf': 4, 'max_depth': 'none'}. Best is trial 18 with value: 0.7556401413968181.
+[I 2026-06-19 18:37:37,005] Trial 26 finished with value: 0.7550571571343085 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': 'none'}. Best is trial 18 with value: 0.7556401413968181.
+[I 2026-06-19 18:37:55,863] Trial 27 finished with value: 0.7467791918830495 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 800, 'min_samples_leaf': 2, 'max_depth': '8'}. Best is trial 18 with value: 0.7556401413968181.
+[I 2026-06-19 18:38:27,549] Trial 28 finished with value: 0.7558293285296253 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 900, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:39:35,026] Trial 29 finished with value: 0.7079012360911471 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 24.743303275607825}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:39:42,733] Trial 30 finished with value: 0.7496519573670909 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 600, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:40:16,079] Trial 31 finished with value: 0.7527437275211756 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 900, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:40:50,210] Trial 32 finished with value: 0.7550571571343085 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': 'none'}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:41:19,340] Trial 33 finished with value: 0.7541739411175613 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 800, 'min_samples_leaf': 4, 'max_depth': 'none'}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:41:56,210] Trial 34 finished with value: 0.7525278074239499 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 1000, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:42:13,608] Trial 35 finished with value: 0.7195629777232151 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.04150000647701572}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:42:26,939] Trial 36 finished with value: 0.7493866841047849 and parameters: {'family': 'extra_trees', 'percentile': 100, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': 'none'}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:42:50,484] Trial 37 finished with value: 0.7493537819947316 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 800, 'min_samples_leaf': 5, 'max_depth': '12'}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:43:09,341] Trial 38 finished with value: 0.7452718639662261 and parameters: {'family': 'random_forest', 'percentile': 80, 'n_estimators': 900, 'min_samples_leaf': 3, 'max_depth': '8'}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:44:22,461] Trial 39 finished with value: 0.7102537369599684 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 23.437573147053158}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:44:25,546] Trial 40 finished with value: 0.6942427476552107 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 1000, 'min_samples_leaf': 4, 'max_depth': '4'}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:44:59,867] Trial 41 finished with value: 0.7550571571343085 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': 'none'}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:45:32,505] Trial 42 finished with value: 0.755471518082794 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': 'none'}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:46:09,698] Trial 43 finished with value: 0.7546695291502413 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 1000, 'min_samples_leaf': 4, 'max_depth': 'none'}. Best is trial 28 with value: 0.7558293285296253.
+[I 2026-06-19 18:46:39,061] Trial 44 finished with value: 0.756129560283863 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 800, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 44 with value: 0.756129560283863.
+[I 2026-06-19 18:46:49,686] Trial 45 finished with value: 0.7191290811468853 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 800, 'min_samples_leaf': 5, 'max_depth': '4'}. Best is trial 44 with value: 0.756129560283863.
+[I 2026-06-19 18:47:11,753] Trial 46 finished with value: 0.7511263831738609 and parameters: {'family': 'random_forest', 'percentile': 80, 'n_estimators': 800, 'min_samples_leaf': 5, 'max_depth': '12'}. Best is trial 44 with value: 0.756129560283863.
+[I 2026-06-19 18:48:02,275] Trial 47 finished with value: 0.7097170212897216 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 1.164716737536578}. Best is trial 44 with value: 0.756129560283863.
+[I 2026-06-19 18:48:21,413] Trial 48 finished with value: 0.7519633305983454 and parameters: {'family': 'random_forest', 'percentile': 70, 'n_estimators': 600, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 44 with value: 0.756129560283863.
+[I 2026-06-19 18:48:29,841] Trial 49 finished with value: 0.7508199822739883 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 800, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 44 with value: 0.756129560283863.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+[I 2026-06-19 18:52:15,231] A new study created in memory with name: no-name-87863397-ab09-404d-a451-32908ad82927
+[I 2026-06-19 18:52:16,010] Trial 0 finished with value: 0.6993006993006993 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 0 with value: 0.6993006993006993.
+[I 2026-06-19 18:52:17,066] Trial 1 finished with value: 0.7878302253302252 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0066240595682091315}. Best is trial 1 with value: 0.7878302253302252.
+[I 2026-06-19 18:52:18,486] Trial 2 finished with value: 0.7324203574203575 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 700, 'min_samples_leaf': 1, 'max_depth': '12'}. Best is trial 1 with value: 0.7878302253302252.
+[I 2026-06-19 18:52:19,239] Trial 3 finished with value: 0.6993006993006993 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 1 with value: 0.7878302253302252.
+[I 2026-06-19 18:52:20,595] Trial 4 finished with value: 0.808954933954934 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0014254814784217286}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:52:24,631] Trial 5 finished with value: 0.7596153846153846 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.21301372721189435}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:52:28,131] Trial 6 finished with value: 0.7208139083139083 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 1000, 'min_samples_leaf': 5, 'max_depth': '4'}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:52:29,185] Trial 7 finished with value: 0.7338772338772339 and parameters: {'family': 'extra_trees', 'percentile': 90, 'n_estimators': 500, 'min_samples_leaf': 2, 'max_depth': '16'}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:52:33,844] Trial 8 finished with value: 0.7677253302253303 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 1.4611205138065535}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:52:34,560] Trial 9 finished with value: 0.7324689199689199 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 300, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:52:38,210] Trial 10 finished with value: 0.7365967365967366 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 1000, 'min_samples_leaf': 3, 'max_depth': '8'}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:52:39,582] Trial 11 finished with value: 0.7767094017094016 and parameters: {'family': 'logistic', 'percentile': 40, 'logistic_c': 0.0011234362079909188}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:52:41,149] Trial 12 finished with value: 0.7871989121989121 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0017164142601062626}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:52:42,901] Trial 13 finished with value: 0.7964257964257965 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.020341690646828656}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:52:44,666] Trial 14 finished with value: 0.7899669774669774 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.03458075594417433}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:52:46,218] Trial 15 finished with value: 0.7945318570318571 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.023754966069769793}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:52:50,904] Trial 16 finished with value: 0.7651029526029527 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 21.275872228626255}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:52:53,929] Trial 17 finished with value: 0.7383935508935509 and parameters: {'family': 'random_forest', 'percentile': 70, 'n_estimators': 700, 'min_samples_leaf': 3, 'max_depth': 'none'}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:52:56,617] Trial 18 finished with value: 0.7978341103341103 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.01425368592272892}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:52:58,255] Trial 19 finished with value: 0.8068181818181819 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.00564458917941432}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:53:01,802] Trial 20 finished with value: 0.7328088578088578 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 800, 'min_samples_leaf': 4, 'max_depth': '16'}. Best is trial 4 with value: 0.808954933954934.
+[I 2026-06-19 18:53:03,834] Trial 21 finished with value: 0.81002331002331 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.004429547605570954}. Best is trial 21 with value: 0.81002331002331.
+[I 2026-06-19 18:53:05,818] Trial 22 finished with value: 0.8098290598290598 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.004240477077931635}. Best is trial 21 with value: 0.81002331002331.
+[I 2026-06-19 18:53:06,940] Trial 23 finished with value: 0.808517871017871 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.002665905578068932}. Best is trial 21 with value: 0.81002331002331.
+[I 2026-06-19 18:53:09,107] Trial 24 finished with value: 0.7811771561771562 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.07215668891446772}. Best is trial 21 with value: 0.81002331002331.
+[I 2026-06-19 18:53:10,883] Trial 25 finished with value: 0.8122086247086246 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0042650342829910655}. Best is trial 25 with value: 0.8122086247086246.
+[I 2026-06-19 18:53:13,114] Trial 26 finished with value: 0.8082264957264959 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.005328930404881081}. Best is trial 25 with value: 0.8122086247086246.
+[I 2026-06-19 18:53:16,620] Trial 27 finished with value: 0.7620920745920745 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.15443548251989522}. Best is trial 25 with value: 0.8122086247086246.
+[I 2026-06-19 18:53:19,081] Trial 28 finished with value: 0.8010392385392385 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.006096709497483222}. Best is trial 25 with value: 0.8122086247086246.
+[I 2026-06-19 18:53:21,747] Trial 29 finished with value: 0.7371794871794872 and parameters: {'family': 'random_forest', 'percentile': 80, 'n_estimators': 600, 'min_samples_leaf': 3, 'max_depth': '8'}. Best is trial 25 with value: 0.8122086247086246.
+[I 2026-06-19 18:53:23,490] Trial 30 finished with value: 0.7292152292152292 and parameters: {'family': 'extra_trees', 'percentile': 70, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': '12'}. Best is trial 25 with value: 0.8122086247086246.
+[I 2026-06-19 18:53:24,541] Trial 31 finished with value: 0.8036130536130537 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0010016734574392731}. Best is trial 25 with value: 0.8122086247086246.
+[I 2026-06-19 18:53:25,954] Trial 32 finished with value: 0.8125971250971252 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0027723784004905763}. Best is trial 32 with value: 0.8125971250971252.
+[I 2026-06-19 18:53:27,234] Trial 33 finished with value: 0.7996794871794872 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.0034331950021364503}. Best is trial 32 with value: 0.8125971250971252.
+[I 2026-06-19 18:53:29,770] Trial 34 finished with value: 0.8022047397047398 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.009590848014522074}. Best is trial 32 with value: 0.8125971250971252.
+[I 2026-06-19 18:53:31,188] Trial 35 finished with value: 0.7898212898212899 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0028251404496345877}. Best is trial 32 with value: 0.8125971250971252.
+[I 2026-06-19 18:53:31,976] Trial 36 finished with value: 0.730963480963481 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 300, 'min_samples_leaf': 2, 'max_depth': '16'}. Best is trial 32 with value: 0.8125971250971252.
+[I 2026-06-19 18:53:33,500] Trial 37 finished with value: 0.79249222999223 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.012635608898935743}. Best is trial 32 with value: 0.8125971250971252.
+[I 2026-06-19 18:53:36,862] Trial 38 finished with value: 0.7868589743589742 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.045646380457280984}. Best is trial 32 with value: 0.8125971250971252.
+[I 2026-06-19 18:53:37,942] Trial 39 finished with value: 0.808517871017871 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0026778379319974802}. Best is trial 32 with value: 0.8125971250971252.
+[I 2026-06-19 18:53:39,546] Trial 40 finished with value: 0.7282439782439782 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 800, 'min_samples_leaf': 4, 'max_depth': '12'}. Best is trial 32 with value: 0.8125971250971252.
+[I 2026-06-19 18:53:41,464] Trial 41 finished with value: 0.8110916860916861 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0018369735427059245}. Best is trial 32 with value: 0.8125971250971252.
+[I 2026-06-19 18:53:43,419] Trial 42 finished with value: 0.8126942501942502 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.003301814394965686}. Best is trial 42 with value: 0.8126942501942502.
+[I 2026-06-19 18:53:44,916] Trial 43 finished with value: 0.7974941724941724 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.001933135055148289}. Best is trial 42 with value: 0.8126942501942502.
+[I 2026-06-19 18:53:47,539] Trial 44 finished with value: 0.8074980574980574 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.007783399109127626}. Best is trial 42 with value: 0.8126942501942502.
+[I 2026-06-19 18:53:49,418] Trial 45 finished with value: 0.7953574203574204 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.009109049161838766}. Best is trial 42 with value: 0.8126942501942502.
+[I 2026-06-19 18:53:52,020] Trial 46 finished with value: 0.7373737373737373 and parameters: {'family': 'random_forest', 'percentile': 70, 'n_estimators': 600, 'min_samples_leaf': 2, 'max_depth': 'none'}. Best is trial 42 with value: 0.8126942501942502.
+[I 2026-06-19 18:53:53,908] Trial 47 finished with value: 0.8110916860916861 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.00190954934924786}. Best is trial 42 with value: 0.8126942501942502.
+[I 2026-06-19 18:53:54,976] Trial 48 finished with value: 0.7264471639471639 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 500, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 42 with value: 0.8126942501942502.
+[I 2026-06-19 18:53:56,598] Trial 49 finished with value: 0.7869075369075369 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0016542743763017789}. Best is trial 42 with value: 0.8126942501942502.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+[I 2026-06-19 18:56:50,643] A new study created in memory with name: no-name-2aadff55-b065-4133-8293-d82c27680ec0
+[I 2026-06-19 18:56:51,399] Trial 0 finished with value: 0.7567388317779147 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 0 with value: 0.7567388317779147.
+[I 2026-06-19 18:56:52,625] Trial 1 finished with value: 0.7757828414420389 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0066240595682091315}. Best is trial 1 with value: 0.7757828414420389.
+[I 2026-06-19 18:56:54,017] Trial 2 finished with value: 0.7944952389975841 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 700, 'min_samples_leaf': 1, 'max_depth': '12'}. Best is trial 2 with value: 0.7944952389975841.
+[I 2026-06-19 18:56:54,738] Trial 3 finished with value: 0.7567388317779147 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 2 with value: 0.7944952389975841.
+[I 2026-06-19 18:56:55,567] Trial 4 finished with value: 0.8006537495854849 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0014254814784217286}. Best is trial 4 with value: 0.8006537495854849.
+[I 2026-06-19 18:56:59,131] Trial 5 finished with value: 0.73523141787863 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.21301372721189435}. Best is trial 4 with value: 0.8006537495854849.
+[I 2026-06-19 18:57:02,581] Trial 6 finished with value: 0.7743142735326165 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 1000, 'min_samples_leaf': 5, 'max_depth': '4'}. Best is trial 4 with value: 0.8006537495854849.
+[I 2026-06-19 18:57:03,620] Trial 7 finished with value: 0.7907053863281065 and parameters: {'family': 'extra_trees', 'percentile': 90, 'n_estimators': 500, 'min_samples_leaf': 2, 'max_depth': '16'}. Best is trial 4 with value: 0.8006537495854849.
+[I 2026-06-19 18:57:08,981] Trial 8 finished with value: 0.7365104931545786 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 1.4611205138065535}. Best is trial 4 with value: 0.8006537495854849.
+[I 2026-06-19 18:57:09,692] Trial 9 finished with value: 0.7702875550712965 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 300, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 4 with value: 0.8006537495854849.
+[I 2026-06-19 18:57:13,212] Trial 10 finished with value: 0.7821308446634138 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 1000, 'min_samples_leaf': 3, 'max_depth': '8'}. Best is trial 4 with value: 0.8006537495854849.
+[I 2026-06-19 18:57:14,494] Trial 11 finished with value: 0.8013169738026436 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0011755327203465582}. Best is trial 11 with value: 0.8013169738026436.
+[I 2026-06-19 18:57:15,653] Trial 12 finished with value: 0.8022170638116445 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0010936476616866374}. Best is trial 12 with value: 0.8022170638116445.
+[I 2026-06-19 18:57:17,437] Trial 13 finished with value: 0.8007484959022217 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0013347383902959447}. Best is trial 12 with value: 0.8022170638116445.
+[I 2026-06-19 18:57:20,028] Trial 14 finished with value: 0.7729404519399308 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 0.018670863493121193}. Best is trial 12 with value: 0.8022170638116445.
+[I 2026-06-19 18:57:21,218] Trial 15 finished with value: 0.8025486759202236 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.001037188093555136}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:22,561] Trial 16 finished with value: 0.7653133734426074 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.011814145193153835}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:27,478] Trial 17 finished with value: 0.796627031124165 and parameters: {'family': 'random_forest', 'percentile': 80, 'n_estimators': 700, 'min_samples_leaf': 3, 'max_depth': 'none'}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:30,164] Trial 18 finished with value: 0.7452745274527454 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 29.803468870872535}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:33,210] Trial 19 finished with value: 0.7446586763939552 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.038121053596231316}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:36,169] Trial 20 finished with value: 0.7877682505092615 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 800, 'min_samples_leaf': 4, 'max_depth': '16'}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:37,349] Trial 21 finished with value: 0.8022170638116444 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0010920912652891174}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:39,023] Trial 22 finished with value: 0.7889999526268417 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.0035403100552740207}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:40,326] Trial 23 finished with value: 0.8015064664361173 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.0010148408524692427}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:42,397] Trial 24 finished with value: 0.792173954237529 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.004775822617941798}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:44,012] Trial 25 finished with value: 0.7936898953053201 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.00384867720504984}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:46,808] Trial 26 finished with value: 0.7500118432895923 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.06754862884407092}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:48,172] Trial 27 finished with value: 0.7941162537306362 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.003161990002963656}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:50,664] Trial 28 finished with value: 0.7967691505992704 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 600, 'min_samples_leaf': 3, 'max_depth': '8'}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:51,385] Trial 29 finished with value: 0.7993273011511678 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.0010496473768619508}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:53,083] Trial 30 finished with value: 0.7770619167179875 and parameters: {'family': 'extra_trees', 'percentile': 70, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': '12'}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:53,734] Trial 31 finished with value: 0.8012696006442749 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.0010014685061848533}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:54,568] Trial 32 finished with value: 0.7879577431427351 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.002933472839289064}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:56,245] Trial 33 finished with value: 0.7800464256952012 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.008760686031017}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:57,877] Trial 34 finished with value: 0.796816523757639 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.0020720010241444997}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:57:59,737] Trial 35 finished with value: 0.7955374484816903 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.003024329791946203}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:58:00,435] Trial 36 finished with value: 0.7835520394144677 and parameters: {'family': 'extra_trees', 'percentile': 50, 'n_estimators': 300, 'min_samples_leaf': 2, 'max_depth': '16'}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:58:02,644] Trial 37 finished with value: 0.7660713439765029 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.01684048483260021}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:58:03,932] Trial 38 finished with value: 0.7966744042825336 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.002183588890693188}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:58:05,979] Trial 39 finished with value: 0.7868681605002606 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.006946274991348339}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:58:07,475] Trial 40 finished with value: 0.7811360083376759 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 800, 'min_samples_leaf': 4, 'max_depth': '12'}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:58:08,295] Trial 41 finished with value: 0.8014590932777489 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0011082893786276903}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:58:09,097] Trial 42 finished with value: 0.8017907053863282 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.001100155161881918}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:58:10,287] Trial 43 finished with value: 0.7964375384906912 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.0021566169643991535}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:58:12,065] Trial 44 finished with value: 0.7907053863281065 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.00544234989706594}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:58:13,576] Trial 45 finished with value: 0.7984272111421669 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0018534582226252966}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:58:16,229] Trial 46 finished with value: 0.7852100999573641 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 600, 'min_samples_leaf': 2, 'max_depth': 'none'}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:58:17,696] Trial 47 finished with value: 0.7941636268890047 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.002073657168657553}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:58:18,681] Trial 48 finished with value: 0.7736984224738265 and parameters: {'family': 'extra_trees', 'percentile': 70, 'n_estimators': 500, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 15 with value: 0.8025486759202236.
+[I 2026-06-19 18:58:19,320] Trial 49 finished with value: 0.8010801080108011 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.0010731609335290014}. Best is trial 15 with value: 0.8025486759202236.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+[I 2026-06-19 19:00:57,078] A new study created in memory with name: no-name-2ac02fe0-1ee3-43be-84af-928d8afb7a8b
+[I 2026-06-19 19:00:57,779] Trial 0 finished with value: 0.7089555845536707 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 0 with value: 0.7089555845536707.
+[I 2026-06-19 19:00:59,286] Trial 1 finished with value: 0.7926634768740032 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0066240595682091315}. Best is trial 1 with value: 0.7926634768740032.
+[I 2026-06-19 19:01:00,630] Trial 2 finished with value: 0.7486830022715191 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 700, 'min_samples_leaf': 1, 'max_depth': '12'}. Best is trial 1 with value: 0.7926634768740032.
+[I 2026-06-19 19:01:01,339] Trial 3 finished with value: 0.7089555845536707 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 1 with value: 0.7926634768740032.
+[I 2026-06-19 19:01:02,470] Trial 4 finished with value: 0.7978348074041854 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0014254814784217286}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:06,617] Trial 5 finished with value: 0.7784060702720991 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.21301372721189435}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:10,088] Trial 6 finished with value: 0.7309941520467836 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 1000, 'min_samples_leaf': 5, 'max_depth': '4'}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:11,123] Trial 7 finished with value: 0.7392102846648301 and parameters: {'family': 'extra_trees', 'percentile': 90, 'n_estimators': 500, 'min_samples_leaf': 2, 'max_depth': '16'}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:15,380] Trial 8 finished with value: 0.7760378908704267 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 1.4611205138065535}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:16,055] Trial 9 finished with value: 0.739935237542893 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 300, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:19,565] Trial 10 finished with value: 0.738581992170509 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 1000, 'min_samples_leaf': 3, 'max_depth': '8'}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:20,208] Trial 11 finished with value: 0.7792276835339037 and parameters: {'family': 'logistic', 'percentile': 40, 'logistic_c': 0.0011234362079909188}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:21,426] Trial 12 finished with value: 0.7889420520999468 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0017164142601062626}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:23,634] Trial 13 finished with value: 0.7959499299212218 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.020341690646828656}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:26,567] Trial 14 finished with value: 0.7919868541878111 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.03458075594417433}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:28,639] Trial 15 finished with value: 0.7950799864675463 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.023754966069769793}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:32,061] Trial 16 finished with value: 0.7962640761683824 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 21.275872228626255}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:35,140] Trial 17 finished with value: 0.750084577835774 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 700, 'min_samples_leaf': 3, 'max_depth': 'none'}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:38,347] Trial 18 finished with value: 0.7971098545261225 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 29.803468870872535}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:43,712] Trial 19 finished with value: 0.7853172877096323 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 27.544421082443318}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:47,104] Trial 20 finished with value: 0.7477647286259728 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 800, 'min_samples_leaf': 4, 'max_depth': '16'}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:50,968] Trial 21 finished with value: 0.7971098545261226 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 20.497304521067694}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:55,209] Trial 22 finished with value: 0.7727997680150789 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 4.339516111995373}. Best is trial 4 with value: 0.7978348074041854.
+[I 2026-06-19 19:01:58,654] Trial 23 finished with value: 0.8032477888937218 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 4.036113505719297}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:02:03,968] Trial 24 finished with value: 0.7755545889517182 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 2.7695274722089303}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:02:08,454] Trial 25 finished with value: 0.8012179208351456 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 0.40548225400863436}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:02:12,859] Trial 26 finished with value: 0.7873954859600792 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.3770199942650913}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:02:16,180] Trial 27 finished with value: 0.8006379585326954 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 0.20432560160177676}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:02:20,024] Trial 28 finished with value: 0.8012179208351458 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 0.2581231289862252}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:02:22,491] Trial 29 finished with value: 0.7437049925088203 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 600, 'min_samples_leaf': 3, 'max_depth': '8'}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:02:24,159] Trial 30 finished with value: 0.742738388671403 and parameters: {'family': 'extra_trees', 'percentile': 100, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': '12'}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:02:27,746] Trial 31 finished with value: 0.8008796094920496 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 0.22396152319008522}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:02:32,053] Trial 32 finished with value: 0.8014112416026292 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 0.8376138114497531}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:02:36,818] Trial 33 finished with value: 0.7763762022135228 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.8066823424411405}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:02:40,148] Trial 34 finished with value: 0.8009762698757914 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 0.08222797294373627}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:02:45,788] Trial 35 finished with value: 0.8020395340969504 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 4.329020429775383}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:02:46,521] Trial 36 finished with value: 0.7429800396307573 and parameters: {'family': 'extra_trees', 'percentile': 90, 'n_estimators': 300, 'min_samples_leaf': 2, 'max_depth': '16'}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:02:53,312] Trial 37 finished with value: 0.7833357498429269 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 6.743511462483615}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:02:58,888] Trial 38 finished with value: 0.8016045623701127 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 1.617477360371179}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:03:04,250] Trial 39 finished with value: 0.7704799188052777 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 8.44390333107699}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:03:05,778] Trial 40 finished with value: 0.7462181624861051 and parameters: {'family': 'extra_trees', 'percentile': 90, 'n_estimators': 800, 'min_samples_leaf': 4, 'max_depth': '12'}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:03:10,927] Trial 41 finished with value: 0.8017495529457253 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 1.7047627680567259}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:03:16,580] Trial 42 finished with value: 0.8019428737132086 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 1.573905886892735}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:03:21,763] Trial 43 finished with value: 0.8006862887245663 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 1.9562657319339591}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:03:27,246] Trial 44 finished with value: 0.7733314001256585 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 9.32034713287948}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:03:30,348] Trial 45 finished with value: 0.8011212604514041 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 1.2097852543199223}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:03:33,076] Trial 46 finished with value: 0.755690880092794 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 600, 'min_samples_leaf': 2, 'max_depth': 'none'}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:03:38,028] Trial 47 finished with value: 0.7739113624281088 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 2.692198372500537}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:03:39,033] Trial 48 finished with value: 0.740998501764052 and parameters: {'family': 'extra_trees', 'percentile': 100, 'n_estimators': 500, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 23 with value: 0.8032477888937218.
+[I 2026-06-19 19:03:45,045] Trial 49 finished with value: 0.7748779662655261 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 3.8951784322376386}. Best is trial 23 with value: 0.8032477888937218.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+[I 2026-06-19 19:07:44,592] A new study created in memory with name: no-name-42da5309-60da-4e70-a400-29e656556d95
+[I 2026-06-19 19:07:45,387] Trial 0 finished with value: 0.7170260295260295 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 0 with value: 0.7170260295260295.
+[I 2026-06-19 19:07:46,835] Trial 1 finished with value: 0.8152680652680652 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0066240595682091315}. Best is trial 1 with value: 0.8152680652680652.
+[I 2026-06-19 19:07:48,334] Trial 2 finished with value: 0.7524766899766899 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 700, 'min_samples_leaf': 1, 'max_depth': '12'}. Best is trial 1 with value: 0.8152680652680652.
+[I 2026-06-19 19:07:49,148] Trial 3 finished with value: 0.7170260295260295 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 1 with value: 0.8152680652680652.
+[I 2026-06-19 19:07:51,167] Trial 4 finished with value: 0.8262432012432013 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0014254814784217286}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:07:55,415] Trial 5 finished with value: 0.7963286713286712 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.21301372721189435}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:07:59,108] Trial 6 finished with value: 0.734411421911422 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 1000, 'min_samples_leaf': 5, 'max_depth': '4'}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:08:00,292] Trial 7 finished with value: 0.7470376845376846 and parameters: {'family': 'extra_trees', 'percentile': 90, 'n_estimators': 500, 'min_samples_leaf': 2, 'max_depth': '16'}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:08:06,558] Trial 8 finished with value: 0.8031759906759907 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 1.4611205138065535}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:08:07,336] Trial 9 finished with value: 0.7465034965034965 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 300, 'min_samples_leaf': 5, 'max_depth': 'none'}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:08:11,101] Trial 10 finished with value: 0.7479603729603729 and parameters: {'family': 'random_forest', 'percentile': 40, 'n_estimators': 1000, 'min_samples_leaf': 3, 'max_depth': '8'}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:08:12,747] Trial 11 finished with value: 0.8003593628593628 and parameters: {'family': 'logistic', 'percentile': 40, 'logistic_c': 0.0011234362079909188}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:08:14,170] Trial 12 finished with value: 0.8118201243201244 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0017164142601062626}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:08:16,798] Trial 13 finished with value: 0.8186674436674437 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.020341690646828656}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:08:19,545] Trial 14 finished with value: 0.8157051282051281 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.03458075594417433}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:08:22,262] Trial 15 finished with value: 0.8180361305361304 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.023754966069769793}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:08:27,112] Trial 16 finished with value: 0.8160693473193472 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 21.275872228626255}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:08:30,250] Trial 17 finished with value: 0.7512626262626263 and parameters: {'family': 'random_forest', 'percentile': 70, 'n_estimators': 700, 'min_samples_leaf': 3, 'max_depth': 'none'}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:08:33,213] Trial 18 finished with value: 0.8194444444444443 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.01425368592272892}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:08:35,923] Trial 19 finished with value: 0.8260975135975135 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.00564458917941432}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:08:39,672] Trial 20 finished with value: 0.7432983682983683 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 800, 'min_samples_leaf': 4, 'max_depth': '16'}. Best is trial 4 with value: 0.8262432012432013.
+[I 2026-06-19 19:08:41,654] Trial 21 finished with value: 0.827991452991453 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.004429547605570954}. Best is trial 21 with value: 0.827991452991453.
+[I 2026-06-19 19:08:43,990] Trial 22 finished with value: 0.8279428904428905 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.004240477077931635}. Best is trial 21 with value: 0.827991452991453.
+[I 2026-06-19 19:08:46,352] Trial 23 finished with value: 0.8279914529914529 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.002665905578068932}. Best is trial 21 with value: 0.827991452991453.
+[I 2026-06-19 19:08:48,564] Trial 24 finished with value: 0.824980574980575 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.004328188814571475}. Best is trial 21 with value: 0.827991452991453.
+[I 2026-06-19 19:08:53,270] Trial 25 finished with value: 0.8161907536907537 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 0.08728270190139499}. Best is trial 21 with value: 0.827991452991453.
+[I 2026-06-19 19:08:55,255] Trial 26 finished with value: 0.8279914529914529 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.004238129984240922}. Best is trial 21 with value: 0.827991452991453.
+[I 2026-06-19 19:08:58,131] Trial 27 finished with value: 0.826923076923077 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0033747064845795496}. Best is trial 21 with value: 0.827991452991453.
+[I 2026-06-19 19:09:01,907] Trial 28 finished with value: 0.8074494949494948 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.08722081057990494}. Best is trial 21 with value: 0.827991452991453.
+[I 2026-06-19 19:09:04,591] Trial 29 finished with value: 0.75495337995338 and parameters: {'family': 'random_forest', 'percentile': 90, 'n_estimators': 600, 'min_samples_leaf': 3, 'max_depth': '8'}. Best is trial 21 with value: 0.827991452991453.
+[I 2026-06-19 19:09:06,484] Trial 30 finished with value: 0.743104118104118 and parameters: {'family': 'extra_trees', 'percentile': 100, 'n_estimators': 900, 'min_samples_leaf': 4, 'max_depth': '12'}. Best is trial 21 with value: 0.827991452991453.
+[I 2026-06-19 19:09:08,902] Trial 31 finished with value: 0.8253205128205128 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.0064170832755164895}. Best is trial 21 with value: 0.827991452991453.
+[I 2026-06-19 19:09:11,099] Trial 32 finished with value: 0.8297397047397046 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.0030384405069779903}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:12,633] Trial 33 finished with value: 0.826388888888889 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0010252964042266831}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:15,246] Trial 34 finished with value: 0.8202214452214452 and parameters: {'family': 'logistic', 'percentile': 80, 'logistic_c': 0.012744686037328716}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:17,015] Trial 35 finished with value: 0.8268745143745143 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0028251404496345877}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:17,856] Trial 36 finished with value: 0.7419386169386171 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 300, 'min_samples_leaf': 2, 'max_depth': '16'}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:19,705] Trial 37 finished with value: 0.8121600621600622 and parameters: {'family': 'logistic', 'percentile': 60, 'logistic_c': 0.009223471621970347}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:21,288] Trial 38 finished with value: 0.8284770784770784 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.002154872429624922}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:23,156] Trial 39 finished with value: 0.8283799533799533 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0023690952874309613}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:24,910] Trial 40 finished with value: 0.7391219891219891 and parameters: {'family': 'extra_trees', 'percentile': 90, 'n_estimators': 800, 'min_samples_leaf': 4, 'max_depth': '12'}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:26,346] Trial 41 finished with value: 0.8282342657342657 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0021899768129197148}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:28,396] Trial 42 finished with value: 0.8285742035742035 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.0020054834035205605}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:30,348] Trial 43 finished with value: 0.8282828282828283 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 0.002020604538647326}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:32,304] Trial 44 finished with value: 0.8284285159285159 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 0.0018467415852076786}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:34,319] Trial 45 finished with value: 0.8262432012432013 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 0.0010535204611876402}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:37,307] Trial 46 finished with value: 0.7539821289821289 and parameters: {'family': 'random_forest', 'percentile': 100, 'n_estimators': 600, 'min_samples_leaf': 2, 'max_depth': 'none'}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:40,147] Trial 47 finished with value: 0.820027195027195 and parameters: {'family': 'logistic', 'percentile': 90, 'logistic_c': 0.01051718964004603}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:41,288] Trial 48 finished with value: 0.739996114996115 and parameters: {'family': 'extra_trees', 'percentile': 90, 'n_estimators': 500, 'min_samples_leaf': 5, 'max_depth': '8'}. Best is trial 32 with value: 0.8297397047397046.
+[I 2026-06-19 19:09:43,253] Trial 49 finished with value: 0.8284770784770784 and parameters: {'family': 'logistic', 'percentile': 100, 'logistic_c': 0.001959549149893867}. Best is trial 32 with value: 0.8297397047397046.
+Wrote strong baseline metrics: data/outputs/metrics/strong_baseline_metrics.csv (190 rows)
+Wrote strong baseline predictions: data/outputs/metrics/strong_baseline_predictions.csv (101657 rows)
+Wrote strong baseline model selection: reports/tables/strong_baseline_model_selection.csv (3 rows)
+Wrote strong baseline protocol audit: reports/tables/strong_baseline_protocol_audit.csv
+Wrote paper metric table: reports/tables/paper_metric_table.csv (729 rows)
+Wrote raw combined metric table: reports/tables/paper_metric_table_raw.csv (729 rows)
+Wrote experiment manifest: reports/experiment_manifest.json
+severity               check                                                             message
+ warning      unknown_labels                                       5688 rows have unknown labels
+   error      split_coverage                                   No supervised rows in split=train
+   error      split_coverage                              No supervised rows in split=validation
+   error      split_coverage                                    No supervised rows in split=test
+ warning split_label_balance      Split train does not contain both positive and negative labels
+ warning split_label_balance Split validation does not contain both positive and negative labels
+ warning split_label_balance       Split test does not contain both positive and negative labels
+Traceback (most recent call last):
+  File "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/scripts/12_validate_artifacts.py", line 57, in <module>
+    main()
+  File "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/scripts/12_validate_artifacts.py", line 53, in main
+    raise_on_errors(issues)
+  File "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/src/covid_audio_btp/validation.py", line 165, in raise_on_errors
+    raise ValueError(f"Validation failed:\n{message}")
+ValueError: Validation failed:
+- split_coverage: No supervised rows in split=train
+- split_coverage: No supervised rows in split=validation
+- split_coverage: No supervised rows in split=test

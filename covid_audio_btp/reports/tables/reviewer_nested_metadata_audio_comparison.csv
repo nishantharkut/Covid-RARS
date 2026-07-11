@@ -1,0 +1,2 @@
+analysis,skipped,skip_reason,n_validation_aligned,n_test_aligned
+nested_metadata_audio,True,validation/test prediction pairs unavailable or single-class,0,314

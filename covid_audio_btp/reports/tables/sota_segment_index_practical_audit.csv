@@ -1,0 +1,2 @@
+severity,check,message
+ok,segment_index,no leakage detected

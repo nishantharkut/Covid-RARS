@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this research artifact, please cite the repository and the associated manuscript when available."
+title: "Reliability-Aware COVID Respiratory Audio Evaluation Under Temporal and Cross-Dataset Shift"
+version: "0.1.0"
+date-released: "2026-07-11"
+url: "https://github.com/nishantharkut/Covid-19-BTP"
+authors:
+  - family-names: "Harkut"
+    given-names: "Nishant"
+repository-code: "https://github.com/nishantharkut/Covid-19-BTP"
+keywords:
+  - "COVID-19"
+  - "respiratory audio"
+  - "Coswara"
+  - "COUGHVID"
+  - "domain shift"
+  - "metadata confounding"
+  - "clinical AI reliability"

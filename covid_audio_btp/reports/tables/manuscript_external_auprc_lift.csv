@@ -1,0 +1,5 @@
+representation,model_name,feature_strategy,selection_metric,auroc,auprc,target_prevalence,absolute_auprc_lift,relative_auprc_lift,pr_lift_interpretation
+mfcc,logistic_regression,top_stable_50,auroc,0.534794231414978,0.0421759634825796,0.03420957868203097,0.007966,1.23287,limited_lift
+beats,logistic_regression,drop_high_shift,auroc,0.5529926606224734,0.0393621818365529,0.03420957868203097,0.005153,1.150619,limited_lift
+opensmile_egemaps,logistic_regression,drop_high_shift,auroc,0.551946483160424,0.0391140150941119,0.03420957868203097,0.004904,1.143364,limited_lift
+panns,logistic_regression,drop_high_shift,auroc,0.5024390456628771,0.0348934361797145,0.03420957868203097,0.000684,1.01999,near_prevalence

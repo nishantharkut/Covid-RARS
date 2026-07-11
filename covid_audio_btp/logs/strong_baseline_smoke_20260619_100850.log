@@ -1,0 +1,345 @@
+nohup: ignoring input
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/01_build_coswara_index.py --raw-dir /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/data/raw/coswara --output data/interim/coswara_index.csv
+Wrote 24712 rows to data/interim/coswara_index.csv
+modality  submodality    
+breath    deep_breath        2746
+          shallow_breath     2746
+cough     heavy_cough        2746
+speech    counting_fast      2746
+          counting_normal    2746
+          vowel_e            2746
+          vowel_a            2746
+cough     shallow_cough      2745
+speech    vowel_o            2745
+dtype: int64
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/02_clean_metadata.py --index data/interim/coswara_index.csv --output data/processed/metadata_clean.csv --availability-output data/processed/modality_availability.csv
+Wrote metadata: data/processed/metadata_clean.csv (24712 rows)
+Wrote availability: data/processed/modality_availability.csv (2746 participants)
+Wrote audit: reports/tables/dataset_audit.csv
+label_binary
+negative    12895
+positive     6129
+unknown      5688
+Name: count, dtype: int64
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/03_create_splits.py --metadata data/processed/metadata_clean.csv --output data/processed/split_manifest.csv --metadata-output data/processed/metadata_with_split.csv
+Wrote split manifest: data/processed/split_manifest.csv (2114 participants)
+Updated metadata with split column: data/processed/metadata_with_split.csv
+Wrote split audit: reports/tables/split_audit.csv
+split
+train         1479
+test           318
+validation     317
+Name: count, dtype: int64
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/04_quality_audit.py --metadata data/processed/metadata_with_split.csv --output data/processed/audio_quality.csv --metadata-output data/processed/metadata_with_quality.csv
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/librosa/core/spectrum.py:266: UserWarning: n_fft=2048 is too large for input signal of length=1366
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/librosa/core/spectrum.py:266: UserWarning: n_fft=2048 is too large for input signal of length=1487
+  warnings.warn(
+Wrote quality audit: data/processed/audio_quality.csv (24712 rows)
+Updated metadata: data/processed/metadata_with_quality.csv
+Wrote quality summary: reports/tables/quality_summary.csv
+quality_flag
+ok                23539
+mostly_silence      597
+corrupt             390
+short               186
+Name: count, dtype: int64
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/05_extract_features.py --metadata data/processed/metadata_with_quality.csv --features-output data/processed/features_mfcc.csv
+Wrote features: data/processed/features_mfcc.csv (19024 rows, 261 columns)
+Wrote spectrogram index: data/processed/spectrogram_index.csv (19024 rows)
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/49_extract_strong_features.py --metadata data/processed/metadata_with_quality.csv --output data/processed/features_strong_acoustic.csv
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/librosa/core/pitch.py:103: UserWarning: Trying to estimate tuning from empty frequency set.
+  return pitch_tuning(
+Wrote strong acoustic features: data/processed/features_strong_acoustic.csv (19024 rows, 2185 columns)
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/47_run_strong_baseline.py --features data/processed/features_strong_acoustic.csv --metadata data/processed/metadata_with_quality.csv --modalities cough breath speech --model-names logistic_l2_f80 logistic_smote_f80 extra_trees_f100 extra_trees_smote_f100 random_forest_f80 random_forest_smote_f80 svc_rbf_f60 xgboost_smote_f80 lightgbm_smote_f80 catboost_smote_f80 optuna_validation_search --optuna-trials 5
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:18:01,245] A new study created in memory with name: no-name-db36fb97-2648-4b75-9415-4791c9c85239
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:18:01,912] Trial 0 finished with value: 0.7243388052895576 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 0 with value: 0.7243388052895576.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:18:02,916] Trial 1 finished with value: 0.7352314181486549 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0066240595682091315}. Best is trial 1 with value: 0.7352314181486549.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:18:04,312] Trial 2 finished with value: 0.7544060647514821 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 700, 'min_samples_leaf': 1, 'max_depth': '12'}. Best is trial 2 with value: 0.7544060647514821.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:18:04,990] Trial 3 finished with value: 0.7243388052895576 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 2 with value: 0.7544060647514821.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:18:06,424] Trial 4 finished with value: 0.7489797081623346 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0014254814784217286}. Best is trial 2 with value: 0.7544060647514821.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:20:07,805] A new study created in memory with name: no-name-6fa393e1-2cf9-4746-9a06-fbbe99b52704
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:20:08,428] Trial 0 finished with value: 0.6943570451436388 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 0 with value: 0.6943570451436388.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:20:09,339] Trial 1 finished with value: 0.7365253077975376 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0066240595682091315}. Best is trial 1 with value: 0.7365253077975376.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:20:10,677] Trial 2 finished with value: 0.7220246238030095 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 700, 'min_samples_leaf': 1, 'max_depth': '12'}. Best is trial 1 with value: 0.7365253077975376.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:20:11,326] Trial 3 finished with value: 0.6943570451436388 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 1 with value: 0.7365253077975376.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:20:12,076] Trial 4 finished with value: 0.7357729138166895 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0014254814784217286}. Best is trial 1 with value: 0.7365253077975376.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:25:13,179] A new study created in memory with name: no-name-fa75254c-b146-40cb-91b6-57ebde7fbad8
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:25:14,033] Trial 0 finished with value: 0.6969484724122208 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 0 with value: 0.6969484724122208.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:25:16,825] Trial 1 finished with value: 0.7405809393524851 and parameters: {'family': 'logistic', 'percentile': 50, 'logistic_c': 0.0066240595682091315}. Best is trial 1 with value: 0.7405809393524851.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:25:18,970] Trial 2 finished with value: 0.7444970360237118 and parameters: {'family': 'extra_trees', 'percentile': 60, 'n_estimators': 700, 'min_samples_leaf': 1, 'max_depth': '12'}. Best is trial 2 with value: 0.7444970360237118.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:25:19,851] Trial 3 finished with value: 0.6969484724122208 and parameters: {'family': 'extra_trees', 'percentile': 80, 'n_estimators': 400, 'min_samples_leaf': 1, 'max_depth': '4'}. Best is trial 2 with value: 0.7444970360237118.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+[I 2026-06-19 12:25:21,335] Trial 4 finished with value: 0.7483146374829001 and parameters: {'family': 'logistic', 'percentile': 70, 'logistic_c': 0.0014254814784217286}. Best is trial 4 with value: 0.7483146374829001.
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:110: UserWarning: Features [   4 1850] are constant.
+  warnings.warn("Features %s are constant." % constant_features_idx, UserWarning)
+/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/lib/python3.12/site-packages/sklearn/feature_selection/_univariate_selection.py:111: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+Wrote strong baseline metrics: data/outputs/metrics/strong_baseline_metrics.csv (90 rows)
+Wrote strong baseline predictions: data/outputs/metrics/strong_baseline_predictions.csv (70485 rows)
+Wrote strong baseline model selection: reports/tables/strong_baseline_model_selection.csv (3 rows)
+Wrote strong baseline protocol audit: reports/tables/strong_baseline_protocol_audit.csv
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/07_train_cnn.py --spectrogram-index data/processed/spectrogram_index.csv --modality cough --architecture residual_cnn --metrics-output data/outputs/metrics/cnn_metrics_residual_cnn_cough.csv --validation-output data/outputs/metrics/cnn_logits_validation_residual_cnn_cough.csv --test-output data/outputs/metrics/cnn_logits_test_residual_cnn_cough.csv --history-output data/outputs/metrics/cnn_training_history_residual_cnn_cough.csv --epochs 5 --batch-size 32
+Wrote CNN model and metrics for modality=cough
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/07_train_cnn.py --spectrogram-index data/processed/spectrogram_index.csv --modality breath --architecture residual_cnn --metrics-output data/outputs/metrics/cnn_metrics_residual_cnn_breath.csv --validation-output data/outputs/metrics/cnn_logits_validation_residual_cnn_breath.csv --test-output data/outputs/metrics/cnn_logits_test_residual_cnn_breath.csv --history-output data/outputs/metrics/cnn_training_history_residual_cnn_breath.csv --epochs 5 --batch-size 32
+Wrote CNN model and metrics for modality=breath
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/07_train_cnn.py --spectrogram-index data/processed/spectrogram_index.csv --modality speech --architecture residual_cnn --metrics-output data/outputs/metrics/cnn_metrics_residual_cnn_speech.csv --validation-output data/outputs/metrics/cnn_logits_validation_residual_cnn_speech.csv --test-output data/outputs/metrics/cnn_logits_test_residual_cnn_speech.csv --history-output data/outputs/metrics/cnn_training_history_residual_cnn_speech.csv --epochs 5 --batch-size 32
+Wrote CNN model and metrics for modality=speech
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/07_train_cnn.py --spectrogram-index data/processed/spectrogram_index.csv --modality cough --architecture cnn_bigru --metrics-output data/outputs/metrics/cnn_metrics_cnn_bigru_cough.csv --validation-output data/outputs/metrics/cnn_logits_validation_cnn_bigru_cough.csv --test-output data/outputs/metrics/cnn_logits_test_cnn_bigru_cough.csv --history-output data/outputs/metrics/cnn_training_history_cnn_bigru_cough.csv --epochs 5 --batch-size 32
+Wrote CNN model and metrics for modality=cough
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/07_train_cnn.py --spectrogram-index data/processed/spectrogram_index.csv --modality breath --architecture cnn_bigru --metrics-output data/outputs/metrics/cnn_metrics_cnn_bigru_breath.csv --validation-output data/outputs/metrics/cnn_logits_validation_cnn_bigru_breath.csv --test-output data/outputs/metrics/cnn_logits_test_cnn_bigru_breath.csv --history-output data/outputs/metrics/cnn_training_history_cnn_bigru_breath.csv --epochs 5 --batch-size 32
+Wrote CNN model and metrics for modality=breath
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/07_train_cnn.py --spectrogram-index data/processed/spectrogram_index.csv --modality speech --architecture cnn_bigru --metrics-output data/outputs/metrics/cnn_metrics_cnn_bigru_speech.csv --validation-output data/outputs/metrics/cnn_logits_validation_cnn_bigru_speech.csv --test-output data/outputs/metrics/cnn_logits_test_cnn_bigru_speech.csv --history-output data/outputs/metrics/cnn_training_history_cnn_bigru_speech.csv --epochs 5 --batch-size 32
+Wrote CNN model and metrics for modality=speech
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/20_make_paper_tables.py
+Wrote paper metric table: reports/tables/paper_metric_table.csv (629 rows)
+Wrote raw combined metric table: reports/tables/paper_metric_table_raw.csv (629 rows)
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/24_make_experiment_manifest.py
+Wrote experiment manifest: reports/experiment_manifest.json
++ /home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python scripts/12_validate_artifacts.py --strict
+severity               check                                                             message
+ warning      unknown_labels                                       5688 rows have unknown labels
+   error      split_coverage                                   No supervised rows in split=train
+   error      split_coverage                              No supervised rows in split=validation
+   error      split_coverage                                    No supervised rows in split=test
+ warning split_label_balance      Split train does not contain both positive and negative labels
+ warning split_label_balance Split validation does not contain both positive and negative labels
+ warning split_label_balance       Split test does not contain both positive and negative labels
+Traceback (most recent call last):
+  File "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/scripts/12_validate_artifacts.py", line 57, in <module>
+    main()
+  File "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/scripts/12_validate_artifacts.py", line 53, in main
+    raise_on_errors(issues)
+  File "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/src/covid_audio_btp/validation.py", line 165, in raise_on_errors
+    raise ValueError(f"Validation failed:\n{message}")
+ValueError: Validation failed:
+- split_coverage: No supervised rows in split=train
+- split_coverage: No supervised rows in split=validation
+- split_coverage: No supervised rows in split=test
+Traceback (most recent call last):
+  File "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/scripts/48_run_strong_baseline_e2e.py", line 237, in <module>
+    main()
+  File "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/scripts/48_run_strong_baseline_e2e.py", line 222, in main
+    _run([sys.executable, "scripts/12_validate_artifacts.py", "--strict"])
+  File "/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/scripts/48_run_strong_baseline_e2e.py", line 56, in _run
+    subprocess.run(args, cwd=PROJECT_ROOT, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/covid/Desktop/Covid-19-BTP/covid_audio_btp/.venv/bin/python', 'scripts/12_validate_artifacts.py', '--strict']' returned non-zero exit status 1.

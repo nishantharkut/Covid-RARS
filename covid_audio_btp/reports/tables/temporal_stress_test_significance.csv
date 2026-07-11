@@ -1,0 +1,2 @@
+comparison,reference_protocol,stress_protocol,reference_auroc,stress_auroc,delta_auroc,delta_ci_low,delta_ci_high,p_value_two_sided,n_bootstraps
+temporal_minus_participant_full_multimodal,existing_participant_split,temporal_early_to_late,0.8734251524046059,0.5657527470586157,-0.3076724053459903,-0.3905463682897451,-0.2208713691513949,0.0,5000

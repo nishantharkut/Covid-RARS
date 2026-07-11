@@ -1,0 +1,611 @@
+diff --git a/covid_audio_btp/run_strong_baseline_e2e.sh b/covid_audio_btp/run_strong_baseline_e2e.sh
+index 445e967..cb430e1 100755
+--- a/covid_audio_btp/run_strong_baseline_e2e.sh
++++ b/covid_audio_btp/run_strong_baseline_e2e.sh
+@@ -11,7 +11,7 @@ if [ ! -x "$VENV_DIR/bin/python" ]; then
+   "$PYTHON_BIN" -m venv "$VENV_DIR"
+ fi
+ 
+-"$VENV_DIR/bin/python" -m pip install --upgrade pip setuptools wheel
++"$VENV_DIR/bin/python" -m pip install --upgrade pip "setuptools<82" wheel
+ "$VENV_DIR/bin/python" -m pip install -r requirements-dev.txt
+ INSTALL_OPTIONAL="${INSTALL_OPTIONAL:-auto}"
+ if [ "$INSTALL_OPTIONAL" != "skip" ]; then
+diff --git a/covid_audio_btp/scripts/47_run_strong_baseline.py b/covid_audio_btp/scripts/47_run_strong_baseline.py
+index 276b010..d821600 100755
+--- a/covid_audio_btp/scripts/47_run_strong_baseline.py
++++ b/covid_audio_btp/scripts/47_run_strong_baseline.py
+@@ -24,6 +24,12 @@ def parse_args() -> argparse.Namespace:
+     parser.add_argument("--require-quality-ok", action="store_true")
+     parser.add_argument("--random-state", type=int, default=42)
+     parser.add_argument("--optuna-trials", type=int, default=25)
++    parser.add_argument(
++        "--ensemble-top-k",
++        type=int,
++        default=3,
++        help="Average the top-k validation models per modality as an additional model candidate.",
++    )
+     parser.add_argument(
+         "--metrics-output",
+         type=Path,
+@@ -69,6 +75,7 @@ def main() -> None:
+         require_quality_ok=args.require_quality_ok,
+         random_state=args.random_state,
+         optuna_trials=args.optuna_trials,
++        ensemble_top_k=args.ensemble_top_k,
+     )
+     save_strong_baseline_result(
+         result,
+diff --git a/covid_audio_btp/scripts/48_run_strong_baseline_e2e.py b/covid_audio_btp/scripts/48_run_strong_baseline_e2e.py
+index 84a5358..b0ef352 100755
+--- a/covid_audio_btp/scripts/48_run_strong_baseline_e2e.py
++++ b/covid_audio_btp/scripts/48_run_strong_baseline_e2e.py
+@@ -29,6 +29,7 @@ def parse_args() -> argparse.Namespace:
+     parser.add_argument("--cnn-epochs", type=int, default=50)
+     parser.add_argument("--cnn-batch-size", type=int, default=32)
+     parser.add_argument("--optuna-trials", type=int, default=25)
++    parser.add_argument("--ensemble-top-k", type=int, default=3)
+     parser.add_argument("--skip-validation", action="store_true")
+     parser.add_argument("--modalities", nargs="+", default=["cough", "breath", "speech"])
+     parser.add_argument(
+@@ -206,6 +207,8 @@ def main() -> None:
+         *args.model_names,
+         "--optuna-trials",
+         str(args.optuna_trials),
++        "--ensemble-top-k",
++        str(args.ensemble_top_k),
+     ]
+     if args.require_quality_ok:
+         strong_cmd.append("--require-quality-ok")
+@@ -216,10 +219,22 @@ def main() -> None:
+     _run([sys.executable, "scripts/24_make_experiment_manifest.py"])
+     core_validation_inputs = [
+         PROJECT_ROOT / "data" / "interim" / "coswara_index.csv",
+-        PROJECT_ROOT / "data" / "processed" / "metadata_clean.csv",
++        PROJECT_ROOT / "data" / "processed" / "metadata_with_quality.csv",
+     ]
+     if not args.skip_validation and all(path.exists() for path in core_validation_inputs):
+-        _run([sys.executable, "scripts/12_validate_artifacts.py", "--strict"])
++        _run(
++            [
++                sys.executable,
++                "scripts/12_validate_artifacts.py",
++                "--index",
++                "data/interim/coswara_index.csv",
++                "--metadata",
++                "data/processed/metadata_with_quality.csv",
++                "--quality",
++                "data/processed/audio_quality.csv",
++                "--strict",
++            ]
++        )
+     elif not args.skip_validation:
+         missing = ", ".join(str(path.relative_to(PROJECT_ROOT)) for path in core_validation_inputs if not path.exists())
+         print(f"Skipping strict artifact validation because core preprocessing artifacts are absent: {missing}")
+diff --git a/covid_audio_btp/scripts/49_extract_strong_features.py b/covid_audio_btp/scripts/49_extract_strong_features.py
+index 4b850e6..6c4890f 100644
+--- a/covid_audio_btp/scripts/49_extract_strong_features.py
++++ b/covid_audio_btp/scripts/49_extract_strong_features.py
+@@ -14,13 +14,18 @@ def parse_args() -> argparse.Namespace:
+     parser.add_argument("--metadata", required=True, type=Path)
+     parser.add_argument("--output", type=Path, default=Path("data/processed/features_strong_acoustic.csv"))
+     parser.add_argument("--quality-mode", choices=["all_samples", "quality_ok_only"], default="all_samples")
++    parser.add_argument("--progress-interval", type=int, default=250)
+     return parser.parse_args()
+ 
+ 
+ def main() -> None:
+     args = parse_args()
+     metadata = pd.read_csv(args.metadata)
+-    features = build_strong_feature_table(metadata, quality_mode=args.quality_mode)
++    features = build_strong_feature_table(
++        metadata,
++        quality_mode=args.quality_mode,
++        progress_interval=args.progress_interval,
++    )
+     args.output.parent.mkdir(parents=True, exist_ok=True)
+     features.to_csv(args.output, index=False)
+     print(f"Wrote strong acoustic features: {args.output} ({len(features)} rows, {features.shape[1]} columns)")
+@@ -28,4 +33,3 @@ def main() -> None:
+ 
+ if __name__ == "__main__":
+     main()
+-
+diff --git a/covid_audio_btp/src/covid_audio_btp/strong_baseline.py b/covid_audio_btp/src/covid_audio_btp/strong_baseline.py
+index 216953a..44ea553 100644
+--- a/covid_audio_btp/src/covid_audio_btp/strong_baseline.py
++++ b/covid_audio_btp/src/covid_audio_btp/strong_baseline.py
+@@ -4,11 +4,13 @@ from dataclasses import dataclass
+ from itertools import combinations
+ from pathlib import Path
+ from typing import Iterable
++import warnings
+ 
+ import numpy as np
+ import pandas as pd
++from sklearn.calibration import CalibratedClassifierCV
+ from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier
+-from sklearn.feature_selection import SelectPercentile, f_classif
++from sklearn.feature_selection import SelectPercentile, VarianceThreshold, f_classif
+ from sklearn.linear_model import LogisticRegression
+ from sklearn.metrics import roc_auc_score
+ from sklearn.pipeline import Pipeline
+@@ -43,6 +45,34 @@ DEFAULT_MODEL_NAMES = (
+ )
+ 
+ 
++def _safe_f_classif(x: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
++    with np.errstate(divide="ignore", invalid="ignore"):
++        with warnings.catch_warnings():
++            warnings.filterwarnings("ignore", message=r"Features .* are constant\.", category=UserWarning)
++            warnings.filterwarnings("ignore", message=r"invalid value encountered in divide", category=RuntimeWarning)
++            warnings.filterwarnings("ignore", message=r"divide by zero encountered in divide", category=RuntimeWarning)
++            scores, p_values = f_classif(x, y)
++    max_float = np.finfo(np.float64).max
++    scores = np.nan_to_num(scores, nan=0.0, posinf=max_float, neginf=0.0)
++    p_values = np.nan_to_num(p_values, nan=1.0, posinf=1.0, neginf=0.0)
++    return scores, p_values
++
++
++def _preprocess_steps(percentile: int, scale: bool = False) -> list[tuple[str, object]]:
++    """Shared numeric preprocessing for high-dimensional acoustic features.
++
++    VarianceThreshold removes exactly constant columns before the univariate
++    F-score selector. Without this, sklearn emits repeated constant-feature and
++    invalid-divide warnings for fallback acoustic descriptors that are all zero
++    in a modality subset.
++    """
++    steps: list[tuple[str, object]] = [("variance", VarianceThreshold())]
++    if scale:
++        steps.append(("scaler", StandardScaler()))
++    steps.append(("select", SelectPercentile(score_func=_safe_f_classif, percentile=int(percentile))))
++    return steps
++
++
+ @dataclass(frozen=True)
+ class StrongBaselineResult:
+     metrics: pd.DataFrame
+@@ -124,8 +154,7 @@ def _make_model(model_name: str, random_state: int = 42) -> Pipeline:
+     if model_name == "logistic_l2_f80":
+         return Pipeline(
+             [
+-                ("scaler", StandardScaler()),
+-                ("select", SelectPercentile(score_func=f_classif, percentile=80)),
++                *_preprocess_steps(percentile=80, scale=True),
+                 (
+                     "model",
+                     LogisticRegression(
+@@ -139,10 +168,7 @@ def _make_model(model_name: str, random_state: int = 42) -> Pipeline:
+         )
+     if model_name == "logistic_smote_f80":
+         return smote_pipeline(
+-            [
+-                ("scaler", StandardScaler()),
+-                ("select", SelectPercentile(score_func=f_classif, percentile=80)),
+-            ],
++            _preprocess_steps(percentile=80, scale=True),
+             LogisticRegression(
+                 C=1.0,
+                 max_iter=4000,
+@@ -152,7 +178,7 @@ def _make_model(model_name: str, random_state: int = 42) -> Pipeline:
+     if model_name == "extra_trees_f100":
+         return Pipeline(
+             [
+-                ("select", SelectPercentile(score_func=f_classif, percentile=100)),
++                *_preprocess_steps(percentile=100),
+                 (
+                     "model",
+                     ExtraTreesClassifier(
+@@ -167,9 +193,7 @@ def _make_model(model_name: str, random_state: int = 42) -> Pipeline:
+         )
+     if model_name == "extra_trees_smote_f100":
+         return smote_pipeline(
+-            [
+-                ("select", SelectPercentile(score_func=f_classif, percentile=100)),
+-            ],
++            _preprocess_steps(percentile=100),
+             ExtraTreesClassifier(
+                 n_estimators=800,
+                 min_samples_leaf=2,
+@@ -180,7 +204,7 @@ def _make_model(model_name: str, random_state: int = 42) -> Pipeline:
+     if model_name == "random_forest_f80":
+         return Pipeline(
+             [
+-                ("select", SelectPercentile(score_func=f_classif, percentile=80)),
++                *_preprocess_steps(percentile=80),
+                 (
+                     "model",
+                     RandomForestClassifier(
+@@ -195,9 +219,7 @@ def _make_model(model_name: str, random_state: int = 42) -> Pipeline:
+         )
+     if model_name == "random_forest_smote_f80":
+         return smote_pipeline(
+-            [
+-                ("select", SelectPercentile(score_func=f_classif, percentile=80)),
+-            ],
++            _preprocess_steps(percentile=80),
+             RandomForestClassifier(
+                 n_estimators=800,
+                 min_samples_leaf=2,
+@@ -208,40 +230,37 @@ def _make_model(model_name: str, random_state: int = 42) -> Pipeline:
+     if model_name == "svc_rbf_f60":
+         return Pipeline(
+             [
+-                ("scaler", StandardScaler()),
+-                ("select", SelectPercentile(score_func=f_classif, percentile=60)),
++                *_preprocess_steps(percentile=60, scale=True),
+                 (
+                     "model",
+-                    SVC(
+-                        C=2.0,
+-                        gamma="scale",
+-                        kernel="rbf",
+-                        probability=True,
+-                        class_weight="balanced",
+-                        random_state=random_state,
++                    CalibratedClassifierCV(
++                        estimator=SVC(
++                            C=2.0,
++                            gamma="scale",
++                            kernel="rbf",
++                            probability=False,
++                            class_weight="balanced",
++                            random_state=random_state,
++                        ),
++                        method="sigmoid",
++                        cv=3,
+                     ),
+                 ),
+             ]
+         )
+     if model_name == "xgboost_smote_f80":
+         return smote_pipeline(
+-            [
+-                ("select", SelectPercentile(score_func=f_classif, percentile=80)),
+-            ],
++            _preprocess_steps(percentile=80),
+             optional_classifier("xgboost"),
+         )
+     if model_name == "lightgbm_smote_f80":
+         return smote_pipeline(
+-            [
+-                ("select", SelectPercentile(score_func=f_classif, percentile=80)),
+-            ],
++            _preprocess_steps(percentile=80),
+             optional_classifier("lightgbm"),
+         )
+     if model_name == "catboost_smote_f80":
+         return smote_pipeline(
+-            [
+-                ("select", SelectPercentile(score_func=f_classif, percentile=80)),
+-            ],
++            _preprocess_steps(percentile=80),
+             optional_classifier("catboost"),
+         )
+     raise ValueError(f"Unknown strong-baseline model: {model_name}")
+@@ -262,8 +281,7 @@ def _model_from_optuna_params(params: dict[str, object], random_state: int) -> P
+     if family == "logistic":
+         return Pipeline(
+             [
+-                ("scaler", StandardScaler()),
+-                ("select", SelectPercentile(score_func=f_classif, percentile=percentile)),
++                *_preprocess_steps(percentile=percentile, scale=True),
+                 (
+                     "model",
+                     LogisticRegression(
+@@ -278,7 +296,7 @@ def _model_from_optuna_params(params: dict[str, object], random_state: int) -> P
+     if family == "extra_trees":
+         return Pipeline(
+             [
+-                ("select", SelectPercentile(score_func=f_classif, percentile=percentile)),
++                *_preprocess_steps(percentile=percentile),
+                 (
+                     "model",
+                     ExtraTreesClassifier(
+@@ -295,7 +313,7 @@ def _model_from_optuna_params(params: dict[str, object], random_state: int) -> P
+     if family == "random_forest":
+         return Pipeline(
+             [
+-                ("select", SelectPercentile(score_func=f_classif, percentile=percentile)),
++                *_preprocess_steps(percentile=percentile),
+                 (
+                     "model",
+                     RandomForestClassifier(
+@@ -416,6 +434,97 @@ def _has_two_classes(df: pd.DataFrame) -> bool:
+     return df["label_binary"].isin(["positive", "negative"]).all() and df["label_binary"].nunique() == 2
+ 
+ 
++def _top_k_modality_ensemble(
++    metrics: pd.DataFrame,
++    predictions: pd.DataFrame,
++    top_k: int,
++) -> tuple[pd.DataFrame, pd.DataFrame]:
++    if top_k < 2 or metrics.empty or predictions.empty:
++        return pd.DataFrame(), pd.DataFrame()
++
++    skipped = metrics["skipped"].fillna(False).astype(bool) if "skipped" in metrics.columns else False
++    candidates = metrics[
++        metrics["analysis_family"].eq("strong_audio_modality")
++        & metrics["metric_split"].eq("validation")
++        & ~skipped
++    ].copy()
++    if candidates.empty:
++        return pd.DataFrame(), pd.DataFrame()
++    candidates["auroc"] = pd.to_numeric(candidates["auroc"], errors="coerce")
++    candidates["auprc"] = pd.to_numeric(candidates["auprc"], errors="coerce")
++
++    metric_rows: list[dict[str, object]] = []
++    prediction_rows: list[pd.DataFrame] = []
++    for modality, group in candidates.groupby("modality", dropna=False):
++        ranked = group.sort_values(["auroc", "auprc", "model_name"], ascending=[False, False, True])
++        selected_models = [str(name) for name in ranked["model_name"].dropna().head(top_k)]
++        if len(selected_models) < 2:
++            continue
++        source = predictions[
++            predictions["analysis_family"].eq("strong_audio_modality")
++            & predictions["modality"].astype(str).eq(str(modality))
++            & predictions["model_name"].astype(str).isin(selected_models)
++        ].copy()
++        if source.empty:
++            continue
++
++        ensemble_name = f"top_{len(selected_models)}_validation_ensemble"
++        group_cols = [
++            "recording_id",
++            "participant_id",
++            "dataset",
++            "modality",
++            "submodality",
++            "label_binary",
++            "split",
++            "analysis_family",
++            "evaluation_protocol",
++        ]
++        averaged = (
++            source.groupby(group_cols, dropna=False)
++            .agg(
++                probability=("probability", "mean"),
++                n_ensemble_models=("model_name", "nunique"),
++            )
++            .reset_index()
++        )
++        averaged["model_name"] = ensemble_name
++        averaged["ensemble_members"] = ",".join(selected_models)
++        prediction_rows.append(averaged)
++
++        participant_pred = _participant_average(averaged)
++        validation_participant = participant_pred[participant_pred["split"].eq("validation")]
++        test_participant = participant_pred[participant_pred["split"].eq("test")]
++        if validation_participant.empty or test_participant.empty or validation_participant["label_binary"].nunique() < 2:
++            continue
++        threshold = best_threshold_by_balanced_accuracy(
++            labels_to_binary(validation_participant["label_binary"]),
++            validation_participant["probability"].astype(float).to_numpy(),
++        )
++        for split_name, split_predictions in (("validation", validation_participant), ("test", test_participant)):
++            metric_rows.append(
++                _metric_row(
++                    split_predictions,
++                    threshold=threshold,
++                    extra={
++                        "evaluation_protocol": "clean_internal_protocol",
++                        "analysis_family": "strong_audio_modality",
++                        "model_name": ensemble_name,
++                        "modality": modality,
++                        "metric_split": split_name,
++                        "threshold_source": "validation_balanced_accuracy",
++                        "skipped": False,
++                        "n_ensemble_models": float(len(selected_models)),
++                        "ensemble_members": ",".join(selected_models),
++                    },
++                )
++            )
++
++    ensemble_metrics = pd.DataFrame(metric_rows)
++    ensemble_predictions = pd.concat(prediction_rows, ignore_index=True) if prediction_rows else pd.DataFrame()
++    return ensemble_metrics, ensemble_predictions
++
++
+ def _prepare_features_for_protocol(
+     features: pd.DataFrame,
+     metadata: pd.DataFrame | None,
+@@ -466,6 +575,7 @@ def train_strong_modality_models(
+     model_names: Iterable[str] = DEFAULT_MODEL_NAMES,
+     random_state: int = 42,
+     optuna_trials: int = 25,
++    ensemble_top_k: int = 3,
+ ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[tuple[str, str], object]]:
+     cols = feature_columns(features)
+     if not cols:
+@@ -581,6 +691,15 @@ def train_strong_modality_models(
+ 
+     metrics = pd.DataFrame(metric_rows)
+     predictions = pd.concat(prediction_frames, ignore_index=True) if prediction_frames else pd.DataFrame()
++    ensemble_metrics, ensemble_predictions = _top_k_modality_ensemble(
++        metrics,
++        predictions,
++        top_k=ensemble_top_k,
++    )
++    if not ensemble_metrics.empty:
++        metrics = pd.concat([metrics, ensemble_metrics], ignore_index=True, sort=False)
++    if not ensemble_predictions.empty:
++        predictions = pd.concat([predictions, ensemble_predictions], ignore_index=True, sort=False)
+     selection = select_best_modality_models(metrics)
+     return metrics, predictions, selection, fitted
+ 
+@@ -772,6 +891,7 @@ def run_strong_baseline(
+     require_quality_ok: bool = False,
+     random_state: int = 42,
+     optuna_trials: int = 25,
++    ensemble_top_k: int = 3,
+ ) -> StrongBaselineResult:
+     prepared, protocol = _prepare_features_for_protocol(
+         features,
+@@ -794,6 +914,7 @@ def run_strong_baseline(
+         model_names=model_names,
+         random_state=random_state,
+         optuna_trials=optuna_trials,
++        ensemble_top_k=ensemble_top_k,
+     )
+     selected = _selected_predictions(modality_predictions, selection)
+     fusion_metrics, fusion_predictions = run_strong_fusion(selected, selection, modalities=modalities)
+diff --git a/covid_audio_btp/src/covid_audio_btp/strong_features.py b/covid_audio_btp/src/covid_audio_btp/strong_features.py
+index afecc93..8a9327d 100644
+--- a/covid_audio_btp/src/covid_audio_btp/strong_features.py
++++ b/covid_audio_btp/src/covid_audio_btp/strong_features.py
+@@ -134,7 +134,11 @@ def extract_strong_features_for_row(row: pd.Series) -> dict[str, object]:
+     }
+ 
+ 
+-def build_strong_feature_table(metadata: pd.DataFrame, quality_mode: str = "all_samples") -> pd.DataFrame:
++def build_strong_feature_table(
++    metadata: pd.DataFrame,
++    quality_mode: str = "all_samples",
++    progress_interval: int = 250,
++) -> pd.DataFrame:
+     df = metadata.copy()
+     df = df[df["label_binary"].isin(["positive", "negative"])]
+     if quality_mode == "quality_ok_only" and "quality_flag" in df.columns:
+@@ -143,10 +147,12 @@ def build_strong_feature_table(metadata: pd.DataFrame, quality_mode: str = "all_
+         raise ValueError(f"Unknown quality_mode: {quality_mode}")
+ 
+     rows: list[dict[str, object]] = []
+-    for _, row in df.iterrows():
++    total = len(df)
++    for idx, (_, row) in enumerate(df.iterrows(), start=1):
+         try:
+             rows.append(extract_strong_features_for_row(row))
+         except Exception as exc:
+             print(f"WARNING: skipping {row.get('audio_path', '?')} — {exc}")
++        if progress_interval > 0 and (idx % progress_interval == 0 or idx == total):
++            print(f"Strong feature extraction progress: {idx}/{total} rows", flush=True)
+     return pd.DataFrame(rows)
+-
+diff --git a/covid_audio_btp/tests/test_strong_baseline.py b/covid_audio_btp/tests/test_strong_baseline.py
+index 06249a6..2b10ad3 100644
+--- a/covid_audio_btp/tests/test_strong_baseline.py
++++ b/covid_audio_btp/tests/test_strong_baseline.py
+@@ -2,6 +2,7 @@ from __future__ import annotations
+ 
+ import importlib.util
+ import sys
++import warnings
+ from pathlib import Path
+ 
+ import numpy as np
+@@ -187,6 +188,45 @@ def test_strong_baseline_e2e_runner_uses_existing_inputs(tmp_path: Path, monkeyp
+     assert not any("12_validate_artifacts.py" in cmd for cmd in command_text)
+ 
+ 
++def test_strong_baseline_e2e_validates_split_metadata_after_rebuild(tmp_path: Path, monkeypatch) -> None:
++    script = Path(__file__).parents[1] / "scripts" / "48_run_strong_baseline_e2e.py"
++    spec = importlib.util.spec_from_file_location("strong_baseline_e2e", script)
++    assert spec is not None and spec.loader is not None
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++
++    raw_dir = tmp_path / "raw"
++    raw_dir.mkdir()
++    (tmp_path / "data" / "interim").mkdir(parents=True)
++    (tmp_path / "data" / "processed").mkdir(parents=True)
++    (tmp_path / "data" / "interim" / "coswara_index.csv").write_text("recording_id\n")
++    (tmp_path / "data" / "processed" / "metadata_with_quality.csv").write_text("recording_id\n")
++    (tmp_path / "data" / "processed" / "audio_quality.csv").write_text("recording_id\n")
++    commands: list[list[str]] = []
++    monkeypatch.setattr(module, "PROJECT_ROOT", tmp_path)
++    monkeypatch.setattr(module, "_run", lambda args: commands.append(list(args)))
++    monkeypatch.setattr(module, "_torch_available", lambda: False)
++    monkeypatch.setattr(
++        sys,
++        "argv",
++        [
++            "48_run_strong_baseline_e2e.py",
++            "--raw-dir",
++            str(raw_dir),
++            "--rebuild-features",
++            "--skip-cnn",
++        ],
++    )
++
++    module.main()
++
++    validation_commands = [cmd for cmd in commands if "scripts/12_validate_artifacts.py" in cmd]
++    assert validation_commands
++    validation = validation_commands[-1]
++    assert "--metadata" in validation
++    assert validation[validation.index("--metadata") + 1] == "data/processed/metadata_with_quality.csv"
++
++
+ def test_extended_acoustic_feature_bank_contains_paper_style_features() -> None:
+     from covid_audio_btp.strong_features import extract_extended_acoustic_features
+ 
+@@ -211,3 +251,69 @@ def test_optional_smote_model_is_registered_or_skips_cleanly() -> None:
+         assert "imbalanced-learn" in str(exc)
+     else:
+         assert hasattr(model, "fit")
++
++
++def test_strong_models_filter_constant_features_before_univariate_selection() -> None:
++    from covid_audio_btp.strong_baseline import _make_model
++
++    model = _make_model("logistic_l2_f80", random_state=0)
++
++    assert "variance" in model.named_steps
++    assert list(model.named_steps).index("variance") < list(model.named_steps).index("select")
++
++
++def test_strong_model_fit_suppresses_expected_constant_feature_warnings() -> None:
++    from covid_audio_btp.strong_baseline import _make_model
++
++    x = pd.DataFrame(
++        {
++            "constant": [1.0] * 8,
++            "perfect_split": [0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0],
++            "useful": [-1.2, -0.9, -0.8, -0.7, 0.7, 0.8, 0.9, 1.2],
++        }
++    )
++    y = np.asarray([0, 0, 0, 0, 1, 1, 1, 1])
++    model = _make_model("logistic_l2_f80", random_state=0)
++
++    with warnings.catch_warnings(record=True) as caught:
++        warnings.simplefilter("always")
++        model.fit(x, y)
++
++    warning_text = "\n".join(str(item.message) for item in caught)
++    assert "constant" not in warning_text.lower()
++    assert "divide" not in warning_text.lower()
++
++
++def test_svc_uses_explicit_calibration_instead_of_deprecated_probability_mode() -> None:
++    from sklearn.calibration import CalibratedClassifierCV
++    from sklearn.svm import SVC
++
++    from covid_audio_btp.strong_baseline import _make_model
++
++    model = _make_model("svc_rbf_f60", random_state=0)
++    calibrated = model.named_steps["model"]
++
++    assert isinstance(calibrated, CalibratedClassifierCV)
++    assert isinstance(calibrated.estimator, SVC)
++    assert calibrated.estimator.probability is False
++
++
++def test_top_k_validation_ensemble_is_added_as_modality_candidate() -> None:
++    from covid_audio_btp.strong_baseline import run_strong_baseline
++
++    metadata = _metadata_frame(48)
++    features = _feature_frame(metadata)
++    result = run_strong_baseline(
++        features,
++        metadata=metadata,
++        model_names=["logistic_l2_f80", "extra_trees_f100", "random_forest_f80"],
++        ensemble_top_k=2,
++        random_state=0,
++    )
++
++    assert "top_2_validation_ensemble" in set(result.metrics["model_name"].astype(str))
++    ensemble_predictions = result.predictions[
++        result.predictions["model_name"].astype(str).eq("top_2_validation_ensemble")
++    ]
++    assert not ensemble_predictions.empty
++    assert ensemble_predictions["analysis_family"].eq("strong_audio_modality").all()

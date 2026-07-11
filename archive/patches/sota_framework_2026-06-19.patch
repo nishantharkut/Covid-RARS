@@ -1,0 +1,1898 @@
+diff --git a/covid_audio_btp/requirements-gpu.txt b/covid_audio_btp/requirements-gpu.txt
+index 48c197d..b18eb24 100644
+--- a/covid_audio_btp/requirements-gpu.txt
++++ b/covid_audio_btp/requirements-gpu.txt
+@@ -1,3 +1,6 @@
+ # Install PyTorch from the official selector for your CUDA/driver setup when enabling CNN.
+ # Example for recent CUDA-compatible wheels, if supported by your system:
+ # pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu128
++transformers>=4.40
++accelerate>=0.30
++safetensors>=0.4
+diff --git a/covid_audio_btp/run_sota_e2e.sh b/covid_audio_btp/run_sota_e2e.sh
+new file mode 100755
+index 0000000..f0d7f2f
+--- /dev/null
++++ b/covid_audio_btp/run_sota_e2e.sh
+@@ -0,0 +1,11 @@
++#!/usr/bin/env bash
++set -euo pipefail
++
++cd "$(dirname "$0")"
++
++if [[ -d ".venv" ]]; then
++  # shellcheck disable=SC1091
++  source ".venv/bin/activate"
++fi
++
++python scripts/53_run_sota_e2e.py "$@"
+diff --git a/covid_audio_btp/scripts/20_make_paper_tables.py b/covid_audio_btp/scripts/20_make_paper_tables.py
+index 7fdeacd..775dda7 100644
+--- a/covid_audio_btp/scripts/20_make_paper_tables.py
++++ b/covid_audio_btp/scripts/20_make_paper_tables.py
+@@ -29,6 +29,8 @@ DEFAULT_METRIC_PATHS = [
+     Path("data/outputs/metrics/temporal_holdout_metrics.csv"),
+     Path("reports/tables/temporal_metadata_ablation.csv"),
+     Path("reports/tables/temporal_matched_cohort_metrics.csv"),
++    Path("data/outputs/metrics/strong_baseline_metrics.csv"),
++    Path("data/outputs/metrics/sota_fusion_metrics.csv"),
+ ]
+ 
+ DEFAULT_CI_PATHS = [
+@@ -56,6 +58,11 @@ def default_metric_paths(metrics_dir: Path = Path("data/outputs/metrics")) -> li
+     representation_patterns = [
+         "external_model_grid_*_metrics.csv",
+         "coughvid_internal_*_metrics.csv",
++        "cnn_metrics_*.csv",
++        "sota_ssl_metrics_*.csv",
++        "sota_spectrogram_metrics_*.csv",
++        "sota_foundation_metrics_*.csv",
++        "sota_fusion_metrics*.csv",
+     ]
+     discovered: list[Path] = []
+     for pattern in representation_patterns:
+@@ -67,6 +74,7 @@ def default_ci_paths(metrics_dir: Path = Path("data/outputs/metrics")) -> list[P
+     representation_patterns = [
+         "external_model_grid_*_bootstrap_ci.csv",
+         "coughvid_internal_*_bootstrap_ci.csv",
++        "sota_*_bootstrap_ci.csv",
+     ]
+     discovered: list[Path] = []
+     for pattern in representation_patterns:
+diff --git a/covid_audio_btp/scripts/24_make_experiment_manifest.py b/covid_audio_btp/scripts/24_make_experiment_manifest.py
+index 6dee6dc..85e5677 100644
+--- a/covid_audio_btp/scripts/24_make_experiment_manifest.py
++++ b/covid_audio_btp/scripts/24_make_experiment_manifest.py
+@@ -13,6 +13,7 @@ DEFAULT_ARTIFACTS = [
+     Path("data/processed/metadata_clean.csv"),
+     Path("data/processed/audio_quality.csv"),
+     Path("data/processed/features_mfcc.csv"),
++    Path("data/processed/features_strong_acoustic.csv"),
+     Path("data/outputs/metrics/ml_baseline_metrics.csv"),
+     Path("data/outputs/metrics/calibration_metrics.csv"),
+     Path("data/outputs/metrics/fusion_metrics.csv"),
+@@ -83,6 +84,15 @@ DEFAULT_ARTIFACTS = [
+     Path("reports/tables/temporal_month_ablation_effect_sizes.csv"),
+     Path("reports/final/TEMPORAL_MONTH_CAUSAL_DAG.md"),
+     Path("reports/final/TEMPORAL_SHORTCUT_THEORY.md"),
++    Path("data/outputs/metrics/strong_baseline_metrics.csv"),
++    Path("data/outputs/metrics/strong_baseline_predictions.csv"),
++    Path("reports/tables/strong_baseline_model_selection.csv"),
++    Path("reports/tables/strong_baseline_protocol_audit.csv"),
++    Path("reports/tables/strong_baseline_participant_audit.csv"),
++    Path("data/processed/sota_segment_index.csv"),
++    Path("reports/tables/sota_segment_index_audit.csv"),
++    Path("data/outputs/metrics/sota_fusion_metrics.csv"),
++    Path("data/outputs/metrics/sota_fusion_predictions.csv"),
+     Path("reports/tables/feature_shift_report.csv"),
+     Path("reports/tables/feature_shift_summary.csv"),
+     Path("reports/tables/paper_metric_table.csv"),
+@@ -110,6 +120,19 @@ def default_artifact_paths(project_root: Path | None = None) -> list[Path]:
+         (metrics_dir, "external_model_grid_*_bootstrap_ci.csv"),
+         (metrics_dir, "coughvid_internal_*_metrics.csv"),
+         (metrics_dir, "coughvid_internal_*_bootstrap_ci.csv"),
++        (metrics_dir, "cnn_metrics_*.csv"),
++        (metrics_dir, "cnn_logits_validation_*.csv"),
++        (metrics_dir, "cnn_logits_test_*.csv"),
++        (metrics_dir, "cnn_training_history_*.csv"),
++        (metrics_dir, "sota_ssl_metrics_*.csv"),
++        (metrics_dir, "sota_ssl_predictions_*.csv"),
++        (metrics_dir, "sota_ssl_history_*.csv"),
++        (metrics_dir, "sota_spectrogram_metrics_*.csv"),
++        (metrics_dir, "sota_spectrogram_predictions_*.csv"),
++        (metrics_dir, "sota_foundation_metrics_*.csv"),
++        (metrics_dir, "sota_foundation_predictions_*.csv"),
++        (metrics_dir, "sota_fusion_metrics*.csv"),
++        (metrics_dir, "sota_fusion_predictions*.csv"),
+         (tables_dir, "feature_shift_*_cough.csv"),
+         (tables_dir, "feature_shift_*_summary.csv"),
+     ]
+diff --git a/covid_audio_btp/scripts/50_build_sota_segment_index.py b/covid_audio_btp/scripts/50_build_sota_segment_index.py
+new file mode 100755
+index 0000000..4995524
+--- /dev/null
++++ b/covid_audio_btp/scripts/50_build_sota_segment_index.py
+@@ -0,0 +1,54 @@
++#!/usr/bin/env python
++from __future__ import annotations
++
++import argparse
++from pathlib import Path
++
++import pandas as pd
++
++from covid_audio_btp.sota_segments import build_sota_segment_index, validate_segment_index_no_leakage
++
++
++def parse_args() -> argparse.Namespace:
++    parser = argparse.ArgumentParser(description="Build leakage-safe active segment index for SOTA audio branches.")
++    parser.add_argument("--metadata", type=Path, default=Path("data/processed/metadata_with_quality.csv"))
++    parser.add_argument("--output", type=Path, default=Path("data/processed/sota_segment_index.csv"))
++    parser.add_argument("--audit-output", type=Path, default=Path("reports/tables/sota_segment_index_audit.csv"))
++    parser.add_argument("--modalities", nargs="+", default=["cough", "breath", "speech"])
++    parser.add_argument("--quality-mode", choices=["all_samples", "quality_ok_only"], default="quality_ok_only")
++    parser.add_argument("--window-sec", type=float, default=3.0)
++    parser.add_argument("--overlap", type=float, default=0.5)
++    parser.add_argument("--max-segments-per-recording", type=int, default=8)
++    parser.add_argument("--augment-train-copies", type=int, default=0)
++    parser.add_argument("--random-state", type=int, default=42)
++    return parser.parse_args()
++
++
++def main() -> None:
++    args = parse_args()
++    metadata = pd.read_csv(args.metadata)
++    index = build_sota_segment_index(
++        metadata,
++        modalities=args.modalities,
++        quality_mode=args.quality_mode,
++        window_sec=args.window_sec,
++        overlap=args.overlap,
++        max_segments_per_recording=args.max_segments_per_recording,
++        augment_train_copies=args.augment_train_copies,
++        random_state=args.random_state,
++    )
++    audit = validate_segment_index_no_leakage(index)
++    args.output.parent.mkdir(parents=True, exist_ok=True)
++    args.audit_output.parent.mkdir(parents=True, exist_ok=True)
++    index.to_csv(args.output, index=False)
++    audit.to_csv(args.audit_output, index=False)
++    print(f"Wrote SOTA segment index: {args.output} ({len(index)} rows)")
++    print(f"Wrote SOTA segment audit: {args.audit_output}")
++    errors = audit[audit["severity"].astype(str).eq("error")]
++    if not errors.empty:
++        messages = "\n".join(f"- {row.check}: {row.message}" for row in errors.itertuples(index=False))
++        raise ValueError(f"SOTA segment index failed leakage validation:\n{messages}")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/covid_audio_btp/scripts/51_train_sota_ssl_branch.py b/covid_audio_btp/scripts/51_train_sota_ssl_branch.py
+new file mode 100755
+index 0000000..d138908
+--- /dev/null
++++ b/covid_audio_btp/scripts/51_train_sota_ssl_branch.py
+@@ -0,0 +1,84 @@
++#!/usr/bin/env python
++from __future__ import annotations
++
++import argparse
++from pathlib import Path
++
++import pandas as pd
++
++from covid_audio_btp.sota_ssl import train_sota_ssl_branch
++
++
++def parse_args() -> argparse.Namespace:
++    parser = argparse.ArgumentParser(description="Train one SOTA waveform SSL branch for one modality.")
++    parser.add_argument("--segment-index", type=Path, default=Path("data/processed/sota_segment_index.csv"))
++    parser.add_argument("--modality", required=True)
++    parser.add_argument("--backend", choices=["hf_ssl", "debug_acoustic"], default="hf_ssl")
++    parser.add_argument("--model-name", default="microsoft/wavlm-base-plus")
++    parser.add_argument("--target-seconds", type=float, default=3.0)
++    parser.add_argument("--sample-rate", type=int, default=16000)
++    parser.add_argument("--max-epochs", type=int, default=8)
++    parser.add_argument("--batch-size", type=int, default=2)
++    parser.add_argument("--gradient-accumulation", type=int, default=16)
++    parser.add_argument("--learning-rate", type=float, default=2e-5)
++    parser.add_argument("--head-learning-rate", type=float, default=1e-4)
++    parser.add_argument("--weight-decay", type=float, default=0.01)
++    parser.add_argument("--unfreeze-top-layers", type=int, default=4)
++    parser.add_argument("--patience", type=int, default=3)
++    parser.add_argument("--device", default=None)
++    parser.add_argument("--model-output", type=Path, default=None)
++    parser.add_argument("--metrics-output", type=Path, default=None)
++    parser.add_argument("--predictions-output", type=Path, default=None)
++    parser.add_argument("--history-output", type=Path, default=None)
++    return parser.parse_args()
++
++
++def _default_path(kind: str, modality: str, backend: str, model_name: str) -> Path:
++    safe_model = model_name.replace("/", "_").replace(":", "_")
++    if kind == "metrics":
++        return Path(f"data/outputs/metrics/sota_ssl_metrics_{backend}_{safe_model}_{modality}.csv")
++    if kind == "predictions":
++        return Path(f"data/outputs/metrics/sota_ssl_predictions_{backend}_{safe_model}_{modality}.csv")
++    if kind == "history":
++        return Path(f"data/outputs/metrics/sota_ssl_history_{backend}_{safe_model}_{modality}.csv")
++    raise ValueError(kind)
++
++
++def main() -> None:
++    args = parse_args()
++    segment_index = pd.read_csv(args.segment_index)
++    target_samples = int(round(float(args.target_seconds) * int(args.sample_rate)))
++    result = train_sota_ssl_branch(
++        segment_index,
++        modality=args.modality,
++        backend=args.backend,
++        model_name=args.model_name,
++        target_samples=target_samples,
++        max_epochs=args.max_epochs,
++        batch_size=args.batch_size,
++        gradient_accumulation=args.gradient_accumulation,
++        learning_rate=args.learning_rate,
++        head_learning_rate=args.head_learning_rate,
++        weight_decay=args.weight_decay,
++        unfreeze_top_layers=args.unfreeze_top_layers,
++        patience=args.patience,
++        device=args.device,
++        model_output=args.model_output,
++    )
++    metrics_output = args.metrics_output or _default_path("metrics", args.modality, args.backend, args.model_name)
++    predictions_output = args.predictions_output or _default_path("predictions", args.modality, args.backend, args.model_name)
++    history_output = args.history_output or _default_path("history", args.modality, args.backend, args.model_name)
++    for path, frame in (
++        (metrics_output, result.metrics),
++        (predictions_output, result.predictions),
++        (history_output, result.history),
++    ):
++        path.parent.mkdir(parents=True, exist_ok=True)
++        frame.to_csv(path, index=False)
++    print(f"Wrote SOTA SSL metrics: {metrics_output} ({len(result.metrics)} rows)")
++    print(f"Wrote SOTA SSL predictions: {predictions_output} ({len(result.predictions)} rows)")
++    print(f"Wrote SOTA SSL history: {history_output} ({len(result.history)} rows)")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/covid_audio_btp/scripts/52_fuse_sota_predictions.py b/covid_audio_btp/scripts/52_fuse_sota_predictions.py
+new file mode 100755
+index 0000000..5d9a55c
+--- /dev/null
++++ b/covid_audio_btp/scripts/52_fuse_sota_predictions.py
+@@ -0,0 +1,52 @@
++#!/usr/bin/env python
++from __future__ import annotations
++
++import argparse
++from pathlib import Path
++
++import pandas as pd
++
++from covid_audio_btp.sota_predictions import fuse_sota_prediction_sources
++
++
++def parse_args() -> argparse.Namespace:
++    parser = argparse.ArgumentParser(description="Fuse SOTA branch prediction CSVs with validation-only stackers.")
++    parser.add_argument("--metrics", nargs="+", type=Path, required=True)
++    parser.add_argument("--predictions", nargs="+", type=Path, required=True)
++    parser.add_argument("--top-k", type=int, default=8)
++    parser.add_argument("--fusion-name", default="sota_validation_stack")
++    parser.add_argument("--metrics-output", type=Path, default=Path("data/outputs/metrics/sota_fusion_metrics.csv"))
++    parser.add_argument("--predictions-output", type=Path, default=Path("data/outputs/metrics/sota_fusion_predictions.csv"))
++    return parser.parse_args()
++
++
++def _read_csvs(paths: list[Path]) -> pd.DataFrame:
++    frames: list[pd.DataFrame] = []
++    for path in paths:
++        if path.exists() and path.stat().st_size > 0:
++            frame = pd.read_csv(path)
++            if not frame.empty:
++                frames.append(frame)
++    return pd.concat(frames, ignore_index=True, sort=False) if frames else pd.DataFrame()
++
++
++def main() -> None:
++    args = parse_args()
++    metrics = _read_csvs(args.metrics)
++    predictions = _read_csvs(args.predictions)
++    fused_metrics, fused_predictions = fuse_sota_prediction_sources(
++        metrics,
++        predictions,
++        top_k=args.top_k,
++        fusion_name=args.fusion_name,
++    )
++    args.metrics_output.parent.mkdir(parents=True, exist_ok=True)
++    args.predictions_output.parent.mkdir(parents=True, exist_ok=True)
++    fused_metrics.to_csv(args.metrics_output, index=False)
++    fused_predictions.to_csv(args.predictions_output, index=False)
++    print(f"Wrote SOTA fusion metrics: {args.metrics_output} ({len(fused_metrics)} rows)")
++    print(f"Wrote SOTA fusion predictions: {args.predictions_output} ({len(fused_predictions)} rows)")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/covid_audio_btp/scripts/53_run_sota_e2e.py b/covid_audio_btp/scripts/53_run_sota_e2e.py
+new file mode 100755
+index 0000000..6058a31
+--- /dev/null
++++ b/covid_audio_btp/scripts/53_run_sota_e2e.py
+@@ -0,0 +1,224 @@
++#!/usr/bin/env python
++from __future__ import annotations
++
++import argparse
++import subprocess
++import sys
++from pathlib import Path
++
++
++PROJECT_ROOT = Path(__file__).resolve().parents[1]
++
++
++def parse_args() -> argparse.Namespace:
++    parser = argparse.ArgumentParser(description="One-command SOTA-targeted internal benchmark pipeline.")
++    parser.add_argument("--raw-dir", type=Path, default=None, help="Coswara raw directory, used only if metadata is absent.")
++    parser.add_argument("--metadata", type=Path, default=Path("data/processed/metadata_with_quality.csv"))
++    parser.add_argument("--segment-index", type=Path, default=Path("data/processed/sota_segment_index.csv"))
++    parser.add_argument("--segment-audit", type=Path, default=Path("reports/tables/sota_segment_index_audit.csv"))
++    parser.add_argument("--modalities", nargs="+", default=["cough", "breath", "speech"])
++    parser.add_argument("--quality-mode", choices=["all_samples", "quality_ok_only"], default="quality_ok_only")
++    parser.add_argument("--window-sec", type=float, default=3.0)
++    parser.add_argument("--overlap", type=float, default=0.5)
++    parser.add_argument("--max-segments-per-recording", type=int, default=8)
++    parser.add_argument("--augment-train-copies", type=int, default=2)
++    parser.add_argument("--backend", choices=["hf_ssl", "debug_acoustic"], default="hf_ssl")
++    parser.add_argument("--ssl-models", nargs="+", default=["microsoft/wavlm-base-plus"])
++    parser.add_argument("--max-epochs", type=int, default=12)
++    parser.add_argument("--batch-size", type=int, default=2)
++    parser.add_argument("--gradient-accumulation", type=int, default=16)
++    parser.add_argument("--learning-rate", type=float, default=2e-5)
++    parser.add_argument("--head-learning-rate", type=float, default=1e-4)
++    parser.add_argument("--unfreeze-top-layers", type=int, default=4)
++    parser.add_argument("--patience", type=int, default=4)
++    parser.add_argument("--device", default=None)
++    parser.add_argument("--fusion-top-k", type=int, default=8)
++    parser.add_argument("--skip-report-refresh", action="store_true")
++    parser.add_argument("--skip-validation", action="store_true")
++    return parser.parse_args()
++
++
++def _run(cmd: list[str]) -> None:
++    print("+ " + " ".join(cmd), flush=True)
++    subprocess.run(cmd, cwd=PROJECT_ROOT, check=True)
++
++
++def _safe_model_name(model_name: str) -> str:
++    return model_name.replace("/", "_").replace(":", "_")
++
++
++def _ensure_metadata(args: argparse.Namespace) -> None:
++    metadata = PROJECT_ROOT / args.metadata
++    if metadata.exists():
++        return
++    if args.raw_dir is None:
++        raise FileNotFoundError(
++            f"Metadata not found: {args.metadata}. Provide --raw-dir or run preprocessing first."
++        )
++    raw_dir = args.raw_dir
++    _run([sys.executable, "scripts/01_build_coswara_index.py", "--raw-dir", str(raw_dir), "--output", "data/interim/coswara_index.csv"])
++    _run(
++        [
++            sys.executable,
++            "scripts/02_clean_metadata.py",
++            "--index",
++            "data/interim/coswara_index.csv",
++            "--output",
++            "data/processed/metadata_clean.csv",
++            "--availability-output",
++            "data/processed/modality_availability.csv",
++        ]
++    )
++    _run(
++        [
++            sys.executable,
++            "scripts/03_create_splits.py",
++            "--metadata",
++            "data/processed/metadata_clean.csv",
++            "--output",
++            "data/processed/split_manifest.csv",
++            "--metadata-output",
++            "data/processed/metadata_with_split.csv",
++        ]
++    )
++    _run(
++        [
++            sys.executable,
++            "scripts/04_quality_audit.py",
++            "--metadata",
++            "data/processed/metadata_with_split.csv",
++            "--output",
++            "data/processed/audio_quality.csv",
++            "--metadata-output",
++            str(args.metadata),
++        ]
++    )
++
++
++def main() -> None:
++    args = parse_args()
++    _ensure_metadata(args)
++    _run(
++        [
++            sys.executable,
++            "scripts/50_build_sota_segment_index.py",
++            "--metadata",
++            str(args.metadata),
++            "--output",
++            str(args.segment_index),
++            "--audit-output",
++            str(args.segment_audit),
++            "--modalities",
++            *args.modalities,
++            "--quality-mode",
++            args.quality_mode,
++            "--window-sec",
++            str(args.window_sec),
++            "--overlap",
++            str(args.overlap),
++            "--max-segments-per-recording",
++            str(args.max_segments_per_recording),
++            "--augment-train-copies",
++            str(args.augment_train_copies),
++        ]
++    )
++
++    metric_paths: list[str] = []
++    prediction_paths: list[str] = []
++    for model_name in args.ssl_models:
++        safe_model = _safe_model_name(model_name)
++        for modality in args.modalities:
++            metrics_output = Path(f"data/outputs/metrics/sota_ssl_metrics_{args.backend}_{safe_model}_{modality}.csv")
++            predictions_output = Path(f"data/outputs/metrics/sota_ssl_predictions_{args.backend}_{safe_model}_{modality}.csv")
++            history_output = Path(f"data/outputs/metrics/sota_ssl_history_{args.backend}_{safe_model}_{modality}.csv")
++            cmd = [
++                sys.executable,
++                "scripts/51_train_sota_ssl_branch.py",
++                "--segment-index",
++                str(args.segment_index),
++                "--modality",
++                modality,
++                "--backend",
++                args.backend,
++                "--model-name",
++                model_name,
++                "--max-epochs",
++                str(args.max_epochs),
++                "--batch-size",
++                str(args.batch_size),
++                "--gradient-accumulation",
++                str(args.gradient_accumulation),
++                "--learning-rate",
++                str(args.learning_rate),
++                "--head-learning-rate",
++                str(args.head_learning_rate),
++                "--unfreeze-top-layers",
++                str(args.unfreeze_top_layers),
++                "--patience",
++                str(args.patience),
++                "--metrics-output",
++                str(metrics_output),
++                "--predictions-output",
++                str(predictions_output),
++                "--history-output",
++                str(history_output),
++            ]
++            if args.device:
++                cmd.extend(["--device", args.device])
++            _run(cmd)
++            metric_paths.append(str(metrics_output))
++            prediction_paths.append(str(predictions_output))
++
++    if len(metric_paths) >= 2 and len(prediction_paths) >= 2:
++        _run(
++            [
++                sys.executable,
++                "scripts/52_fuse_sota_predictions.py",
++                "--metrics",
++                *metric_paths,
++                "--predictions",
++                *prediction_paths,
++                "--top-k",
++                str(args.fusion_top_k),
++                "--metrics-output",
++                "data/outputs/metrics/sota_fusion_metrics.csv",
++                "--predictions-output",
++                "data/outputs/metrics/sota_fusion_predictions.csv",
++            ]
++        )
++    else:
++        print("Skipping SOTA fusion because fewer than two branch prediction sources were produced.")
++
++    if not args.skip_report_refresh:
++        _run([sys.executable, "scripts/20_make_paper_tables.py"])
++        _run([sys.executable, "scripts/24_make_experiment_manifest.py"])
++    if not args.skip_validation:
++        index_path = PROJECT_ROOT / "data" / "interim" / "coswara_index.csv"
++        quality_path = PROJECT_ROOT / "data" / "processed" / "audio_quality.csv"
++        if index_path.exists() and quality_path.exists():
++            _run(
++                [
++                    sys.executable,
++                    "scripts/12_validate_artifacts.py",
++                    "--index",
++                    "data/interim/coswara_index.csv",
++                    "--metadata",
++                    str(args.metadata),
++                    "--quality",
++                    "data/processed/audio_quality.csv",
++                    "--strict",
++                ]
++            )
++        else:
++            print("Skipping strict artifact validation because index/quality artifacts are absent.")
++
++    print("\nSOTA E2E pipeline completed.")
++    print("Primary outputs:")
++    print(f"- {args.segment_index}")
++    print("- data/outputs/metrics/sota_ssl_metrics_*.csv")
++    print("- data/outputs/metrics/sota_ssl_predictions_*.csv")
++    print("- data/outputs/metrics/sota_fusion_metrics.csv")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/covid_audio_btp/src/covid_audio_btp/sota_predictions.py b/covid_audio_btp/src/covid_audio_btp/sota_predictions.py
+new file mode 100644
+index 0000000..ffaea2a
+--- /dev/null
++++ b/covid_audio_btp/src/covid_audio_btp/sota_predictions.py
+@@ -0,0 +1,279 @@
++from __future__ import annotations
++
++import numpy as np
++import pandas as pd
++from sklearn.linear_model import LogisticRegression
++
++from covid_audio_btp.metrics import (
++    best_threshold_by_balanced_accuracy,
++    binary_metric_bundle,
++    labels_to_binary,
++)
++
++
++SOTA_SOURCE_COLS = [
++    "evaluation_protocol",
++    "analysis_family",
++    "model_name",
++    "modality",
++    "submodality",
++    "modality_combination",
++    "fusion_method",
++]
++
++
++def _ensure_optional_columns(frame: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
++    out = frame.copy()
++    for col in columns:
++        if col not in out.columns:
++            out[col] = ""
++    return out
++
++
++def _source_key(frame: pd.DataFrame) -> pd.DataFrame:
++    out = _ensure_optional_columns(frame, SOTA_SOURCE_COLS)
++    out["sota_source_key"] = out[SOTA_SOURCE_COLS].fillna("").astype(str).agg("||".join, axis=1)
++    return out
++
++
++def aggregate_sota_predictions(predictions: pd.DataFrame, level: str = "participant") -> pd.DataFrame:
++    """Aggregate segment-level branch predictions to recording or participant level."""
++    if predictions.empty:
++        return predictions.copy()
++    if level not in {"recording", "participant"}:
++        raise ValueError(f"Unknown SOTA aggregation level: {level}")
++    df = _ensure_optional_columns(predictions, ["dataset", "submodality", "evaluation_protocol"])
++    group_cols = [
++        "participant_id",
++        "label_binary",
++        "split",
++        "dataset",
++        "modality",
++        "submodality",
++        "model_name",
++        "analysis_family",
++        "evaluation_protocol",
++    ]
++    if level == "recording":
++        group_cols.insert(1, "recording_id")
++    optional = ["modality_combination", "fusion_method"]
++    group_cols.extend([col for col in optional if col in df.columns])
++    aggregated = (
++        df.groupby(group_cols, dropna=False)
++        .agg(
++            probability=("probability", "mean"),
++            n_segments=("probability", "size"),
++            n_recordings=("recording_id", "nunique") if "recording_id" in df.columns else ("probability", "size"),
++        )
++        .reset_index()
++    )
++    if level == "participant":
++        aggregated["recording_id"] = aggregated["participant_id"].astype(str) + "::participant"
++    aggregated["aggregation_level"] = level
++    return aggregated
++
++
++def _metric_row(
++    frame: pd.DataFrame,
++    threshold: float,
++    extra: dict[str, object],
++) -> dict[str, object]:
++    y_true = labels_to_binary(frame["label_binary"])
++    y_prob = frame["probability"].astype(float).to_numpy()
++    row = binary_metric_bundle(y_true, y_prob, threshold=threshold)
++    row.update(extra)
++    row["n_participants"] = float(frame["participant_id"].nunique()) if "participant_id" in frame.columns else float(len(frame))
++    return row
++
++
++def evaluate_sota_prediction_table(
++    predictions: pd.DataFrame,
++    validation_split: str = "validation",
++    test_split: str = "test",
++) -> pd.DataFrame:
++    """Evaluate prediction sources using validation-selected thresholds."""
++    if predictions.empty:
++        return pd.DataFrame()
++    df = _ensure_optional_columns(
++        predictions,
++        ["evaluation_protocol", "analysis_family", "model_name", "modality", "submodality"],
++    )
++    group_cols = [
++        "evaluation_protocol",
++        "analysis_family",
++        "model_name",
++        "modality",
++        "submodality",
++    ]
++    for col in ("modality_combination", "fusion_method"):
++        if col in df.columns:
++            group_cols.append(col)
++
++    rows: list[dict[str, object]] = []
++    for group_key, group in df.groupby(group_cols, dropna=False):
++        if not isinstance(group_key, tuple):
++            group_key = (group_key,)
++        group_meta = dict(zip(group_cols, group_key))
++        val = group[group["split"].astype(str).eq(validation_split)].copy()
++        test = group[group["split"].astype(str).eq(test_split)].copy()
++        if val.empty or test.empty or val["label_binary"].nunique() < 2:
++            rows.append(
++                {
++                    **group_meta,
++                    "metric_split": "skipped",
++                    "skipped": True,
++                    "skip_reason": "missing validation/test split or one-class validation labels",
++                }
++            )
++            continue
++        threshold = best_threshold_by_balanced_accuracy(
++            labels_to_binary(val["label_binary"]),
++            val["probability"].astype(float).to_numpy(),
++        )
++        for split_name, split_frame in ((validation_split, val), (test_split, test)):
++            rows.append(
++                _metric_row(
++                    split_frame,
++                    threshold=threshold,
++                    extra={
++                        **group_meta,
++                        "metric_split": split_name,
++                        "threshold_source": "validation_balanced_accuracy",
++                        "skipped": False,
++                    },
++                )
++            )
++    return pd.DataFrame(rows)
++
++
++def _participant_matrix(predictions: pd.DataFrame, selected_keys: list[str], split: str) -> pd.DataFrame:
++    pred = _source_key(predictions)
++    pred = pred[pred["sota_source_key"].isin(selected_keys) & pred["split"].astype(str).eq(split)].copy()
++    if pred.empty:
++        return pd.DataFrame()
++    participant = (
++        pred.groupby(["participant_id", "label_binary", "sota_source_key"], dropna=False)
++        .agg(probability=("probability", "mean"))
++        .reset_index()
++    )
++    matrix = participant.pivot_table(
++        index=["participant_id", "label_binary"],
++        columns="sota_source_key",
++        values="probability",
++        aggfunc="mean",
++    ).reset_index()
++    matrix.columns.name = None
++    matrix["split"] = split
++    return matrix
++
++
++def _participant_fusion_frame(
++    source: pd.DataFrame,
++    probabilities: np.ndarray,
++    split: str,
++    fusion_method: str,
++    fusion_name: str,
++    selected_keys: list[str],
++) -> pd.DataFrame:
++    return pd.DataFrame(
++        {
++            "recording_id": source["participant_id"].astype(str) + f"::{fusion_name}",
++            "participant_id": source["participant_id"].astype(str),
++            "dataset": "mixed",
++            "modality": "multimodal",
++            "submodality": fusion_name,
++            "label_binary": source["label_binary"].to_numpy(),
++            "split": split,
++            "model_name": fusion_name,
++            "analysis_family": "sota_prediction_fusion",
++            "evaluation_protocol": "sota_internal_protocol",
++            "modality_combination": "branch_prediction_stack",
++            "fusion_method": fusion_method,
++            "probability": probabilities,
++            "ensemble_members": ";".join(selected_keys),
++        }
++    )
++
++
++def fuse_sota_prediction_sources(
++    metrics: pd.DataFrame,
++    predictions: pd.DataFrame,
++    top_k: int = 8,
++    fusion_name: str = "sota_validation_stack",
++) -> tuple[pd.DataFrame, pd.DataFrame]:
++    """Fuse top validation prediction sources with simple, defensible stackers."""
++    if metrics.empty or predictions.empty or top_k < 2:
++        return pd.DataFrame(), pd.DataFrame()
++    skipped = metrics["skipped"].fillna(False).astype(bool) if "skipped" in metrics.columns else False
++    candidates = metrics[metrics["metric_split"].eq("validation") & ~skipped].copy()
++    if candidates.empty:
++        return pd.DataFrame(), pd.DataFrame()
++    candidates = _source_key(candidates)
++    candidates["auroc"] = pd.to_numeric(candidates["auroc"], errors="coerce")
++    candidates["auprc"] = pd.to_numeric(candidates["auprc"], errors="coerce")
++    ranked = candidates.sort_values(["auroc", "auprc", "sota_source_key"], ascending=[False, False, True])
++    selected_keys = list(dict.fromkeys(ranked["sota_source_key"].dropna().astype(str).head(top_k)))
++    if len(selected_keys) < 2:
++        return pd.DataFrame(), pd.DataFrame()
++
++    val = _participant_matrix(predictions, selected_keys, split="validation").dropna(subset=selected_keys)
++    test = _participant_matrix(predictions, selected_keys, split="test").dropna(subset=selected_keys)
++    if val.empty or test.empty or val["label_binary"].nunique() < 2:
++        return pd.DataFrame(), pd.DataFrame()
++
++    val_x = val[selected_keys].to_numpy(dtype=float)
++    test_x = test[selected_keys].to_numpy(dtype=float)
++    val_y = labels_to_binary(val["label_binary"])
++    weight_map = ranked.drop_duplicates("sota_source_key").set_index("sota_source_key")["auroc"].to_dict()
++    raw_weights = np.asarray([max(float(weight_map.get(key, 0.5)) - 0.5, 0.01) for key in selected_keys])
++    weights = raw_weights / raw_weights.sum()
++
++    fusion_specs: list[tuple[str, np.ndarray, np.ndarray]] = [
++        ("top_source_uniform_mean", val_x.mean(axis=1), test_x.mean(axis=1)),
++        ("top_source_validation_weighted_auroc", np.average(val_x, axis=1, weights=weights), np.average(test_x, axis=1, weights=weights)),
++    ]
++    if len(val) >= 8:
++        stacker = LogisticRegression(C=0.1, class_weight="balanced", max_iter=2000, random_state=42)
++        stacker.fit(val_x, val_y)
++        fusion_specs.append(
++            (
++                "top_source_stacked_logistic_validation",
++                stacker.predict_proba(val_x)[:, 1],
++                stacker.predict_proba(test_x)[:, 1],
++            )
++        )
++
++    prediction_frames: list[pd.DataFrame] = []
++    metric_rows: list[dict[str, object]] = []
++    for method, val_prob, test_prob in fusion_specs:
++        threshold = best_threshold_by_balanced_accuracy(val_y, val_prob)
++        for split_name, frame, probs in (("validation", val, val_prob), ("test", test, test_prob)):
++            pred_frame = _participant_fusion_frame(
++                frame,
++                probs,
++                split=split_name,
++                fusion_method=method,
++                fusion_name=fusion_name,
++                selected_keys=selected_keys,
++            )
++            prediction_frames.append(pred_frame)
++            metric_rows.append(
++                _metric_row(
++                    pred_frame,
++                    threshold=threshold,
++                    extra={
++                        "evaluation_protocol": "sota_internal_protocol",
++                        "analysis_family": "sota_prediction_fusion",
++                        "model_name": fusion_name,
++                        "modality": "multimodal",
++                        "modality_combination": "branch_prediction_stack",
++                        "fusion_method": method,
++                        "metric_split": split_name,
++                        "threshold_source": "validation_balanced_accuracy",
++                        "skipped": False,
++                        "n_ensemble_models": float(len(selected_keys)),
++                        "ensemble_members": ";".join(selected_keys),
++                    },
++                )
++            )
++    return pd.DataFrame(metric_rows), pd.concat(prediction_frames, ignore_index=True)
+diff --git a/covid_audio_btp/src/covid_audio_btp/sota_segments.py b/covid_audio_btp/src/covid_audio_btp/sota_segments.py
+new file mode 100644
+index 0000000..9e0df46
+--- /dev/null
++++ b/covid_audio_btp/src/covid_audio_btp/sota_segments.py
+@@ -0,0 +1,291 @@
++from __future__ import annotations
++
++from dataclasses import dataclass
++from pathlib import Path
++from typing import Iterable
++
++import numpy as np
++import pandas as pd
++
++from covid_audio_btp.audio_io import load_audio, pad_or_crop_center, peak_normalize
++from covid_audio_btp.preprocess import detect_active_event, trim_silence
++from covid_audio_btp.strong_features import augment_waveform
++
++
++SOTA_PREPROCESSING_VERSION = "sota_active_segments_v1"
++
++
++@dataclass(frozen=True)
++class SegmentConfig:
++    window_sec: float = 3.0
++    overlap: float = 0.5
++    max_segments_per_recording: int = 8
++    quality_mode: str = "quality_ok_only"
++    augment_train_copies: int = 0
++    random_state: int = 42
++
++    @property
++    def hop_fraction(self) -> float:
++        return max(0.05, 1.0 - min(0.95, max(0.0, self.overlap)))
++
++
++def rms_normalize(y: np.ndarray, target_dbfs: float = -23.0, eps: float = 1e-8) -> np.ndarray:
++    arr = np.asarray(y, dtype=np.float32)
++    if arr.size == 0:
++        return arr
++    rms = float(np.sqrt(np.mean(np.square(arr))))
++    if rms < eps:
++        return arr
++    target = float(10.0 ** (target_dbfs / 20.0))
++    out = arr * (target / max(rms, eps))
++    peak = float(np.max(np.abs(out))) if out.size else 0.0
++    if peak > 1.0:
++        out = out / peak
++    return np.nan_to_num(out, nan=0.0, posinf=0.0, neginf=0.0).astype(np.float32, copy=False)
++
++
++def _stable_seed(*parts: object, base_seed: int = 42) -> int:
++    text = "::".join(str(part) for part in parts)
++    value = 2166136261
++    for ch in text:
++        value ^= ord(ch)
++        value *= 16777619
++        value &= 0xFFFFFFFF
++    return int((value + int(base_seed)) % (2**32 - 1))
++
++
++def _segment_starts(
++    active_start: int,
++    active_end: int,
++    sample_rate: int,
++    config: SegmentConfig,
++) -> list[tuple[int, int]]:
++    window = max(1, int(round(config.window_sec * sample_rate)))
++    hop = max(1, int(round(window * config.hop_fraction)))
++    active_start = max(0, int(active_start))
++    active_end = max(active_start, int(active_end))
++    if active_end <= active_start:
++        return [(active_start, active_start + window)]
++    active_len = active_end - active_start
++    if active_len <= window:
++        return [(active_start, active_end)]
++
++    starts = list(range(active_start, active_end - window + 1, hop))
++    final_start = max(active_start, active_end - window)
++    if not starts or starts[-1] != final_start:
++        starts.append(final_start)
++    starts = sorted(set(starts))
++    if config.max_segments_per_recording > 0 and len(starts) > config.max_segments_per_recording:
++        indices = np.linspace(0, len(starts) - 1, config.max_segments_per_recording)
++        starts = [starts[int(round(i))] for i in indices]
++        starts = sorted(set(starts))
++    return [(start, min(active_end, start + window)) for start in starts]
++
++
++def _filter_metadata(
++    metadata: pd.DataFrame,
++    modalities: Iterable[str] | None,
++    quality_mode: str,
++) -> pd.DataFrame:
++    df = metadata.copy()
++    if "split" not in df.columns:
++        df["split"] = "unused"
++    if modalities is not None:
++        allowed = {str(m) for m in modalities}
++        df = df[df["modality"].astype(str).isin(allowed)]
++    df = df[df["label_binary"].isin(["positive", "negative"])]
++    df = df[df["split"].isin(["train", "validation", "test"])]
++    if quality_mode == "quality_ok_only" and "quality_flag" in df.columns:
++        df = df[df["quality_flag"].astype(str).str.lower().eq("ok")]
++    elif quality_mode not in {"all_samples", "quality_ok_only"}:
++        raise ValueError(f"Unknown quality_mode: {quality_mode}")
++    required = {"recording_id", "participant_id", "modality", "label_binary", "split", "audio_path"}
++    missing = required - set(df.columns)
++    if missing:
++        raise ValueError(f"Metadata is missing required SOTA segment columns: {sorted(missing)}")
++    return df.reset_index(drop=True)
++
++
++def build_sota_segment_index(
++    metadata: pd.DataFrame,
++    modalities: Iterable[str] | None = None,
++    quality_mode: str = "quality_ok_only",
++    window_sec: float = 3.0,
++    overlap: float = 0.5,
++    max_segments_per_recording: int = 8,
++    augment_train_copies: int = 0,
++    random_state: int = 42,
++) -> pd.DataFrame:
++    """Create a leakage-safe segment table for deep/foundation audio branches.
++
++    Segments inherit the participant split from their source recording. Training
++    augmentation is represented as extra segment rows only for train rows, so
++    validation/test metrics remain untouched.
++    """
++    config = SegmentConfig(
++        window_sec=float(window_sec),
++        overlap=float(overlap),
++        max_segments_per_recording=int(max_segments_per_recording),
++        quality_mode=str(quality_mode),
++        augment_train_copies=int(augment_train_copies),
++        random_state=int(random_state),
++    )
++    df = _filter_metadata(metadata, modalities=modalities, quality_mode=config.quality_mode)
++    rows: list[dict[str, object]] = []
++    for _, row in df.iterrows():
++        recording_id = str(row["recording_id"])
++        try:
++            y, sample_rate, original_sample_rate = load_audio(Path(row["audio_path"]))
++        except Exception as exc:
++            rows.append(
++                {
++                    "segment_id": f"{recording_id}::load_error",
++                    "recording_id": recording_id,
++                    "source_recording_id": recording_id,
++                    "participant_id": str(row["participant_id"]),
++                    "dataset": row.get("dataset", "unknown"),
++                    "modality": row.get("modality", "unknown"),
++                    "submodality": row.get("submodality", row.get("modality", "unknown")),
++                    "label_binary": row["label_binary"],
++                    "split": row["split"],
++                    "audio_path": row["audio_path"],
++                    "segment_start_sample": 0,
++                    "segment_end_sample": 0,
++                    "segment_index": 0,
++                    "segment_count": 0,
++                    "is_augmented": False,
++                    "augmentation_id": "original",
++                    "augmentation_seed": int(config.random_state),
++                    "preprocessing_version": SOTA_PREPROCESSING_VERSION,
++                    "skip_reason": f"load_error: {exc}",
++                }
++            )
++            continue
++
++        trimmed, trim_index = trim_silence(y)
++        event = detect_active_event(trimmed, sample_rate=sample_rate, modality=str(row.get("modality", "unknown")))
++        active_start = int(trim_index[0] + event.start_sample)
++        active_end = int(trim_index[0] + event.end_sample)
++        windows = _segment_starts(active_start, active_end, sample_rate=sample_rate, config=config)
++        source_rows: list[dict[str, object]] = []
++        for segment_index, (start, end) in enumerate(windows):
++            start = max(0, min(int(start), int(y.size)))
++            end = max(start + 1, min(int(end), int(y.size)))
++            source_rows.append(
++                {
++                    "segment_id": f"{recording_id}::seg{segment_index:03d}",
++                    "recording_id": recording_id,
++                    "source_recording_id": recording_id,
++                    "participant_id": str(row["participant_id"]),
++                    "dataset": row.get("dataset", "unknown"),
++                    "modality": row.get("modality", "unknown"),
++                    "submodality": row.get("submodality", row.get("modality", "unknown")),
++                    "label_binary": row["label_binary"],
++                    "split": row["split"],
++                    "audio_path": row["audio_path"],
++                    "sample_rate": int(sample_rate),
++                    "original_sample_rate": int(original_sample_rate),
++                    "segment_start_sample": int(start),
++                    "segment_end_sample": int(end),
++                    "segment_start_sec": float(start / sample_rate),
++                    "segment_end_sec": float(end / sample_rate),
++                    "segment_duration_sec": float((end - start) / sample_rate),
++                    "segment_index": int(segment_index),
++                    "segment_count": int(len(windows)),
++                    "active_start_sec": float(active_start / sample_rate),
++                    "active_end_sec": float(active_end / sample_rate),
++                    "segmentation_method": event.method,
++                    "is_augmented": False,
++                    "augmentation_id": "original",
++                    "augmentation_seed": int(config.random_state),
++                    "preprocessing_version": SOTA_PREPROCESSING_VERSION,
++                    "skip_reason": "",
++                }
++            )
++        rows.extend(source_rows)
++        if str(row["split"]) == "train" and config.augment_train_copies > 0:
++            for source in source_rows:
++                for copy_idx in range(1, config.augment_train_copies + 1):
++                    augmented = dict(source)
++                    augmented["segment_id"] = f"{source['segment_id']}::aug{copy_idx}"
++                    augmented["is_augmented"] = True
++                    augmented["augmentation_id"] = f"aug{copy_idx}"
++                    augmented["augmentation_seed"] = _stable_seed(source["segment_id"], copy_idx, base_seed=config.random_state)
++                    rows.append(augmented)
++    out = pd.DataFrame(rows)
++    if not out.empty:
++        out = out[out["skip_reason"].fillna("").eq("")].reset_index(drop=True)
++    return out
++
++
++def validate_segment_index_no_leakage(segment_index: pd.DataFrame) -> pd.DataFrame:
++    rows: list[dict[str, object]] = []
++    if segment_index.empty:
++        return pd.DataFrame([{"severity": "error", "check": "segment_index", "message": "segment index is empty"}])
++
++    split_counts = segment_index.groupby("participant_id")["split"].nunique()
++    leaking = split_counts[split_counts > 1]
++    if not leaking.empty:
++        rows.append(
++            {
++                "severity": "error",
++                "check": "participant_split_leakage",
++                "message": f"{len(leaking)} participants appear in multiple splits",
++            }
++        )
++    augmented_non_train = segment_index[segment_index["is_augmented"].fillna(False).astype(bool) & ~segment_index["split"].eq("train")]
++    if not augmented_non_train.empty:
++        rows.append(
++            {
++                "severity": "error",
++                "check": "augmentation_split_leakage",
++                "message": f"{len(augmented_non_train)} augmented segments are outside train split",
++            }
++        )
++    invalid_window = segment_index[
++        pd.to_numeric(segment_index["segment_end_sample"], errors="coerce")
++        <= pd.to_numeric(segment_index["segment_start_sample"], errors="coerce")
++    ]
++    if not invalid_window.empty:
++        rows.append(
++            {
++                "severity": "error",
++                "check": "invalid_segment_window",
++                "message": f"{len(invalid_window)} segments have non-positive duration",
++            }
++        )
++    duplicate_ids = int(segment_index["segment_id"].duplicated().sum()) if "segment_id" in segment_index.columns else len(segment_index)
++    if duplicate_ids:
++        rows.append(
++            {
++                "severity": "error",
++                "check": "duplicate_segment_id",
++                "message": f"{duplicate_ids} duplicated segment IDs",
++            }
++        )
++    if not rows:
++        rows.append({"severity": "ok", "check": "segment_index", "message": "no leakage detected"})
++    return pd.DataFrame(rows)
++
++
++def load_sota_segment_waveform(
++    segment_row: pd.Series | dict[str, object],
++    target_samples: int = 48000,
++    rms_dbfs: float = -23.0,
++) -> np.ndarray:
++    row = pd.Series(segment_row)
++    y, sample_rate, _ = load_audio(Path(row["audio_path"]))
++    start = max(0, int(row.get("segment_start_sample", 0)))
++    end = min(int(y.size), max(start + 1, int(row.get("segment_end_sample", y.size))))
++    segment = y[start:end]
++    segment = peak_normalize(segment)
++    if bool(row.get("is_augmented", False)):
++        segment = augment_waveform(
++            segment,
++            sample_rate=sample_rate,
++            augmentation_id=str(row.get("augmentation_id", "aug")),
++            seed=int(row.get("augmentation_seed", 42)),
++        )
++    segment = rms_normalize(segment, target_dbfs=float(rms_dbfs))
++    fixed = pad_or_crop_center(segment, int(target_samples))
++    return np.nan_to_num(fixed, nan=0.0, posinf=0.0, neginf=0.0).astype(np.float32, copy=False)
+diff --git a/covid_audio_btp/src/covid_audio_btp/sota_ssl.py b/covid_audio_btp/src/covid_audio_btp/sota_ssl.py
+new file mode 100644
+index 0000000..1d42cd3
+--- /dev/null
++++ b/covid_audio_btp/src/covid_audio_btp/sota_ssl.py
+@@ -0,0 +1,362 @@
++from __future__ import annotations
++
++from dataclasses import dataclass
++from pathlib import Path
++from typing import Iterable
++
++import numpy as np
++import pandas as pd
++from sklearn.linear_model import LogisticRegression
++from sklearn.pipeline import Pipeline
++from sklearn.preprocessing import StandardScaler
++
++from covid_audio_btp.metrics import labels_to_binary
++from covid_audio_btp.sota_predictions import aggregate_sota_predictions, evaluate_sota_prediction_table
++from covid_audio_btp.sota_segments import load_sota_segment_waveform
++
++
++@dataclass(frozen=True)
++class SOTASSLResult:
++    metrics: pd.DataFrame
++    predictions: pd.DataFrame
++    history: pd.DataFrame
++
++
++def _filter_branch_segments(segment_index: pd.DataFrame, modality: str) -> pd.DataFrame:
++    df = segment_index.copy()
++    df = df[df["modality"].astype(str).eq(str(modality))]
++    df = df[df["label_binary"].isin(["positive", "negative"])]
++    df = df[df["split"].isin(["train", "validation", "test"])]
++    if df.empty:
++        raise ValueError(f"No SOTA segments available for modality={modality}")
++    return df.reset_index(drop=True)
++
++
++def _waveform_stats(row: pd.Series, target_samples: int) -> dict[str, float]:
++    y = load_sota_segment_waveform(row, target_samples=target_samples)
++    abs_y = np.abs(y)
++    zcr = np.mean(np.abs(np.diff(np.signbit(y).astype(np.int8)))) if y.size > 1 else 0.0
++    return {
++        "mean": float(np.mean(y)),
++        "std": float(np.std(y)),
++        "abs_mean": float(np.mean(abs_y)),
++        "abs_max": float(np.max(abs_y)) if y.size else 0.0,
++        "rms": float(np.sqrt(np.mean(np.square(y)))) if y.size else 0.0,
++        "zcr": float(zcr),
++        "q25": float(np.percentile(y, 25)),
++        "q75": float(np.percentile(y, 75)),
++    }
++
++
++def train_debug_acoustic_branch(
++    segment_index: pd.DataFrame,
++    modality: str,
++    target_samples: int = 48000,
++    model_name: str = "debug_acoustic",
++) -> SOTASSLResult:
++    """Fast smoke backend for validating SOTA branch plumbing without heavy models."""
++    df = _filter_branch_segments(segment_index, modality)
++    feature_rows: list[dict[str, object]] = []
++    for _, row in df.iterrows():
++        feature_rows.append({**row.to_dict(), **_waveform_stats(row, target_samples=target_samples)})
++    features = pd.DataFrame(feature_rows)
++    train = features[features["split"].eq("train")].copy()
++    eval_df = features[features["split"].isin(["validation", "test"])].copy()
++    feature_cols = ["mean", "std", "abs_mean", "abs_max", "rms", "zcr", "q25", "q75"]
++    if train.empty or eval_df.empty:
++        raise ValueError(f"Need train and validation/test segments for modality={modality}")
++
++    model = None
++    if train["label_binary"].nunique() >= 2:
++        model = Pipeline(
++            [
++                ("scaler", StandardScaler()),
++                (
++                    "model",
++                    LogisticRegression(
++                        C=0.5,
++                        class_weight="balanced",
++                        max_iter=2000,
++                        random_state=42,
++                    ),
++                ),
++            ]
++        )
++        model.fit(train[feature_cols], labels_to_binary(train["label_binary"]))
++        probabilities = model.predict_proba(eval_df[feature_cols])[:, 1]
++    else:
++        fallback = float(labels_to_binary(train["label_binary"]).mean()) if not train.empty else 0.5
++        probabilities = np.full(len(eval_df), fallback, dtype=float)
++
++    predictions = eval_df[
++        [
++            "segment_id",
++            "recording_id",
++            "participant_id",
++            "dataset",
++            "modality",
++            "submodality",
++            "label_binary",
++            "split",
++        ]
++    ].copy()
++    predictions["model_name"] = f"{model_name}_{modality}"
++    predictions["analysis_family"] = "sota_ssl_branch"
++    predictions["evaluation_protocol"] = "sota_internal_protocol"
++    predictions["probability"] = probabilities
++    participant_predictions = aggregate_sota_predictions(predictions, level="participant")
++    metrics = evaluate_sota_prediction_table(participant_predictions)
++    history = pd.DataFrame(
++        [
++            {
++                "backend": "debug_acoustic",
++                "modality": modality,
++                "model_name": f"{model_name}_{modality}",
++                "n_train_segments": float(len(train)),
++                "n_eval_segments": float(len(eval_df)),
++                "trained_classifier": bool(model is not None),
++            }
++        ]
++    )
++    return SOTASSLResult(metrics=metrics, predictions=participant_predictions, history=history)
++
++
++def _require_hf_stack():
++    try:
++        import torch
++        from torch import nn
++        from torch.utils.data import DataLoader, Dataset
++        from transformers import AutoModel, get_cosine_schedule_with_warmup
++    except Exception as exc:  # pragma: no cover - optional heavy dependencies
++        raise RuntimeError(
++            "The hf_ssl backend requires torch and transformers. Install the GPU requirements "
++            "before running the serious SOTA branch."
++        ) from exc
++    return torch, nn, DataLoader, Dataset, AutoModel, get_cosine_schedule_with_warmup
++
++
++def _freeze_ssl_layers(model: object, unfreeze_top_layers: int) -> None:
++    for param in model.parameters():
++        param.requires_grad = False
++    feature_extractor = getattr(model, "feature_extractor", None)
++    if feature_extractor is not None:
++        for param in feature_extractor.parameters():
++            param.requires_grad = False
++    encoder = getattr(model, "encoder", None)
++    layers = list(getattr(encoder, "layers", []) or [])
++    if not layers:
++        for param in model.parameters():
++            param.requires_grad = True
++        return
++    keep = max(0, min(int(unfreeze_top_layers), len(layers)))
++    for layer in layers[-keep:]:
++        for param in layer.parameters():
++            param.requires_grad = True
++
++
++def train_hf_ssl_branch(
++    segment_index: pd.DataFrame,
++    modality: str,
++    model_name: str = "microsoft/wavlm-base-plus",
++    max_epochs: int = 8,
++    batch_size: int = 2,
++    gradient_accumulation: int = 16,
++    learning_rate: float = 2e-5,
++    head_learning_rate: float = 1e-4,
++    weight_decay: float = 0.01,
++    unfreeze_top_layers: int = 4,
++    target_samples: int = 48000,
++    patience: int = 3,
++    device: str | None = None,
++    model_output: Path | None = None,
++) -> SOTASSLResult:
++    """Fine-tune a waveform SSL encoder on segment rows for one modality."""
++    torch, nn, DataLoader, Dataset, AutoModel, get_cosine_schedule_with_warmup = _require_hf_stack()
++
++    class SegmentDataset(Dataset):
++        def __init__(self, frame: pd.DataFrame) -> None:
++            self.frame = frame.reset_index(drop=True)
++
++        def __len__(self) -> int:
++            return len(self.frame)
++
++        def __getitem__(self, idx: int):
++            row = self.frame.iloc[idx]
++            y = load_sota_segment_waveform(row, target_samples=target_samples)
++            label = 1.0 if row["label_binary"] == "positive" else 0.0
++            return torch.from_numpy(y), torch.tensor(label, dtype=torch.float32), row.to_dict()
++
++    class SSLClassifier(nn.Module):
++        def __init__(self) -> None:
++            super().__init__()
++            self.encoder = AutoModel.from_pretrained(model_name)
++            _freeze_ssl_layers(self.encoder, unfreeze_top_layers=unfreeze_top_layers)
++            hidden = int(getattr(self.encoder.config, "hidden_size", getattr(self.encoder.config, "d_model", 768)))
++            self.classifier = nn.Sequential(
++                nn.LayerNorm(hidden),
++                nn.Dropout(0.25),
++                nn.Linear(hidden, 256),
++                nn.GELU(),
++                nn.Dropout(0.20),
++                nn.Linear(256, 1),
++            )
++
++        def forward(self, input_values):
++            outputs = self.encoder(input_values=input_values)
++            hidden = outputs.last_hidden_state
++            pooled = hidden.mean(dim=1)
++            return self.classifier(pooled).squeeze(-1)
++
++    def collate(batch):
++        audio, labels, rows = zip(*batch)
++        return torch.stack(audio, dim=0), torch.stack(labels, dim=0), list(rows)
++
++    def collect(model, loader, device_name: str) -> pd.DataFrame:
++        model.eval()
++        pred_rows: list[dict[str, object]] = []
++        with torch.no_grad():
++            for audio, _, rows in loader:
++                audio = audio.to(device_name)
++                logits = model(audio).detach().float().cpu().numpy()
++                probs = 1.0 / (1.0 + np.exp(-logits))
++                for row, prob, logit in zip(rows, probs, logits):
++                    pred_rows.append(
++                        {
++                            "segment_id": row["segment_id"],
++                            "recording_id": row["recording_id"],
++                            "participant_id": row["participant_id"],
++                            "dataset": row.get("dataset", "unknown"),
++                            "modality": row.get("modality", modality),
++                            "submodality": row.get("submodality", modality),
++                            "label_binary": row["label_binary"],
++                            "split": row["split"],
++                            "model_name": model_name,
++                            "analysis_family": "sota_ssl_branch",
++                            "evaluation_protocol": "sota_internal_protocol",
++                            "logit": float(logit),
++                            "probability": float(prob),
++                        }
++                    )
++        return pd.DataFrame(pred_rows)
++
++    df = _filter_branch_segments(segment_index, modality)
++    train = df[df["split"].eq("train")].copy()
++    validation = df[df["split"].eq("validation")].copy()
++    test = df[df["split"].eq("test")].copy()
++    if train.empty or validation.empty or test.empty:
++        raise ValueError(f"Need train/validation/test segments for modality={modality}")
++    if train["label_binary"].nunique() < 2:
++        raise ValueError(f"Train split for modality={modality} does not contain both classes")
++
++    device_name = device or ("cuda" if torch.cuda.is_available() else "cpu")
++    model = SSLClassifier().to(device_name)
++    train_loader = DataLoader(SegmentDataset(train), batch_size=batch_size, shuffle=True, collate_fn=collate)
++    val_loader = DataLoader(SegmentDataset(validation), batch_size=batch_size, shuffle=False, collate_fn=collate)
++    test_loader = DataLoader(SegmentDataset(test), batch_size=batch_size, shuffle=False, collate_fn=collate)
++
++    backbone_params = [p for n, p in model.named_parameters() if p.requires_grad and not n.startswith("classifier.")]
++    head_params = [p for n, p in model.named_parameters() if p.requires_grad and n.startswith("classifier.")]
++    optimizer = torch.optim.AdamW(
++        [
++            {"params": backbone_params, "lr": learning_rate},
++            {"params": head_params, "lr": head_learning_rate},
++        ],
++        weight_decay=weight_decay,
++    )
++    total_steps = max(1, int(np.ceil(len(train_loader) / max(1, gradient_accumulation))) * int(max_epochs))
++    scheduler = get_cosine_schedule_with_warmup(
++        optimizer,
++        num_warmup_steps=max(1, int(total_steps * 0.1)),
++        num_training_steps=total_steps,
++    )
++    labels = labels_to_binary(train["label_binary"])
++    pos_weight = torch.tensor([(len(labels) - labels.sum()) / max(1, labels.sum())], dtype=torch.float32, device=device_name)
++    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
++
++    best_state = None
++    best_val = -np.inf
++    bad_epochs = 0
++    history_rows: list[dict[str, object]] = []
++    for epoch in range(1, int(max_epochs) + 1):
++        model.train()
++        losses: list[float] = []
++        optimizer.zero_grad(set_to_none=True)
++        for step, (audio, y, _) in enumerate(train_loader, start=1):
++            audio = audio.to(device_name)
++            y = y.to(device_name)
++            logits = model(audio)
++            loss = criterion(logits, y) / max(1, gradient_accumulation)
++            loss.backward()
++            losses.append(float(loss.detach().cpu()) * max(1, gradient_accumulation))
++            if step % max(1, gradient_accumulation) == 0 or step == len(train_loader):
++                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
++                optimizer.step()
++                scheduler.step()
++                optimizer.zero_grad(set_to_none=True)
++
++        val_pred = aggregate_sota_predictions(collect(model, val_loader, device_name), level="participant")
++        val_metrics = evaluate_sota_prediction_table(
++            pd.concat([val_pred, val_pred.assign(split="test")], ignore_index=True, sort=False)
++        )
++        val_auroc = float(pd.to_numeric(val_metrics.get("auroc"), errors="coerce").max()) if not val_metrics.empty else float("nan")
++        history_rows.append(
++            {
++                "backend": "hf_ssl",
++                "model_name": model_name,
++                "modality": modality,
++                "epoch": epoch,
++                "train_loss": float(np.mean(losses)) if losses else float("nan"),
++                "validation_auroc": val_auroc,
++            }
++        )
++        improved = np.isfinite(val_auroc) and val_auroc > best_val
++        if improved:
++            best_val = val_auroc
++            best_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
++            bad_epochs = 0
++        else:
++            bad_epochs += 1
++            if bad_epochs >= int(patience):
++                break
++
++    if best_state is not None:
++        model.load_state_dict(best_state)
++    if model_output is not None:
++        model_output.parent.mkdir(parents=True, exist_ok=True)
++        torch.save({"model_state_dict": model.state_dict(), "model_name": model_name, "modality": modality}, model_output)
++
++    segment_predictions = pd.concat(
++        [collect(model, val_loader, device_name), collect(model, test_loader, device_name)],
++        ignore_index=True,
++        sort=False,
++    )
++    participant_predictions = aggregate_sota_predictions(segment_predictions, level="participant")
++    metrics = evaluate_sota_prediction_table(participant_predictions)
++    history = pd.DataFrame(history_rows)
++    return SOTASSLResult(metrics=metrics, predictions=participant_predictions, history=history)
++
++
++def train_sota_ssl_branch(
++    segment_index: pd.DataFrame,
++    modality: str,
++    backend: str = "hf_ssl",
++    model_name: str = "microsoft/wavlm-base-plus",
++    target_samples: int = 48000,
++    **kwargs,
++) -> SOTASSLResult:
++    if backend == "debug_acoustic":
++        return train_debug_acoustic_branch(
++            segment_index,
++            modality=modality,
++            target_samples=target_samples,
++            model_name="debug_acoustic",
++        )
++    if backend == "hf_ssl":
++        return train_hf_ssl_branch(
++            segment_index,
++            modality=modality,
++            model_name=model_name,
++            target_samples=target_samples,
++            **kwargs,
++        )
++    raise ValueError(f"Unknown SOTA SSL backend: {backend}")
+diff --git a/covid_audio_btp/tests/test_manifest_script.py b/covid_audio_btp/tests/test_manifest_script.py
+index 3c1a070..988e705 100644
+--- a/covid_audio_btp/tests/test_manifest_script.py
++++ b/covid_audio_btp/tests/test_manifest_script.py
+@@ -21,6 +21,9 @@ def test_default_artifact_paths_discovers_representation_outputs(tmp_path) -> No
+     tables_dir.mkdir(parents=True)
+     (metrics_dir / "external_model_grid_beats_metrics.csv").write_text("auroc\\n0.5\\n")
+     (metrics_dir / "coughvid_internal_panns_cnn14_bootstrap_ci.csv").write_text("metric\\nauroc\\n")
++    (metrics_dir / "sota_ssl_metrics_hf_ssl_microsoft_wavlm-base-plus_cough.csv").write_text("auroc\\n0.9\\n")
++    (metrics_dir / "sota_ssl_predictions_hf_ssl_microsoft_wavlm-base-plus_cough.csv").write_text("probability\\n0.8\\n")
++    (metrics_dir / "sota_fusion_metrics.csv").write_text("auroc\\n0.93\\n")
+     (tables_dir / "feature_shift_beats_cough.csv").write_text("feature\\nsome_dim\\n")
+ 
+     artifacts = module.default_artifact_paths(project_root=tmp_path)
+@@ -79,4 +82,7 @@ def test_default_artifact_paths_discovers_representation_outputs(tmp_path) -> No
+     assert tmp_path / "reports" / "final" / "TEMPORAL_SHORTCUT_THEORY.md" in artifacts
+     assert metrics_dir / "external_model_grid_beats_metrics.csv" in artifacts
+     assert metrics_dir / "coughvid_internal_panns_cnn14_bootstrap_ci.csv" in artifacts
++    assert metrics_dir / "sota_ssl_metrics_hf_ssl_microsoft_wavlm-base-plus_cough.csv" in artifacts
++    assert metrics_dir / "sota_ssl_predictions_hf_ssl_microsoft_wavlm-base-plus_cough.csv" in artifacts
++    assert metrics_dir / "sota_fusion_metrics.csv" in artifacts
+     assert tables_dir / "feature_shift_beats_cough.csv" in artifacts
+diff --git a/covid_audio_btp/tests/test_paper_tables_script.py b/covid_audio_btp/tests/test_paper_tables_script.py
+index e192805..f99205d 100644
+--- a/covid_audio_btp/tests/test_paper_tables_script.py
++++ b/covid_audio_btp/tests/test_paper_tables_script.py
+@@ -20,6 +20,8 @@ def test_default_metric_paths_discovers_representation_outputs(tmp_path) -> None
+     (metrics_dir / "external_model_grid_opensmile_egemaps_metrics.csv").write_text("auroc\\n0.5\\n")
+     (metrics_dir / "coughvid_internal_beats_bootstrap_ci.csv").write_text("metric\\nauroc\\n")
+     (metrics_dir / "coughvid_internal_beats_metrics.csv").write_text("auroc\\n0.7\\n")
++    (metrics_dir / "sota_ssl_metrics_hf_ssl_microsoft_wavlm-base-plus_cough.csv").write_text("auroc\\n0.9\\n")
++    (metrics_dir / "sota_fusion_metrics.csv").write_text("auroc\\n0.93\\n")
+ 
+     metric_paths = module.default_metric_paths(metrics_dir=metrics_dir)
+     ci_paths = module.default_ci_paths(metrics_dir=metrics_dir)
+@@ -34,6 +36,8 @@ def test_default_metric_paths_discovers_representation_outputs(tmp_path) -> None
+     assert Path("reports/tables/temporal_matched_cohort_metrics.csv") in metric_paths
+     assert metrics_dir / "external_model_grid_opensmile_egemaps_metrics.csv" in metric_paths
+     assert metrics_dir / "coughvid_internal_beats_metrics.csv" in metric_paths
++    assert metrics_dir / "sota_ssl_metrics_hf_ssl_microsoft_wavlm-base-plus_cough.csv" in metric_paths
++    assert metrics_dir / "sota_fusion_metrics.csv" in metric_paths
+     assert Path("data/outputs/metrics/temporal_holdout_bootstrap_ci.csv") in ci_paths
+     assert metrics_dir / "coughvid_internal_beats_bootstrap_ci.csv" in ci_paths
+ 
+diff --git a/covid_audio_btp/tests/test_sota_cli.py b/covid_audio_btp/tests/test_sota_cli.py
+new file mode 100644
+index 0000000..01cbd8a
+--- /dev/null
++++ b/covid_audio_btp/tests/test_sota_cli.py
+@@ -0,0 +1,175 @@
++from __future__ import annotations
++
++import importlib.util
++import sys
++from pathlib import Path
++
++import numpy as np
++import pandas as pd
++import soundfile as sf
++
++
++def _load_script(path: Path, name: str):
++    spec = importlib.util.spec_from_file_location(name, path)
++    assert spec is not None and spec.loader is not None
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    return module
++
++
++def _metadata_with_audio(tmp_path: Path) -> Path:
++    rows: list[dict[str, object]] = []
++    sr = 16000
++    t = np.linspace(0, 1.2, int(sr * 1.2), endpoint=False)
++    y = (0.1 * np.sin(2 * np.pi * 200 * t)).astype(np.float32)
++    for idx, split in enumerate(["train", "validation", "test"]):
++        path = tmp_path / f"audio_{idx}.wav"
++        sf.write(path, y, sr)
++        rows.append(
++            {
++                "recording_id": f"r{idx}",
++                "participant_id": f"p{idx}",
++                "dataset": "coswara",
++                "modality": "cough",
++                "submodality": "cough",
++                "label_binary": "positive" if idx != 1 else "negative",
++                "split": split,
++                "quality_flag": "ok",
++                "audio_path": str(path),
++            }
++        )
++    metadata = tmp_path / "metadata.csv"
++    pd.DataFrame(rows).to_csv(metadata, index=False)
++    return metadata
++
++
++def test_build_sota_segment_index_cli_writes_index_and_audit(tmp_path: Path, monkeypatch) -> None:
++    metadata = _metadata_with_audio(tmp_path)
++    index_output = tmp_path / "segments.csv"
++    audit_output = tmp_path / "audit.csv"
++    script = Path(__file__).parents[1] / "scripts" / "50_build_sota_segment_index.py"
++    module = _load_script(script, "build_sota_segment_index_cli")
++
++    monkeypatch.setattr(
++        sys,
++        "argv",
++        [
++            "50_build_sota_segment_index.py",
++            "--metadata",
++            str(metadata),
++            "--output",
++            str(index_output),
++            "--audit-output",
++            str(audit_output),
++            "--modalities",
++            "cough",
++            "--window-sec",
++            "1.0",
++            "--augment-train-copies",
++            "1",
++        ],
++    )
++    module.main()
++
++    index = pd.read_csv(index_output)
++    audit = pd.read_csv(audit_output)
++    assert not index.empty
++    assert not audit.empty
++    assert index[index["is_augmented"].astype(bool)]["split"].eq("train").all()
++
++
++def test_fuse_sota_predictions_cli_writes_metrics_and_predictions(tmp_path: Path, monkeypatch) -> None:
++    from covid_audio_btp.sota_predictions import aggregate_sota_predictions, evaluate_sota_prediction_table
++
++    rows: list[dict[str, object]] = []
++    for split in ("validation", "test"):
++        for idx in range(10):
++            label = "positive" if idx % 2 else "negative"
++            probability = 0.75 if label == "positive" else 0.25
++            for model_name in ("ssl", "spec"):
++                rows.append(
++                    {
++                        "recording_id": f"{split}_{idx}",
++                        "participant_id": f"{split}_p{idx}",
++                        "dataset": "coswara",
++                        "modality": "cough",
++                        "submodality": "cough",
++                        "label_binary": label,
++                        "split": split,
++                        "model_name": model_name,
++                        "analysis_family": "sota_ssl_branch",
++                        "evaluation_protocol": "sota_internal_protocol",
++                        "probability": probability,
++                    }
++                )
++    predictions = aggregate_sota_predictions(pd.DataFrame(rows), level="participant")
++    metrics = evaluate_sota_prediction_table(predictions)
++    predictions_path = tmp_path / "predictions.csv"
++    metrics_path = tmp_path / "metrics.csv"
++    output_metrics = tmp_path / "fused_metrics.csv"
++    output_predictions = tmp_path / "fused_predictions.csv"
++    predictions.to_csv(predictions_path, index=False)
++    metrics.to_csv(metrics_path, index=False)
++
++    script = Path(__file__).parents[1] / "scripts" / "52_fuse_sota_predictions.py"
++    module = _load_script(script, "fuse_sota_predictions_cli")
++    monkeypatch.setattr(
++        sys,
++        "argv",
++        [
++            "52_fuse_sota_predictions.py",
++            "--metrics",
++            str(metrics_path),
++            "--predictions",
++            str(predictions_path),
++            "--metrics-output",
++            str(output_metrics),
++            "--predictions-output",
++            str(output_predictions),
++            "--top-k",
++            "2",
++        ],
++    )
++    module.main()
++
++    assert pd.read_csv(output_metrics)["analysis_family"].eq("sota_prediction_fusion").all()
++    assert not pd.read_csv(output_predictions).empty
++
++
++def test_train_sota_ssl_branch_cli_debug_backend_writes_branch_outputs(tmp_path: Path, monkeypatch) -> None:
++    from covid_audio_btp.sota_segments import build_sota_segment_index
++
++    metadata = pd.read_csv(_metadata_with_audio(tmp_path))
++    segment_index = build_sota_segment_index(metadata, modalities=["cough"], window_sec=1.0)
++    segment_index_path = tmp_path / "segments.csv"
++    metrics_output = tmp_path / "ssl_metrics.csv"
++    predictions_output = tmp_path / "ssl_predictions.csv"
++    history_output = tmp_path / "ssl_history.csv"
++    segment_index.to_csv(segment_index_path, index=False)
++
++    script = Path(__file__).parents[1] / "scripts" / "51_train_sota_ssl_branch.py"
++    module = _load_script(script, "train_sota_ssl_branch_cli")
++    monkeypatch.setattr(
++        sys,
++        "argv",
++        [
++            "51_train_sota_ssl_branch.py",
++            "--segment-index",
++            str(segment_index_path),
++            "--modality",
++            "cough",
++            "--backend",
++            "debug_acoustic",
++            "--metrics-output",
++            str(metrics_output),
++            "--predictions-output",
++            str(predictions_output),
++            "--history-output",
++            str(history_output),
++        ],
++    )
++    module.main()
++
++    assert not pd.read_csv(metrics_output).empty
++    assert not pd.read_csv(predictions_output).empty
++    assert pd.read_csv(history_output)["backend"].eq("debug_acoustic").all()
+diff --git a/covid_audio_btp/tests/test_sota_predictions.py b/covid_audio_btp/tests/test_sota_predictions.py
+new file mode 100644
+index 0000000..cb69ed7
+--- /dev/null
++++ b/covid_audio_btp/tests/test_sota_predictions.py
+@@ -0,0 +1,74 @@
++from __future__ import annotations
++
++import numpy as np
++import pandas as pd
++
++
++def _segment_predictions() -> pd.DataFrame:
++    rows: list[dict[str, object]] = []
++    for split in ("validation", "test"):
++        for idx in range(12):
++            label = "positive" if idx % 2 else "negative"
++            base = 0.72 if label == "positive" else 0.28
++            participant_id = f"{split}_p{idx:02d}"
++            for model_name, offset in (("ssl_wavlm", 0.05), ("spectrogram_convnext", -0.02)):
++                for seg in range(2):
++                    rows.append(
++                        {
++                            "segment_id": f"{participant_id}_{model_name}_{seg}",
++                            "recording_id": f"{participant_id}_rec",
++                            "participant_id": participant_id,
++                            "dataset": "coswara",
++                            "modality": "cough",
++                            "submodality": "cough",
++                            "label_binary": label,
++                            "split": split,
++                            "model_name": model_name,
++                            "analysis_family": "sota_ssl_branch" if model_name == "ssl_wavlm" else "sota_spectrogram_branch",
++                            "evaluation_protocol": "sota_internal_protocol",
++                            "probability": float(np.clip(base + offset + seg * 0.01, 0.001, 0.999)),
++                        }
++                    )
++    return pd.DataFrame(rows)
++
++
++def test_aggregate_sota_predictions_to_participants_and_evaluate_with_validation_threshold() -> None:
++    from covid_audio_btp.sota_predictions import (
++        aggregate_sota_predictions,
++        evaluate_sota_prediction_table,
++    )
++
++    segment = _segment_predictions()
++    participant = aggregate_sota_predictions(segment, level="participant")
++    metrics = evaluate_sota_prediction_table(participant)
++
++    assert not participant.empty
++    assert participant["participant_id"].nunique() == 24
++    assert {"validation", "test"}.issubset(set(metrics["metric_split"]))
++    assert metrics["threshold_source"].eq("validation_balanced_accuracy").all()
++    assert metrics["auroc"].notna().all()
++
++
++def test_fuse_sota_prediction_sources_reports_validation_and_test_metrics() -> None:
++    from covid_audio_btp.sota_predictions import (
++        aggregate_sota_predictions,
++        evaluate_sota_prediction_table,
++        fuse_sota_prediction_sources,
++    )
++
++    participant = aggregate_sota_predictions(_segment_predictions(), level="participant")
++    metrics = evaluate_sota_prediction_table(participant)
++    fused_metrics, fused_predictions = fuse_sota_prediction_sources(
++        metrics,
++        participant,
++        top_k=2,
++        fusion_name="unit_test_stack",
++    )
++
++    assert not fused_metrics.empty
++    assert not fused_predictions.empty
++    assert set(fused_metrics["metric_split"]) == {"validation", "test"}
++    assert fused_metrics["analysis_family"].eq("sota_prediction_fusion").all()
++    assert fused_predictions["fusion_method"].isin(
++        ["top_source_uniform_mean", "top_source_validation_weighted_auroc", "top_source_stacked_logistic_validation"]
++    ).all()
+diff --git a/covid_audio_btp/tests/test_sota_segments.py b/covid_audio_btp/tests/test_sota_segments.py
+new file mode 100644
+index 0000000..62eca4a
+--- /dev/null
++++ b/covid_audio_btp/tests/test_sota_segments.py
+@@ -0,0 +1,90 @@
++from __future__ import annotations
++
++from pathlib import Path
++
++import numpy as np
++import pandas as pd
++import soundfile as sf
++
++
++def _write_tone(path: Path, sample_rate: int = 16000, seconds: float = 2.2, amp: float = 0.2) -> None:
++    t = np.linspace(0, seconds, int(sample_rate * seconds), endpoint=False)
++    y = np.zeros_like(t, dtype=np.float32)
++    start = int(0.25 * sample_rate)
++    end = int(1.75 * sample_rate)
++    y[start:end] = amp * np.sin(2 * np.pi * 220 * t[start:end])
++    path.parent.mkdir(parents=True, exist_ok=True)
++    sf.write(path, y, sample_rate)
++
++
++def _metadata(tmp_path: Path) -> pd.DataFrame:
++    rows: list[dict[str, object]] = []
++    splits = ["train", "validation", "test"]
++    labels = ["positive", "negative", "positive"]
++    for idx, (split, label) in enumerate(zip(splits, labels)):
++        for modality in ("cough", "breath"):
++            audio_path = tmp_path / f"p{idx}_{modality}.wav"
++            _write_tone(audio_path, amp=0.15 + idx * 0.03)
++            rows.append(
++                {
++                    "recording_id": f"rec_{idx}_{modality}",
++                    "participant_id": f"p{idx}",
++                    "dataset": "coswara",
++                    "modality": modality,
++                    "submodality": modality,
++                    "label_binary": label,
++                    "split": split,
++                    "quality_flag": "ok",
++                    "audio_path": str(audio_path),
++                }
++            )
++    return pd.DataFrame(rows)
++
++
++def test_build_sota_segment_index_is_split_safe_and_train_augmented_only(tmp_path: Path) -> None:
++    from covid_audio_btp.sota_segments import (
++        build_sota_segment_index,
++        validate_segment_index_no_leakage,
++    )
++
++    index = build_sota_segment_index(
++        _metadata(tmp_path),
++        modalities=["cough", "breath"],
++        quality_mode="quality_ok_only",
++        window_sec=1.0,
++        overlap=0.5,
++        max_segments_per_recording=3,
++        augment_train_copies=2,
++        random_state=123,
++    )
++
++    assert not index.empty
++    assert {"segment_id", "source_recording_id", "segment_start_sample", "segment_end_sample"}.issubset(index.columns)
++    assert index["segment_id"].is_unique
++    assert index["segment_end_sample"].gt(index["segment_start_sample"]).all()
++    assert set(index["is_augmented"].dropna().unique()).issubset({False, True})
++    assert index[index["is_augmented"].eq(True)]["split"].eq("train").all()
++    assert not index[index["split"].isin(["validation", "test"])]["is_augmented"].any()
++
++    audit = validate_segment_index_no_leakage(index)
++    assert audit["severity"].eq("error").sum() == 0
++
++
++def test_load_sota_segment_waveform_returns_fixed_length_normalized_audio(tmp_path: Path) -> None:
++    from covid_audio_btp.sota_segments import build_sota_segment_index, load_sota_segment_waveform
++
++    index = build_sota_segment_index(
++        _metadata(tmp_path),
++        modalities=["cough"],
++        window_sec=1.0,
++        overlap=0.5,
++        max_segments_per_recording=1,
++    )
++    row = index.iloc[0]
++
++    y = load_sota_segment_waveform(row, target_samples=16000, rms_dbfs=-23.0)
++
++    assert y.shape == (16000,)
++    assert np.isfinite(y).all()
++    assert float(np.max(np.abs(y))) <= 1.0
++    assert float(np.sqrt(np.mean(np.square(y)))) > 0.0

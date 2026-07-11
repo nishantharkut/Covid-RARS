@@ -7,9 +7,9 @@ This file records the advanced ideas from the two uploaded PDFs and the later Ge
 Reviewed source files:
 
 ```text
-.covid_audio_btp_private/gemini_plan_review/adversarial_debiasing_respiratory_diagnostics.pdf
-.covid_audio_btp_private/gemini_plan_review/methodological_audit_debiasing_framework.pdf
-.covid_audio_btp_private/gemini_conversation_review/gemini_complete_conversation
+archive/review_materials/gemini_plan_review_root_duplicate/adversarial_debiasing_respiratory_diagnostics.pdf
+archive/review_materials/gemini_plan_review_root_duplicate/methodological_audit_debiasing_framework.pdf
+archive/review_materials/gemini_conversation_review_root_duplicate/gemini_complete_conversation
 ```
 
 ## Final Decision

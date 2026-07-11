@@ -1,0 +1,22 @@
+analysis,covariate,level,comparison_type,train_value,test_value,proportion_difference,abs_proportion_difference,n_matched_pairs,skipped,standardized_mean_difference,abs_standardized_mean_difference
+matched_cohort_quality,quality_flag,corrupt,proportion_difference_test_minus_train,0.01179245283018868,0.014150943396226415,0.0023584905660377353,0.0023584905660377353,424,False,,
+matched_cohort_quality,quality_flag,mostly_silence,proportion_difference_test_minus_train,0.01179245283018868,0.04009433962264151,0.028301886792452827,0.028301886792452827,424,False,,
+matched_cohort_quality,quality_flag,ok,proportion_difference_test_minus_train,0.9599056603773585,0.9245283018867925,-0.035377358490566,0.035377358490566,424,False,,
+matched_cohort_quality,quality_flag,short,proportion_difference_test_minus_train,0.01650943396226415,0.02122641509433962,0.004716981132075471,0.004716981132075471,424,False,,
+matched_cohort_quality,age,,numeric_smd_test_minus_train,35.966981132075475,37.573113207547166,,,424,False,0.10325884361161394,0.10325884361161394
+matched_cohort_quality,gender,female,proportion_difference_test_minus_train,0.3867924528301887,0.4268867924528302,0.04009433962264147,0.04009433962264147,424,False,,
+matched_cohort_quality,gender,male,proportion_difference_test_minus_train,0.6132075471698113,0.5707547169811321,-0.04245283018867918,0.04245283018867918,424,False,,
+matched_cohort_quality,gender,other,proportion_difference_test_minus_train,0.0,0.0023584905660377358,0.0023584905660377358,0.0023584905660377358,424,False,,
+matched_cohort_quality,country,Australia,proportion_difference_test_minus_train,0.0023584905660377358,0.0023584905660377358,0.0,0.0,424,False,,
+matched_cohort_quality,country,Bahrain,proportion_difference_test_minus_train,0.0023584905660377358,0.007075471698113208,0.004716981132075472,0.004716981132075472,424,False,,
+matched_cohort_quality,country,Bangladesh,proportion_difference_test_minus_train,0.0023584905660377358,0.0023584905660377358,0.0,0.0,424,False,,
+matched_cohort_quality,country,Brazil,proportion_difference_test_minus_train,0.0,0.0023584905660377358,0.0023584905660377358,0.0023584905660377358,424,False,,
+matched_cohort_quality,country,China,proportion_difference_test_minus_train,0.0047169811320754715,0.0047169811320754715,0.0,0.0,424,False,,
+matched_cohort_quality,country,France,proportion_difference_test_minus_train,0.0023584905660377358,0.0023584905660377358,0.0,0.0,424,False,,
+matched_cohort_quality,country,India,proportion_difference_test_minus_train,0.964622641509434,0.9504716981132075,-0.014150943396226467,0.014150943396226467,424,False,,
+matched_cohort_quality,country,Pakistan,proportion_difference_test_minus_train,0.0,0.0023584905660377358,0.0023584905660377358,0.0023584905660377358,424,False,,
+matched_cohort_quality,country,Portugal,proportion_difference_test_minus_train,0.0,0.0023584905660377358,0.0023584905660377358,0.0023584905660377358,424,False,,
+matched_cohort_quality,country,Thailand,proportion_difference_test_minus_train,0.0,0.0023584905660377358,0.0023584905660377358,0.0023584905660377358,424,False,,
+matched_cohort_quality,country,United Kingdom,proportion_difference_test_minus_train,0.0023584905660377358,0.0023584905660377358,0.0,0.0,424,False,,
+matched_cohort_quality,country,United States,proportion_difference_test_minus_train,0.018867924528301886,0.018867924528301886,0.0,0.0,424,False,,
+matched_cohort_quality,duration_sec,,numeric_smd_test_minus_train,9.623442069575471,9.431528940644654,,,424,False,-0.06190286240588929,0.06190286240588929
