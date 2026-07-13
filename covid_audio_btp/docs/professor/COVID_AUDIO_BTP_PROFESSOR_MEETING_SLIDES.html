@@ -1,0 +1,356 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>COVID Audio BTP Research Presentation</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #536172;
+      --line: #d9dee7;
+      --soft: #f4f6f9;
+      --green: #2f7d5f;
+      --blue: #2c5aa0;
+      --red: #b84a4a;
+      --amber: #b7791f;
+      --panel: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #e9edf3;
+      color: var(--ink);
+      font-family: "Segoe UI", Arial, sans-serif;
+      line-height: 1.36;
+    }
+    .deck {
+      display: grid;
+      gap: 28px;
+      padding: 28px;
+    }
+    .slide {
+      width: min(1280px, 100%);
+      min-height: 720px;
+      margin: 0 auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 48px rgba(23, 32, 42, 0.16);
+      padding: 42px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .slide::after {
+      content: attr(data-slide);
+      position: absolute;
+      right: 28px;
+      bottom: 18px;
+      color: #8a94a6;
+      font-size: 13px;
+    }
+    .kicker {
+      color: var(--blue);
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+    h1, h2, h3 { margin: 0; line-height: 1.08; }
+    h1 {
+      font-size: 46px;
+      max-width: 980px;
+      letter-spacing: -0.01em;
+    }
+    h2 { font-size: 34px; margin-bottom: 18px; }
+    h3 { font-size: 20px; margin-bottom: 8px; }
+    p { margin: 0 0 12px; }
+    .subtitle {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 22px;
+      max-width: 920px;
+    }
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    .grid3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      background: #fff;
+    }
+    .soft { background: var(--soft); }
+    .big-number {
+      display: block;
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--blue);
+      margin: 4px 0;
+    }
+    .bad { color: var(--red); }
+    .good { color: var(--green); }
+    .warn { color: var(--amber); }
+    ul {
+      margin: 10px 0 0 20px;
+      padding: 0;
+    }
+    li { margin: 7px 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      color: var(--muted);
+      font-weight: 700;
+      background: #f7f8fb;
+    }
+    .metric-table td:nth-child(n+2), .metric-table th:nth-child(n+2) { text-align: right; }
+    .chart {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      padding: 6px;
+    }
+    .chart img {
+      width: 100%;
+      display: block;
+      border-radius: 5px;
+    }
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin: 18px 0;
+    }
+    .flow div {
+      background: #f4f6f9;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 76px;
+      font-size: 14px;
+      position: relative;
+    }
+    .flow div:not(:last-child)::after {
+      content: ">";
+      position: absolute;
+      right: -11px;
+      top: 28px;
+      color: var(--muted);
+      font-weight: 800;
+      z-index: 2;
+    }
+    .callout {
+      border-left: 5px solid var(--blue);
+      background: #eef3fb;
+      padding: 16px 18px;
+      border-radius: 6px;
+      font-size: 18px;
+      margin-top: 18px;
+    }
+    .script {
+      background: #17202a;
+      color: #f7f8fb;
+      border-radius: 8px;
+      padding: 16px 18px;
+      font-size: 16px;
+    }
+    .small { font-size: 13px; color: var(--muted); }
+    .notes {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    @media print {
+      body { background: white; }
+      .deck { padding: 0; gap: 0; }
+      .slide {
+        width: 100vw;
+        min-height: 100vh;
+        box-shadow: none;
+        border: 0;
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+<body>
+<main class="deck">
+
+  <section class="slide" data-slide="1 / 6">
+    <div class="kicker">Final paper direction</div>
+    <h1>Beyond Internal Accuracy: Temporal Drift, Shortcut Learning, and External Validation of Multimodal COVID-19 Respiratory-Audio Models</h1>
+    <p class="subtitle">A strong Coswara model was built first; stricter temporal and external validation then tested whether high internal COVID-audio metrics support real screening claims.</p>
+    <div class="grid3" style="margin-top:34px">
+      <div class="card">
+        <h3>Strong internal pipeline</h3>
+        <span class="big-number good">0.897 AUROC</span>
+        <p>Best internal multimodal Coswara result using cough + speech fusion.</p>
+      </div>
+      <div class="card">
+        <h3>Strict validation exposes drift</h3>
+        <span class="big-number warn">0.698 AUROC</span>
+        <p>Early-to-late temporal validation, closer to training on past data and testing future data.</p>
+      </div>
+      <div class="card">
+        <h3>External transfer collapses</h3>
+        <span class="big-number bad">0.523-0.548 AUROC</span>
+        <p>COUGHVID cough transfer remains weak across measured audio summaries, WavLM, and CNN-BiGRU.</p>
+      </div>
+    </div>
+    <div class="callout">
+      Say this first: <strong>"The model is not weak internally. The finding is that internal respiratory-audio accuracy does not survive stricter temporal and external validation."</strong>
+    </div>
+    <div class="notes">Key message: internal performance is strong, but validation rigor determines whether the result is deployable.</div>
+  </section>
+
+  <section class="slide" data-slide="2 / 6">
+    <div class="kicker">What we implemented</div>
+    <h2>Complete pipeline: audio measurements -> feature selection -> multimodal fusion -> strict validation</h2>
+    <div class="flow">
+      <div><strong>Coswara audio</strong><br>cough, breath, speech + participant metadata</div>
+      <div><strong>Audio measurements</strong><br>duration, loudness, MFCCs, mel bands, frequency shape, noisiness</div>
+      <div><strong>OpenSMILE</strong><br>ComParE 2016 + IS10 standard audio descriptor sets</div>
+      <div><strong>Top-800 selection</strong><br>from ~10,147 columns using train-only LightGBM ranking</div>
+      <div><strong>Models + fusion</strong><br>LightGBM, CatBoost, XGBoost, SVC, WavLM, CNN-BiGRU</div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>Features in easy words</h3>
+        <ul>
+          <li>How long the sound is and how loud it is.</li>
+          <li>Where the frequency energy lies: low, middle, high, sharp, noisy, or flat.</li>
+          <li>MFCC and mel-band summaries: compact fingerprints of sound texture.</li>
+          <li>How sound properties change over time: delta and delta-delta features.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Weights in easy words</h3>
+        <ul>
+          <li><strong>Class weights:</strong> prevent the smaller positive class from being ignored.</li>
+          <li><strong>Fusion weights:</strong> validation-based trust in stronger modalities/models.</li>
+          <li><strong>WavLM weights:</strong> pretrained transformer weights from <code>microsoft/wavlm-base-plus</code>.</li>
+          <li><strong>IPW weights:</strong> statistical balancing for metadata/confounding checks.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="notes">If asked "how multimodal?": each modality produced participant-level probabilities, then cough/breath/speech predictions were averaged, validation-weighted, or stacked using validation data.</div>
+  </section>
+
+  <section class="slide" data-slide="3 / 6">
+    <div class="kicker">Main results</div>
+    <h2>Validation ladder: performance drops as the test becomes more realistic</h2>
+    <div class="grid2">
+      <div class="chart"><img src="slides_assets/validation_ladder.png" alt="Validation ladder AUROC chart"></div>
+      <div>
+        <table class="metric-table">
+          <thead><tr><th>Evaluation</th><th>AUROC</th><th>AUPRC</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>Existing participant split</td><td>0.897</td><td>0.863</td><td>Strong internal performance</td></tr>
+            <tr><td>Time-aware participant split</td><td>0.849</td><td>0.783</td><td>Still strong, but lower</td></tr>
+            <tr><td>Early-to-late temporal split</td><td>0.698</td><td>0.896</td><td>Calendar drift damages reliability</td></tr>
+            <tr><td>Multi-seed temporal mean</td><td>0.691</td><td>-</td><td>Drop repeats across seeds</td></tr>
+          </tbody>
+        </table>
+        <div class="callout">
+          Time-stratified means the split respects collection time. Early-to-late means train on earlier recordings and test on later recordings, like real deployment.
+        </div>
+      </div>
+    </div>
+    <div class="notes">This ladder separates internal benchmark performance from time-aware and future-facing evaluation.</div>
+  </section>
+
+  <section class="slide" data-slide="4 / 6">
+    <div class="kicker">External validation and architecture check</div>
+    <h2>COUGHVID transfer fails even when the comparison is cough-to-cough</h2>
+    <div class="grid2">
+      <div class="chart"><img src="slides_assets/external_transfer_family.png" alt="External transfer model family chart"></div>
+      <div>
+        <table class="metric-table">
+          <thead><tr><th>Model family</th><th>Internal</th><th>COUGHVID</th><th>Drop</th></tr></thead>
+          <tbody>
+            <tr><td>LightGBM measured audio</td><td>0.853</td><td>0.543</td><td>0.310</td></tr>
+            <tr><td>SVC measured audio</td><td>0.868</td><td>0.523</td><td>0.345</td></tr>
+            <tr><td>WavLM transformer</td><td>0.812</td><td>0.484</td><td>0.328</td></tr>
+            <tr><td>CNN-BiGRU spectrogram</td><td>0.737</td><td>0.548</td><td>0.189</td></tr>
+          </tbody>
+        </table>
+        <div class="callout">
+          COUGHVID is cough-only, so we do not claim full multimodal external validation. We claim fair cough-to-cough external stress testing.
+        </div>
+      </div>
+    </div>
+    <div class="notes">If asked "did you use transformer?": Yes. WavLM is a transformer. It worked internally but failed externally, so model complexity alone did not solve transfer.</div>
+  </section>
+
+  <section class="slide" data-slide="5 / 6">
+    <div class="kicker">Why high internal scores are unsafe</div>
+    <h2>Shortcut and shift evidence explains the performance collapse</h2>
+    <div class="grid3">
+      <div class="chart"><img src="slides_assets/metadata_shortcut_shuffle.png" alt="Metadata shortcut and shuffled label chart"></div>
+      <div class="chart"><img src="slides_assets/stability_support.png" alt="Feature stability and support overlap chart"></div>
+      <div class="chart"><img src="slides_assets/incremental_audio_metadata.png" alt="Incremental audio over metadata chart"></div>
+    </div>
+    <div class="grid3" style="margin-top:16px">
+      <div class="card soft">
+        <h3>Metadata shortcut</h3>
+        <p>Full safe metadata predicts labels at <strong>0.964 AUROC</strong>; symptoms-only reaches <strong>0.932</strong>. Shuffling labels drops to chance.</p>
+      </div>
+      <div class="card soft">
+        <h3>Drift mechanism</h3>
+        <p>Early vs late top-800 audio measurements have only <strong>0.074</strong> Jaccard overlap; <strong>25.2%</strong> of COUGHVID is probably outside Coswara support.</p>
+      </div>
+      <div class="card soft">
+        <h3>Clinical usefulness</h3>
+        <p>At sensitivity >= 0.90, COUGHVID precision is only <strong>0.035-0.037</strong>. Audio+symptoms gain is exploratory: p = <strong>0.104</strong>.</p>
+      </div>
+    </div>
+    <div class="notes">Explain "shuffle-label sanity" simply: if labels are randomly mixed and the model still scores high, there is a bug. Here it drops to 0.5, so the shortcut is real dataset structure.</div>
+  </section>
+
+  <section class="slide" data-slide="6 / 6">
+    <div class="kicker">Base paper comparison and novelty</div>
+    <h2>Base paper: Coppock et al., Nature Machine Intelligence 2024</h2>
+    <div class="grid2">
+      <div class="chart"><img src="slides_assets/base_paper_comparison.png" alt="Base paper comparison chart"></div>
+      <div>
+        <table>
+          <thead><tr><th>Paper / result</th><th>What to say</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Coppock et al.</strong><br>Audio AUC 0.846 -> matched 0.619</td><td>Conceptual base paper: audio looks strong before confounder control, then weakens.</td></tr>
+            <tr><td><strong>Our work</strong><br>0.897 internal -> 0.698 temporal -> 0.543 external best cough</td><td>Public benchmark extension on Coswara/COUGHVID with temporal and external validation.</td></tr>
+            <tr><td><strong>ESWA DNDT/DNDF</strong><br>High reported AUCs under its protocol</td><td>SOTA comparator, not base paper. Compare carefully because protocols differ.</td></tr>
+            <tr><td><strong>HST / spectrogram transformer</strong></td><td>Architecture comparator. We tested WavLM transformer and CNN-BiGRU; external transfer remained weak.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="script" style="margin-top:16px">Key takeaway: the study built a strong internal model using 10,147 audio measurements, top-800 train-only feature selection, multiple model families, multimodal fusion, WavLM transformer, and CNN-BiGRU. The internal score reached 0.897 AUROC, but temporal and external validation show that internal accuracy alone is insufficient for screening claims.</div>
+    <div class="notes">Final novelty sentence: public-benchmark reliability audit extending Coppock's confounding question to Coswara/COUGHVID with multimodal fusion, temporal drift, external transfer, WavLM/CNN checks, feature stability, support overlap, calibration, and decision curves.</div>
+  </section>
+
+</main>
+</body>
+</html>
+
