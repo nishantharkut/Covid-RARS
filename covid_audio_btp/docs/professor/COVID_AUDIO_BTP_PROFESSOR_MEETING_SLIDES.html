@@ -200,7 +200,7 @@
 
   <section class="slide" data-slide="1 / 6">
     <div class="kicker">Final paper direction</div>
-    <h1>Beyond Internal Accuracy: Temporal Drift, Shortcut Learning, and External Validation of Multimodal COVID-19 Respiratory-Audio Models</h1>
+    <h1>Reliability of COVID-19 Respiratory-Audio Screening Under Temporal and External Dataset Shift</h1>
     <p class="subtitle">A strong Coswara model was built first; stricter temporal and external validation then tested whether high internal COVID-audio metrics support real screening claims.</p>
     <div class="grid3" style="margin-top:34px">
       <div class="card">
@@ -233,7 +233,7 @@
       <div><strong>Audio measurements</strong><br>duration, loudness, MFCCs, mel bands, frequency shape, noisiness</div>
       <div><strong>OpenSMILE</strong><br>ComParE 2016 + IS10 standard audio descriptor sets</div>
       <div><strong>Top-800 selection</strong><br>from ~10,147 columns using train-only LightGBM ranking</div>
-      <div><strong>Models + fusion</strong><br>LightGBM, CatBoost, XGBoost, SVC, WavLM, CNN-BiGRU</div>
+      <div><strong>Models + fusion</strong><br>LightGBM, CatBoost, XGBoost, SVC, WavLM, CNN-BiGRU; uniform, weighted, and stacked fusion</div>
     </div>
     <div class="grid2">
       <div class="card">
@@ -246,16 +246,16 @@
         </ul>
       </div>
       <div class="card">
-        <h3>Weights in easy words</h3>
+        <h3>Fusion weights actually used</h3>
         <ul>
-          <li><strong>Class weights:</strong> prevent the smaller positive class from being ignored.</li>
-          <li><strong>Fusion weights:</strong> validation-based trust in stronger modalities/models.</li>
-          <li><strong>WavLM weights:</strong> pretrained transformer weights from <code>microsoft/wavlm-base-plus</code>.</li>
-          <li><strong>IPW weights:</strong> statistical balancing for metadata/confounding checks.</li>
+          <li><strong>Uniform mean:</strong> each available modality/model probability gets equal weight.</li>
+          <li><strong>Validation-weighted mean:</strong> models with stronger validation AUROC/AUPRC get higher weight.</li>
+          <li><strong>Stacked logistic fusion:</strong> a small logistic regression learns weights from validation predictions.</li>
+          <li><strong>Selected combinations:</strong> cough+speech was best internally; cough+breath+speech was also tested.</li>
         </ul>
       </div>
     </div>
-    <div class="notes">If asked "how multimodal?": each modality produced participant-level probabilities, then cough/breath/speech predictions were averaged, validation-weighted, or stacked using validation data.</div>
+    <div class="notes">Multimodal construction: each cough, breath, or speech branch produced a participant-level probability. Fusion combined those probabilities using equal averaging, validation-score weighting, or a logistic meta-model trained on validation predictions.</div>
   </section>
 
   <section class="slide" data-slide="3 / 6">
