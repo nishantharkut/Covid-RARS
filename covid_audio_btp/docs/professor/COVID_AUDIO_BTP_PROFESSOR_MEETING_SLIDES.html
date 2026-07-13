@@ -175,13 +175,6 @@
       font-size: 16px;
     }
     .small { font-size: 13px; color: var(--muted); }
-    .notes {
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px dashed var(--line);
-      color: var(--muted);
-      font-size: 13px;
-    }
     @media print {
       body { background: white; }
       .deck { padding: 0; gap: 0; }
@@ -220,9 +213,8 @@
       </div>
     </div>
     <div class="callout">
-      Say this first: <strong>"The model is not weak internally. The finding is that internal respiratory-audio accuracy does not survive stricter temporal and external validation."</strong>
+      <strong>Internal respiratory-audio accuracy is strong, but it does not survive stricter temporal and external validation.</strong>
     </div>
-    <div class="notes">Key message: internal performance is strong, but validation rigor determines whether the result is deployable.</div>
   </section>
 
   <section class="slide" data-slide="2 / 6">
@@ -255,7 +247,6 @@
         </ul>
       </div>
     </div>
-    <div class="notes">Multimodal construction: each cough, breath, or speech branch produced a participant-level probability. Fusion combined those probabilities using equal averaging, validation-score weighting, or a logistic meta-model trained on validation predictions.</div>
   </section>
 
   <section class="slide" data-slide="3 / 6">
@@ -278,7 +269,6 @@
         </div>
       </div>
     </div>
-    <div class="notes">This ladder separates internal benchmark performance from time-aware and future-facing evaluation.</div>
   </section>
 
   <section class="slide" data-slide="4 / 6">
@@ -297,11 +287,10 @@
           </tbody>
         </table>
         <div class="callout">
-          COUGHVID is cough-only, so we do not claim full multimodal external validation. We claim fair cough-to-cough external stress testing.
+          COUGHVID is cough-only, so this is a fair cough-to-cough external stress test rather than full multimodal external validation.
         </div>
       </div>
     </div>
-    <div class="notes">If asked "did you use transformer?": Yes. WavLM is a transformer. It worked internally but failed externally, so model complexity alone did not solve transfer.</div>
   </section>
 
   <section class="slide" data-slide="5 / 6">
@@ -326,7 +315,6 @@
         <p>At sensitivity >= 0.90, COUGHVID precision is only <strong>0.035-0.037</strong>. Audio+symptoms gain is exploratory: p = <strong>0.104</strong>.</p>
       </div>
     </div>
-    <div class="notes">Explain "shuffle-label sanity" simply: if labels are randomly mixed and the model still scores high, there is a bug. Here it drops to 0.5, so the shortcut is real dataset structure.</div>
   </section>
 
   <section class="slide" data-slide="6 / 6">
@@ -346,11 +334,12 @@
         </table>
       </div>
     </div>
-    <div class="script" style="margin-top:16px">Key takeaway: the study built a strong internal model using 10,147 audio measurements, top-800 train-only feature selection, multiple model families, multimodal fusion, WavLM transformer, and CNN-BiGRU. The internal score reached 0.897 AUROC, but temporal and external validation show that internal accuracy alone is insufficient for screening claims.</div>
-    <div class="notes">Final novelty sentence: public-benchmark reliability audit extending Coppock's confounding question to Coswara/COUGHVID with multimodal fusion, temporal drift, external transfer, WavLM/CNN checks, feature stability, support overlap, calibration, and decision curves.</div>
+    <div class="script" style="margin-top:16px">The study built a strong internal model using 10,147 audio measurements, top-800 train-only feature selection, multiple model families, multimodal fusion, WavLM transformer, and CNN-BiGRU. The internal score reached 0.897 AUROC, but temporal and external validation show that internal accuracy alone is insufficient for screening claims.</div>
   </section>
 
 </main>
 </body>
 </html>
+
+
 
