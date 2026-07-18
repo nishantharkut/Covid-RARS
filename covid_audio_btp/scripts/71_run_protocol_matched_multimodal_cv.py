@@ -31,6 +31,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top-k-values", nargs="+", type=int, default=[800])
     parser.add_argument("--ranker", default="lightgbm", choices=["lightgbm", "extra_trees", "univariate", "auto"])
     parser.add_argument(
+        "--selection-scope",
+        default="per_modality_mean",
+        choices=["per_modality_mean", "global"],
+        help="Feature-ranking scope. per_modality_mean matches the final ComParE+IS10 top-k selection policy.",
+    )
+    parser.add_argument(
         "--model-names",
         nargs="+",
         default=["lightgbm_smote_f80", "svc_rbf_f60", "catboost_smote_f80", "xgboost_smote_f80"],
@@ -88,6 +94,7 @@ def main() -> None:
         validation_fraction=args.validation_fraction,
         top_k_values=args.top_k_values,
         ranker=args.ranker,
+        selection_scope=args.selection_scope,
         model_names=args.model_names,
         random_state=args.random_state,
         optuna_trials=args.optuna_trials,

@@ -44,6 +44,7 @@ def test_protocol_matched_multimodal_cv_keeps_participants_disjoint_and_reports_
         validation_fraction=0.25,
         top_k_values=[2],
         ranker="univariate",
+        selection_scope="per_modality_mean",
         model_names=["logistic_l2_f80"],
         random_state=0,
         ensemble_top_k=1,
@@ -53,6 +54,7 @@ def test_protocol_matched_multimodal_cv_keeps_participants_disjoint_and_reports_
     assert not result.predictions.empty
     assert set(result.split_audit["overlap_count"]) == {0}
     assert set(result.metrics["fold_unit"].dropna()) == {"participant"}
+    assert set(result.feature_selection["selection_scope"]) == {"per_modality_mean"}
 
     fusion = result.metrics[
         result.metrics["analysis_family"].eq("strong_multimodal_fusion")
@@ -149,6 +151,8 @@ def test_protocol_matched_multimodal_cli_writes_outputs(tmp_path: Path, monkeypa
         "2",
         "--ranker",
         "univariate",
+        "--selection-scope",
+        "per_modality_mean",
         "--model-names",
         "logistic_l2_f80",
         "--ensemble-top-k",

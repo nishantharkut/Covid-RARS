@@ -6,7 +6,7 @@ from typing import Iterable
 import numpy as np
 import pandas as pd
 
-from covid_audio_btp.paper_comparable_cv import select_fold_feature_columns
+from covid_audio_btp.compare_is10_rescue import rank_train_features
 from covid_audio_btp.protocol_matched_cv import (
     PROTOCOL_NAME as COUGH_ONLY_PROTOCOL_NAME,
     _has_two_classes,
@@ -66,12 +66,32 @@ def _assign_fold_splits(
     return out[out["split"].isin(["train", "validation", "test"])].copy()
 
 
+def select_fold_feature_columns(
+    fold_features: pd.DataFrame,
+    *,
+    k: int,
+    ranker: str,
+    selection_scope: str,
+    random_state: int,
+) -> tuple[list[str], pd.DataFrame]:
+    ranking = rank_train_features(
+        fold_features,
+        ranker=ranker,
+        selection_scope=selection_scope,
+        random_state=random_state,
+    )
+    selected = ranking.head(min(int(k), len(ranking)))["feature"].astype(str).tolist()
+    return selected, ranking
+
+
 def aggregate_protocol_matched_metrics(metrics: pd.DataFrame) -> pd.DataFrame:
     test = metrics[metrics["metric_split"].astype(str).eq("test")].copy()
     if test.empty:
         return pd.DataFrame()
 
     optional_group_cols = ["modality_combination", "fusion_method", "ensemble_members"]
+    if "feature_selection_scope" in test.columns:
+        optional_group_cols.append("feature_selection_scope")
     group_cols = [
         "evaluation_protocol",
         "analysis_family",
@@ -160,6 +180,7 @@ def run_protocol_matched_multimodal_cv(
     validation_fraction: float = 0.125,
     top_k_values: Iterable[int] = (800,),
     ranker: str = "lightgbm",
+    selection_scope: str = "per_modality_mean",
     model_names: Iterable[str] = ("lightgbm_smote_f80", "svc_rbf_f60", "catboost_smote_f80", "xgboost_smote_f80"),
     random_state: int = 42,
     optuna_trials: int = 0,
@@ -194,14 +215,16 @@ def run_protocol_matched_multimodal_cv(
                 fold_df,
                 k=k,
                 ranker=ranker,
+                selection_scope=selection_scope,
                 random_state=random_state + fold_idx,
             )
-            feature_strategy = f"compare_is10_top{k}_{ranker}"
+            feature_strategy = f"compare_is10_top{k}_{ranker}_{selection_scope}"
             feature_selection = ranking.copy()
             feature_selection["fold"] = int(fold_idx)
             feature_selection["fold_unit"] = "participant"
             feature_selection["evaluation_protocol"] = PROTOCOL_NAME
             feature_selection["feature_strategy"] = feature_strategy
+            feature_selection["feature_selection_scope"] = selection_scope
             feature_selection["selected_feature_k"] = float(k)
             feature_selection["selected"] = feature_selection["feature"].isin(selected_cols)
             feature_selection_frames.append(feature_selection)
@@ -254,12 +277,16 @@ def run_protocol_matched_multimodal_cv(
                 feature_strategy=feature_strategy,
                 selected_feature_k=k,
             )
+            if not metrics.empty:
+                metrics["feature_selection_scope"] = selection_scope
             predictions = _protocol_frame(
                 predictions,
                 fold=fold_idx,
                 feature_strategy=feature_strategy,
                 selected_feature_k=k,
             )
+            if not predictions.empty:
+                predictions["feature_selection_scope"] = selection_scope
             if not branch_selection.empty:
                 branch_selection = _protocol_frame(
                     branch_selection,
@@ -267,6 +294,7 @@ def run_protocol_matched_multimodal_cv(
                     feature_strategy=feature_strategy,
                     selected_feature_k=k,
                 )
+                branch_selection["feature_selection_scope"] = selection_scope
                 branch_selection["modality_set"] = "+".join(modality_list)
                 branch_selection_frames.append(branch_selection)
             if not metrics.empty:
