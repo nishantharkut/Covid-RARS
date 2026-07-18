@@ -186,6 +186,7 @@ def run_protocol_matched_multimodal_cv(
     optuna_trials: int = 0,
     ensemble_top_k: int = 5,
     global_stack_top_k: int = 0,
+    feature_strategy_label: str | None = None,
 ) -> ProtocolMatchedMultimodalCVResult:
     df = _prepare_features(features, modalities)
     modality_list = [str(modality) for modality in modalities]
@@ -218,7 +219,7 @@ def run_protocol_matched_multimodal_cv(
                 selection_scope=selection_scope,
                 random_state=random_state + fold_idx,
             )
-            feature_strategy = f"compare_is10_top{k}_{ranker}_{selection_scope}"
+            feature_strategy = feature_strategy_label or f"compare_is10_top{k}_{ranker}_{selection_scope}"
             feature_selection = ranking.copy()
             feature_selection["fold"] = int(fold_idx)
             feature_selection["fold_unit"] = "participant"

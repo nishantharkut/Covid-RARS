@@ -37,6 +37,11 @@ def parse_args() -> argparse.Namespace:
         help="Feature-ranking scope. per_modality_mean matches the final ComParE+IS10 top-k selection policy.",
     )
     parser.add_argument(
+        "--feature-strategy-label",
+        default=None,
+        help="Optional explicit feature-strategy label for sensitivity runs that reuse a fixed feature bank.",
+    )
+    parser.add_argument(
         "--model-names",
         nargs="+",
         default=["lightgbm_smote_f80", "svc_rbf_f60", "catboost_smote_f80", "xgboost_smote_f80"],
@@ -95,6 +100,7 @@ def main() -> None:
         top_k_values=args.top_k_values,
         ranker=args.ranker,
         selection_scope=args.selection_scope,
+        feature_strategy_label=args.feature_strategy_label,
         model_names=args.model_names,
         random_state=args.random_state,
         optuna_trials=args.optuna_trials,

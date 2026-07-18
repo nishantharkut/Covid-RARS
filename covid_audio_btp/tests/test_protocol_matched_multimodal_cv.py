@@ -118,6 +118,30 @@ def test_protocol_matched_multimodal_cv_aggregate_keeps_fusion_methods_separate(
     assert set(aggregate["fusion_method"]) == {"uniform_mean", "stacked_logistic_validation"}
 
 
+def test_protocol_matched_multimodal_cv_allows_explicit_feature_strategy_label() -> None:
+    from covid_audio_btp.protocol_matched_multimodal_cv import run_protocol_matched_multimodal_cv
+
+    result = run_protocol_matched_multimodal_cv(
+        _multimodal_feature_frame(),
+        modalities=["cough", "speech"],
+        n_splits=2,
+        test_fraction=0.25,
+        validation_fraction=0.25,
+        top_k_values=[2],
+        ranker="univariate",
+        selection_scope="per_modality_mean",
+        feature_strategy_label="fixed_top800_feature_bank_sensitivity",
+        model_names=["logistic_l2_f80"],
+        random_state=0,
+        ensemble_top_k=1,
+    )
+
+    assert set(result.metrics["feature_strategy"].dropna()) == {"fixed_top800_feature_bank_sensitivity"}
+    assert set(result.predictions["feature_strategy"].dropna()) == {"fixed_top800_feature_bank_sensitivity"}
+    assert set(result.feature_selection["feature_strategy"].dropna()) == {"fixed_top800_feature_bank_sensitivity"}
+    assert set(result.summary["feature_strategy"].dropna()) == {"fixed_top800_feature_bank_sensitivity"}
+
+
 def test_protocol_matched_multimodal_cli_writes_outputs(tmp_path: Path, monkeypatch) -> None:
     features_path = tmp_path / "features.csv"
     _multimodal_feature_frame().to_csv(features_path, index=False)
@@ -153,6 +177,8 @@ def test_protocol_matched_multimodal_cli_writes_outputs(tmp_path: Path, monkeypa
         "univariate",
         "--selection-scope",
         "per_modality_mean",
+        "--feature-strategy-label",
+        "fixed_top800_feature_bank_sensitivity",
         "--model-names",
         "logistic_l2_f80",
         "--ensemble-top-k",
@@ -178,5 +204,6 @@ def test_protocol_matched_multimodal_cli_writes_outputs(tmp_path: Path, monkeypa
     split_audit = pd.read_csv(split_audit_output)
     summary = pd.read_csv(summary_output)
     assert "test_aggregate" in set(metrics["metric_split"])
+    assert set(metrics["feature_strategy"].dropna()) == {"fixed_top800_feature_bank_sensitivity"}
     assert set(split_audit["overlap_count"]) == {0}
     assert not summary.empty
